@@ -13,6 +13,7 @@
       "button",
       "title",
       "hero",
+      "hero-banner",
       "cards",
       "columns",
       "fragment"
@@ -22,6 +23,12 @@
     "id": "cards",
     "components": [
       "card"
+    ]
+  },
+  {
+    "id": "hero-banner",
+    "components": [
+      "hero-banner-slide"
     ]
   },
   {
