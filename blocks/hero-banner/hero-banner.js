@@ -88,17 +88,36 @@ function initCarousel(slides, dots) {
   return stopAutoplay;
 }
 
+function getDescriptionElement(block, heading, link, imageList) {
+  const paragraph = [...block.querySelectorAll('p')].find(
+    (p) => !p.querySelector('a') && !p.closest('ul'),
+  );
+  if (paragraph) return paragraph;
+
+  const descriptionRow = [...block.children].find((row) => {
+    if (row.tagName !== 'DIV') return false;
+    if (row.contains(heading) || row.contains(link) || row.contains(imageList)) return false;
+    return Boolean(row.textContent?.trim());
+  });
+
+  if (!descriptionRow) return null;
+
+  const source = descriptionRow.querySelector(':scope > div') || descriptionRow;
+  const description = document.createElement('p');
+  description.textContent = source.textContent.trim();
+  moveInstrumentation(source, description);
+  return description;
+}
+
 /**
  * loads and decorates the hero banner block
  * @param {Element} block The block element
  */
 export default function decorate(block) {
   const heading = block.querySelector('h1, h2, h3, h4, h5, h6');
-  const link = block.querySelector(':scope > div a[href]');
-  const description = [...block.querySelectorAll(':scope > div > p')].find(
-    (paragraph) => !paragraph.querySelector('a'),
-  );
-  const imageList = block.querySelector(':scope > div ul');
+  const link = block.querySelector('a[href]');
+  const imageList = block.querySelector('ul');
+  const description = getDescriptionElement(block, heading, link, imageList);
 
   const media = document.createElement('div');
   media.className = 'hero-banner-media';
@@ -111,7 +130,17 @@ export default function decorate(block) {
       const li = document.createElement('li');
       li.className = 'hero-banner-slide';
       moveInstrumentation(item, li);
-      while (item.firstElementChild) li.append(item.firstElementChild);
+      const picture = item.querySelector('picture');
+      const img = item.querySelector('img');
+      if (picture) {
+        li.append(picture);
+      } else if (img) {
+        const pic = document.createElement('picture');
+        pic.append(img);
+        li.append(pic);
+      } else {
+        while (item.firstElementChild) li.append(item.firstElementChild);
+      }
       slides.append(li);
     });
   } else {
