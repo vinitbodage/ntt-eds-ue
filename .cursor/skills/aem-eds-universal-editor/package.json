@@ -1,0 +1,8 @@
+{
+  "name": "@project/skill-aem-eds-universal-editor",
+  "version": "1.0.0",
+  "description": "Cursor agent skill for AEM Edge Delivery Services with Universal Editor in Cloud Manager",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0"
+}
