@@ -26,6 +26,12 @@
     ]
   },
   {
+    "id": "hero-banner",
+    "components": [
+      "hero-banner-slide"
+    ]
+  },
+  {
     "id": "columns",
     "components": [
       "column"

@@ -1,112 +1,127 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { moveInstrumentation } from '../../scripts/scripts.js';
 
-const AUTOPLAY_MS = 5000;
+const BREAKPOINTS = [{ media: '(min-width: 600px)', width: '600' }, { width: '1200' }];
 
-function optimizeSlidePictures(slides) {
-  slides.querySelectorAll('picture > img').forEach((img) => {
+function getLinkInfo(cell) {
+  const anchor = cell?.querySelector('a[href]');
+  if (!anchor) return { href: '', title: '' };
+  return {
+    href: anchor.getAttribute('href') || '',
+    title: anchor.getAttribute('title') || anchor.textContent.trim(),
+  };
+}
+
+function buildSlide(row) {
+  const cells = [...row.children];
+  const imageCell = cells.find((cell) => cell.querySelector('picture'));
+  const linkCell = cells.find((cell) => cell.querySelector('a[href]'));
+  const textCells = cells.filter((cell) => cell !== imageCell && cell !== linkCell);
+
+  const picture = imageCell?.querySelector('picture');
+  const img = picture?.querySelector('img');
+  const title = textCells[0]?.textContent.trim() || '';
+  const description = textCells[1]?.textContent.trim() || '';
+  const { href, title: linkTitle } = getLinkInfo(linkCell);
+
+  const li = document.createElement('li');
+  li.className = 'hero-banner-slide';
+  moveInstrumentation(row, li);
+
+  const wrapper = document.createElement(href ? 'a' : 'div');
+  wrapper.className = 'hero-banner-link';
+  if (href) {
+    wrapper.href = href;
+    wrapper.setAttribute('aria-label', linkTitle || title || 'Banner link');
+    if (linkTitle) wrapper.title = linkTitle;
+  }
+
+  const imageWrapper = document.createElement('div');
+  imageWrapper.className = 'hero-banner-image';
+
+  if (img) {
     const optimizedPic = createOptimizedPicture(
       img.src,
-      img.alt,
-      false,
-      [{ media: '(min-width: 900px)', width: '2000' }, { width: '750' }],
+      img.alt || title,
+      true,
+      BREAKPOINTS,
     );
     moveInstrumentation(img, optimizedPic.querySelector('img'));
-    img.closest('picture').replaceWith(optimizedPic);
-  });
+    imageWrapper.append(optimizedPic);
+  }
+
+  const content = document.createElement('div');
+  content.className = 'hero-banner-content';
+
+  if (title) {
+    const heading = document.createElement('h2');
+    heading.className = 'hero-banner-title';
+    heading.textContent = title;
+    content.append(heading);
+  }
+
+  if (description) {
+    const paragraph = document.createElement('p');
+    paragraph.className = 'hero-banner-description';
+    paragraph.textContent = description;
+    content.append(paragraph);
+  }
+
+  wrapper.append(imageWrapper, content);
+  li.append(wrapper);
+  return li;
 }
 
-function buildDots(slides, slideItems) {
-  if (slideItems.length < 2) return null;
-
-  const nav = document.createElement('div');
-  nav.className = 'hero-banner-dots';
-  nav.setAttribute('role', 'tablist');
-  nav.setAttribute('aria-label', 'Banner slides');
-
-  slideItems.forEach((_, index) => {
-    const dot = document.createElement('button');
-    dot.type = 'button';
-    dot.className = `hero-banner-dot${index === 0 ? ' is-active' : ''}`;
-    dot.setAttribute('role', 'tab');
-    dot.setAttribute('aria-label', `Show slide ${index + 1}`);
-    dot.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
-    dot.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      slides.dataset.activeIndex = String(index);
-      slides.dispatchEvent(new CustomEvent('slidechange'));
-    });
-    nav.append(dot);
-  });
-
-  return nav;
+function createNavButton(label, className) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = className;
+  button.setAttribute('aria-label', label);
+  return button;
 }
 
-function initCarousel(slides, dots) {
-  const slideItems = [...slides.children];
-  if (slideItems.length < 2) return () => {};
+function initCarousel(block, slides, slideCount) {
+  let activeIndex = 0;
 
-  let timer;
-
-  const setActive = (index) => {
-    const normalized = ((index % slideItems.length) + slideItems.length) % slideItems.length;
-    slides.dataset.activeIndex = String(normalized);
-    slideItems.forEach((slide, i) => {
-      slide.classList.toggle('is-active', i === normalized);
-      slide.setAttribute('aria-hidden', i === normalized ? 'false' : 'true');
+  const showSlide = (index) => {
+    activeIndex = (index + slideCount) % slideCount;
+    slides.forEach((slide, i) => {
+      const isActive = i === activeIndex;
+      slide.classList.toggle('active', isActive);
+      slide.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+      slide.querySelector('.hero-banner-link')?.setAttribute('tabindex', isActive ? '0' : '-1');
     });
-    if (dots) {
-      dots.querySelectorAll('.hero-banner-dot').forEach((dot, i) => {
-        dot.classList.toggle('is-active', i === normalized);
-        dot.setAttribute('aria-selected', i === normalized ? 'true' : 'false');
-      });
-    }
+    block.querySelectorAll('.hero-banner-dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i === activeIndex);
+      dot.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+    });
   };
 
-  const next = () => setActive(Number(slides.dataset.activeIndex || 0) + 1);
+  if (slideCount > 1) {
+    const prev = createNavButton('Previous banner', 'hero-banner-prev');
+    const next = createNavButton('Next banner', 'hero-banner-next');
+    const dots = document.createElement('div');
+    dots.className = 'hero-banner-dots';
+    dots.setAttribute('role', 'tablist');
+    dots.setAttribute('aria-label', 'Banner slides');
 
-  const startAutoplay = () => {
-    clearInterval(timer);
-    timer = setInterval(next, AUTOPLAY_MS);
-  };
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'hero-banner-dot';
+      dot.setAttribute('role', 'tab');
+      dot.setAttribute('aria-label', `Show banner ${i + 1}`);
+      dot.addEventListener('click', () => showSlide(i));
+      dots.append(dot);
+    });
 
-  const stopAutoplay = () => clearInterval(timer);
+    prev.addEventListener('click', () => showSlide(activeIndex - 1));
+    next.addEventListener('click', () => showSlide(activeIndex + 1));
 
-  slides.addEventListener('slidechange', () => {
-    setActive(Number(slides.dataset.activeIndex || 0));
-    startAutoplay();
-  });
+    block.append(prev, next, dots);
+  }
 
-  slides.closest('.hero-banner')?.addEventListener('mouseenter', stopAutoplay);
-  slides.closest('.hero-banner')?.addEventListener('mouseleave', startAutoplay);
-  slides.closest('.hero-banner')?.addEventListener('focusin', stopAutoplay);
-  slides.closest('.hero-banner')?.addEventListener('focusout', startAutoplay);
-
-  setActive(0);
-  startAutoplay();
-  return stopAutoplay;
-}
-
-function getDescriptionElement(block, heading, link, imageList) {
-  const paragraph = [...block.querySelectorAll('p')].find(
-    (p) => !p.querySelector('a') && !p.closest('ul'),
-  );
-  if (paragraph) return paragraph;
-
-  const descriptionRow = [...block.children].find((row) => {
-    if (row.tagName !== 'DIV') return false;
-    if (row.contains(heading) || row.contains(link) || row.contains(imageList)) return false;
-    return Boolean(row.textContent?.trim());
-  });
-
-  if (!descriptionRow) return null;
-
-  const source = descriptionRow.querySelector(':scope > div') || descriptionRow;
-  const description = document.createElement('p');
-  description.textContent = source.textContent.trim();
-  moveInstrumentation(source, description);
-  return description;
+  showSlide(0);
 }
 
 /**
@@ -114,85 +129,22 @@ function getDescriptionElement(block, heading, link, imageList) {
  * @param {Element} block The block element
  */
 export default function decorate(block) {
-  const heading = block.querySelector('h1, h2, h3, h4, h5, h6');
-  const link = block.querySelector('a[href]');
-  const imageList = block.querySelector('ul');
-  const description = getDescriptionElement(block, heading, link, imageList);
+  const slides = [...block.children].map((row) => buildSlide(row));
+  if (!slides.length) return;
 
-  const media = document.createElement('div');
-  media.className = 'hero-banner-media';
+  block.textContent = '';
+  block.setAttribute('role', 'region');
+  block.setAttribute('aria-roledescription', 'carousel');
+  block.setAttribute('aria-label', 'Hero banner');
 
-  const slides = document.createElement('ul');
-  slides.className = 'hero-banner-slides';
+  const viewport = document.createElement('div');
+  viewport.className = 'hero-banner-viewport';
 
-  if (imageList) {
-    [...imageList.children].forEach((item) => {
-      const li = document.createElement('li');
-      li.className = 'hero-banner-slide';
-      moveInstrumentation(item, li);
-      const picture = item.querySelector('picture');
-      const img = item.querySelector('img');
-      if (picture) {
-        li.append(picture);
-      } else if (img) {
-        const pic = document.createElement('picture');
-        pic.append(img);
-        li.append(pic);
-      } else {
-        while (item.firstElementChild) li.append(item.firstElementChild);
-      }
-      slides.append(li);
-    });
-  } else {
-    block.querySelectorAll('picture').forEach((picture) => {
-      const li = document.createElement('li');
-      li.className = 'hero-banner-slide';
-      li.append(picture);
-      slides.append(li);
-    });
-  }
+  const list = document.createElement('ul');
+  list.className = 'hero-banner-slides';
+  list.append(...slides);
+  viewport.append(list);
+  block.append(viewport);
 
-  optimizeSlidePictures(slides);
-  media.append(slides);
-
-  const slideItems = [...slides.children];
-  if (slideItems.length === 1) {
-    slideItems[0].classList.add('is-active');
-    slideItems[0].setAttribute('aria-hidden', 'false');
-  }
-
-  const dots = buildDots(slides, slideItems);
-  if (dots) media.append(dots);
-
-  const content = document.createElement('div');
-  content.className = 'hero-banner-content';
-
-  if (heading) {
-    content.append(heading);
-  }
-
-  if (description) {
-    content.append(description);
-  }
-
-  const inner = document.createElement('div');
-  inner.className = 'hero-banner-inner';
-  inner.append(media, content);
-
-  block.replaceChildren(inner);
-
-  if (link?.href) {
-    const bannerLink = document.createElement('a');
-    bannerLink.className = 'hero-banner-link';
-    bannerLink.href = link.href;
-    bannerLink.title = link.title || link.textContent || heading?.textContent || '';
-    bannerLink.setAttribute(
-      'aria-label',
-      [heading?.textContent, description?.textContent].filter(Boolean).join(' — '),
-    );
-    moveInstrumentation(link, bannerLink);
-    inner.prepend(bannerLink);
-  }
-
-  initCarousel(slides, dots);
+  initCarousel(block, slides, slides.length);
 }
