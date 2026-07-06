@@ -3,26 +3,32 @@ name: aem-eds-universal-editor
 description: >-
   Guide for AEM Edge Delivery Services projects using Universal Editor in AEM
   as a Cloud Service (Cloud Manager). Covers xwalk boilerplate setup, component
-  models, block development, editor-support, local dev, and publishing. Use
-  when working on EDS + Universal Editor + Cloud Manager projects, AEM Sites
-  authoring for Edge Delivery, component-definition/models/filters JSON, block
-  decoration with UE, editor-support.js, fstab/Code Sync setup, or questions
-  about authoring content in AEM Cloud Service for *.aem.page/*.aem.live sites.
+  models, block development, content migration from AEM Sites, path mapping,
+  importer/block/template mapping, editor-support, local dev, and publishing.
+  Use when working on EDS + Universal Editor + Cloud Manager projects, AEM Sites
+  authoring for Edge Delivery, migrating legacy Sites content, mapping components
+  to blocks, component-definition/models/filters JSON, block decoration with UE,
+  editor-support.js, fstab/Code Sync setup, or questions about authoring content
+  in AEM Cloud Service for *.aem.page/*.aem.live sites.
+license: Apache-2.0
+metadata:
+  version: "1.1.0"
 ---
 
 # AEM Edge Delivery Services with Universal Editor
 
 Guide for building and maintaining EDS projects authored in the **Universal Editor** on **AEM as a Cloud Service** (Cloud Manager). Projects are based on [aem-boilerplate-xwalk](https://github.com/adobe-rnd/aem-boilerplate-xwalk).
 
-When the project contains `AGENTS.md`, follow its conventions. This skill extends that guidance with UE-specific workflows.
-
 ## When to Use
 
-- Setting up or troubleshooting an EDS + UE project in Cloud Manager
+- Setting up or troubleshooting a new EDS + UE project in Cloud Manager
 - Creating or modifying blocks that authors add in Universal Editor
 - Configuring component definitions, models, or filters for UE
 - Working with `editor-support.js` for WYSIWYG authoring
 - Publishing content from AEM to Edge Delivery preview/live
+- Migrating content from legacy AEM Sites or external sites to EDS
+- Mapping legacy components/templates to EDS blocks and section layouts
+- Configuring path mapping and importing content with `aem import`
 - Searching official documentation at [aem.live/docs](https://www.aem.live/docs/)
 
 ## Prerequisites
@@ -35,7 +41,7 @@ When the project contains `AGENTS.md`, follow its conventions. This skill extend
 
 ## Project Baseline
 
-Default structure from [aem-boilerplate-xwalk](https://github.com/adobe-rnd/aem-boilerplate-xwalk):
+Follow the conventions in the project's `AGENTS.md` when present. Default structure from [aem-boilerplate-xwalk](https://github.com/adobe-rnd/aem-boilerplate-xwalk):
 
 ```
 blocks/{blockname}/
@@ -59,29 +65,27 @@ component-filters.json
 
 Always prefer official docs at [https://www.aem.live/docs/](https://www.aem.live/docs/) over general web search.
 
-### Quick search
-
-```bash
-node .cursor/skills/aem-eds-universal-editor/scripts/search-docs.js universal editor
-node .cursor/skills/aem-eds-universal-editor/scripts/search-docs.js component model definitions
-```
-
-Fetch full pages at `https://www.aem.live{path}`.
-
-### Fallback (no script)
+### Quick search (no script)
 
 ```bash
 curl -s https://www.aem.live/docpages-index.json | node -e "
 let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{
   const kw=process.argv[1]||'universal editor';
   JSON.parse(d).data.filter(p=>new RegExp(kw,'i').test(p.title+p.path+(p.content||'').slice(0,800)))
-    .slice(0,10).forEach(p=>console.log(p.path,':',p.title));
+    .slice(0,10).forEach(p=>console.log(p.relevanceScore||'',p.path,':',p.title));
 })" "universal editor"
 ```
 
-Also restrict web search: `site:www.aem.live <keywords>`.
+### Full-text search (recommended)
 
-Full search workflow: [references/documentation.md](references/documentation.md)
+Use the **docs-search** skill when available:
+
+```bash
+node .claude/skills/docs-search/scripts/search.js universal editor
+node .claude/skills/docs-search/scripts/search.js component model definitions
+```
+
+Fetch full pages at `https://www.aem.live{path}`.
 
 ### Essential doc pages
 
@@ -91,14 +95,20 @@ Full search workflow: [references/documentation.md](references/documentation.md)
 | UE setup tutorial | https://www.aem.live/developer/ue-tutorial |
 | Component model definitions | https://www.aem.live/developer/component-model-definitions |
 | Markup, sections, blocks | https://www.aem.live/developer/markup-sections-blocks |
-| Markup reference | https://www.aem.live/developer/markup-reference |
 | Path mapping | https://www.aem.live/developer/authoring-path-mapping |
+| Content import / migration | https://www.aem.live/developer/importer |
+| Configuration templates | https://www.aem.live/docs/configuration-templates |
+| MSM / multi-locale | https://www.aem.live/developer/repoless-multisite-manager |
 | Performance (100 score) | https://www.aem.live/developer/keeping-it-100 |
 | Boilerplate examples | https://github.com/adobe-rnd/aem-boilerplate-xwalk/pulls?q=is%3Apr+label%3AExample |
+
+Also restrict web search: `site:www.aem.live <keywords>`.
 
 ## Workflows
 
 ### 1. New Project Setup (Cloud Manager + UE)
+
+Track progress:
 
 ```
 - [ ] Create repo from aem-boilerplate-xwalk template
@@ -117,11 +127,11 @@ Detailed steps: [references/cloud-manager-setup.md](references/cloud-manager-set
 Follow this order — the initial content structure is the contract between authors and developers:
 
 ```
-- [ ] Step 1: Design content model (content-modeling skill)
-- [ ] Step 2: Create UE component config (ue-component-model skill)
+- [ ] Step 1: Design content model (invoke content-modeling skill)
+- [ ] Step 2: Create UE component config (invoke ue-component-model skill)
 - [ ] Step 3: Run npm run build:json if using distributed _{block}.json files
-- [ ] Step 4: Implement block JS + CSS (building-blocks skill)
-- [ ] Step 5: Test locally and in UE (testing-blocks skill)
+- [ ] Step 4: Implement block JS + CSS (invoke building-blocks skill)
+- [ ] Step 5: Test locally and in UE (invoke testing-blocks skill)
 - [ ] Step 6: Lint — npm run lint
 ```
 
@@ -144,13 +154,10 @@ Inspect delivered HTML before coding:
 
 ```bash
 curl http://localhost:3000/path/to/page
-curl http://localhost:3000/path/to/page.md
 curl http://localhost:3000/path/to/page.plain.html
 ```
 
 Block development details: [references/block-development.md](references/block-development.md)
-
-Study reference implementations in [aem-boilerplate-xwalk/blocks](https://github.com/adobe-rnd/aem-boilerplate-xwalk/tree/main/blocks).
 
 ### 3. Component Model Changes
 
@@ -161,14 +168,12 @@ npm run build:json   # Regenerate aggregated component-*.json
 npm run lint         # Validates xwalk model rules
 ```
 
-Key rules:
+Invoke **ue-component-model** for definitions, models, and filters. Key rules:
 
 - Add block `id` to the `section` filter or authors cannot add it
 - `template.model` must match model `id` exactly
 - Use `core/franklin/components/block/v1/block` resourceType for blocks
 - Pair fields for semantic collapsing: `image`+`imageAlt`, `title`+`titleType`, `link`+`linkText`
-
-Invoke **ue-component-model** for definitions, models, and filters.
 
 ### 4. Universal Editor Authoring (editor-support)
 
@@ -179,8 +184,6 @@ Invoke **ue-component-model** for definitions, models, and filters.
 - Sanitizes HTML via DOMPurify before applying updates
 
 Do not remove or break `editor-support.js` loading in `scripts.js`. For RTE customization, see `editor-support-rte.js`.
-
-Ensure `decorate()` is idempotent — safe to run multiple times after UE patches.
 
 ### 5. Local Development
 
@@ -210,7 +213,31 @@ Invoke **aem-cli** skill for TLS, proxy, port, and troubleshooting.
 4. Run PageSpeed Insights targeting score 100
 5. Use `gh pr checks` to verify CI
 
-## Code Style
+### 7. Content Migration from AEM Sites
+
+Migrate legacy AEM Sites (or external) content into EDS + UE authoring.
+
+```
+- [ ] Step 1: Inventory page types + legacy components
+- [ ] Step 2: Map legacy components → EDS block ids + UE models
+- [ ] Step 3: Map page templates → EDS sections + blocks layout
+- [ ] Step 4: Implement blocks + _{block}.json (build:json, lint)
+- [ ] Step 5: Write tools/importer/import.js transformation rules
+- [ ] Step 6: Test import (aem import Workbench, 1–3 URLs)
+- [ ] Step 7: Configure path mapping (mappings, includes, excludes)
+- [ ] Step 8: Bulk import → upload JCR package + assets (aem-import-helper)
+- [ ] Step 9: Verify in UE, publish preview, add URL redirects
+```
+
+**Block mapping:** `WebImporter.Blocks.createBlock` `name` must match block `id` in `_{block}.json`. Cell order must match UE model fields.
+
+**Template mapping:** legacy editable template regions → EDS sections; components → blocks or default content.
+
+**Path mapping:** AEM `/content/...` paths → public URLs via Configuration Service. See [references/content-migration.md](references/content-migration.md).
+
+Invoke **aem-cli** for `aem import`. Invoke **content-modeling** + **ue-component-model** before bulk import.
+
+## Code Style (from AGENTS.md)
 
 ### JavaScript
 - ES6+, Airbnb ESLint, `.js` extensions in imports, LF line endings
@@ -238,7 +265,8 @@ Invoke **aem-cli** skill for TLS, proxy, port, and troubleshooting.
 | **building-blocks** | Block JS/CSS implementation |
 | **testing-blocks** | Lint, browser, and performance testing |
 | **aem-cli** | Local dev server setup and troubleshooting |
-| **docs-search** | Full-text aem.live documentation search |
+| **docs-search** | Searching aem.live documentation |
+| **github-git** | Branch, commit, push migration code changes |
 
 ## Common Pitfalls
 
@@ -248,9 +276,15 @@ Invoke **aem-cli** skill for TLS, proxy, port, and troubleshooting.
 - **Modifying `aem.js`** — never do this; extend via `scripts.js`
 - **Publishing before technical account setup** — publish fails in UE
 - **PR without preview URL** — PR will be rejected per publishing process
+- **Importing before blocks/models exist** — imported structure won't match UE models
+- **Block name mismatch in import.js** — `createBlock` name must equal component definition `id`
+- **Skipping path mapping** — AEM paths won't match public URLs after publish
+- **Forgetting asset upload** — JCR packages are binaryless; use `asset-mapping.json`
+- **Changing model fields post-migration** — breaks existing imported pages without re-import
 
 ## Reference Files
 
 - [references/cloud-manager-setup.md](references/cloud-manager-setup.md) — Cloud Manager, Code Sync, site template, technical account
 - [references/block-development.md](references/block-development.md) — Block patterns from xwalk boilerplate
+- [references/content-migration.md](references/content-migration.md) — Migration, block/template mapping, path mapping, import workflow
 - [references/documentation.md](references/documentation.md) — Documentation search workflow

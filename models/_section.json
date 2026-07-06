@@ -33,6 +33,10 @@
             {
               "name": "Highlight",
               "value": "highlight"
+            },
+            {
+              "name": "Navy",
+              "value": "navy"
             }
           ]
         }
@@ -50,6 +54,8 @@
         "hero",
         "hero-banner",
         "cards",
+        "tiles",
+        "stats",
         "columns",
         "fragment"
       ]

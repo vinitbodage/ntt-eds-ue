@@ -60,6 +60,9 @@ site:www.aem.live component model definitions
 | Component models | /developer/component-model-definitions |
 | Block markup | /developer/markup-sections-blocks, /developer/markup-reference |
 | Path mapping | /developer/authoring-path-mapping |
+| Content import / migration | /developer/importer |
+| Configuration templates | /docs/configuration-templates |
+| MSM / multi-locale | /developer/repoless-multisite-manager |
 | Performance | /developer/keeping-it-100 |
 | Project anatomy | /developer/anatomy-of-a-project |
 | Developer tutorial | /developer/tutorial |

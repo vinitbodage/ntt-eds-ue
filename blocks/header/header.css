@@ -1,9 +1,10 @@
-/* header and nav layout */
+/* header and nav layout — NTT DATA navy theme */
 header .nav-wrapper {
-  background-color: var(--background-color);
+  background-color: var(--ntt-navy);
   width: 100%;
-  z-index: 2;
+  z-index: 10;
   position: fixed;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
 }
 
 header nav {
@@ -19,6 +20,7 @@ header nav {
   height: var(--nav-height);
   padding: 0 24px;
   font-family: var(--body-font-family);
+  color: var(--background-color);
 }
 
 header nav[aria-expanded='true'] {
@@ -72,7 +74,7 @@ header nav .nav-hamburger button {
   border: 0;
   border-radius: 0;
   padding: 0;
-  background-color: var(--background-color);
+  background-color: transparent;
   color: inherit;
   overflow: initial;
   text-overflow: initial;
@@ -142,15 +144,18 @@ header nav[aria-expanded='true'] .nav-hamburger-icon::after {
 /* brand */
 header .nav-brand {
   grid-area: brand;
-  flex-basis: 128px;
+  flex-basis: 160px;
   font-size: var(--heading-font-size-s);
   font-weight: 700;
   line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 header nav .nav-brand img {
-  width: 128px;
+  width: 140px;
   height: auto;
+  filter: brightness(0) invert(1);
 }
 
 /* sections */
@@ -174,7 +179,9 @@ header nav .nav-sections ul {
 }
 
 header nav .nav-sections ul > li {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: var(--body-font-size-xs);
+  letter-spacing: 0.02em;
 }
 
 header nav .nav-sections ul > li > ul {
@@ -242,11 +249,12 @@ header nav .nav-sections ul > li > ul > li {
     display: block;
     position: absolute;
     left: -24px;
-    width: 200px;
+    width: 220px;
     top: 150%;
     padding: 16px;
-    background-color: var(--light-color);
+    background-color: var(--ntt-navy-dark);
     white-space: initial;
+    border: 1px solid rgb(255 255 255 / 12%);
   }
 
   header nav .nav-sections .default-content-wrapper > ul > li > ul::before {
@@ -258,7 +266,7 @@ header nav .nav-sections ul > li > ul > li {
     height: 0;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
-    border-bottom: 8px solid var(--light-color);
+    border-bottom: 8px solid var(--ntt-navy-dark);
   }
 
   header nav .nav-sections .default-content-wrapper > ul > li > ul > li {

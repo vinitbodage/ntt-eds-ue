@@ -2,8 +2,10 @@
 coverage/*
 logs/*
 node_modules/*
+.env
 
 helix-importer-ui
+tools/importer/helix-importer-ui/
 .DS_Store
 *.bak
 .idea

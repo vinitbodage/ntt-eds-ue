@@ -1,0 +1,41 @@
+.stats > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px 24px;
+}
+
+.stats > ul > li {
+  text-align: center;
+}
+
+.stats .stats-value {
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-xl);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ntt-accent);
+}
+
+.stats .stats-label {
+  margin-top: 8px;
+  font-size: var(--body-font-size-s);
+  color: var(--text-muted-color);
+  line-height: 1.4;
+}
+
+main .section.navy .stats .stats-value {
+  color: var(--background-color);
+}
+
+main .section.navy .stats .stats-label {
+  color: rgb(255 255 255 / 80%);
+}
+
+@media (width >= 600px) {
+  .stats > ul {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
