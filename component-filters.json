@@ -44,12 +44,6 @@
     ]
   },
   {
-    "id": "hero-video-carousel",
-    "components": [
-      "hero-video-carousel-slide"
-    ]
-  },
-  {
     "id": "stats",
     "components": [
       "stat"
