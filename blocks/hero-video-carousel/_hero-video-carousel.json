@@ -1,0 +1,120 @@
+{
+  "definitions": [
+    {
+      "title": "Hero Video Carousel",
+      "id": "hero-video-carousel",
+      "plugins": {
+        "xwalk": {
+          "page": {
+            "resourceType": "core/franklin/components/block/v1/block",
+            "template": {
+              "name": "Hero Video Carousel",
+              "model": "hero-video-carousel",
+              "filter": "hero-video-carousel"
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Hero Video Carousel Slide",
+      "id": "hero-video-carousel-slide",
+      "plugins": {
+        "xwalk": {
+          "page": {
+            "resourceType": "core/franklin/components/block/v1/block/item",
+            "template": {
+              "name": "Hero Video Carousel Slide",
+              "model": "hero-video-carousel-slide"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "hero-video-carousel",
+      "fields": [
+        {
+          "component": "number",
+          "name": "autoplayDuration",
+          "label": "Autoplay Duration (seconds)",
+          "valueType": "number",
+          "value": 8,
+          "description": "Time each slide is shown before advancing automatically"
+        },
+        {
+          "component": "boolean",
+          "name": "autoplay",
+          "label": "Autoplay",
+          "valueType": "boolean",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "hero-video-carousel-slide",
+      "fields": [
+        {
+          "component": "reference",
+          "name": "video",
+          "label": "Video",
+          "valueType": "string",
+          "multi": false
+        },
+        {
+          "component": "reference",
+          "name": "video_poster",
+          "label": "Video Poster",
+          "valueType": "string",
+          "multi": false,
+          "description": "Fallback image shown before video loads; used for LCP"
+        },
+        {
+          "component": "text",
+          "name": "title",
+          "label": "Title",
+          "valueType": "string"
+        },
+        {
+          "component": "select",
+          "name": "titleType",
+          "label": "Title Level",
+          "valueType": "string",
+          "value": "h2",
+          "options": [
+            {
+              "name": "H1",
+              "value": "h1"
+            },
+            {
+              "name": "H2",
+              "value": "h2"
+            }
+          ]
+        },
+        {
+          "component": "text",
+          "name": "ctaText",
+          "label": "CTA Text",
+          "valueType": "string"
+        },
+        {
+          "component": "aem-content",
+          "name": "cta",
+          "label": "CTA Link",
+          "valueType": "string"
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "hero-video-carousel",
+      "components": [
+        "hero-video-carousel-slide"
+      ]
+    }
+  ]
+}

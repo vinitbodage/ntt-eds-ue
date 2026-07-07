@@ -14,6 +14,7 @@
       "title",
       "hero",
       "hero-banner",
+      "hero-video-carousel",
       "cards",
       "tiles",
       "stats",
@@ -40,6 +41,12 @@
       "image",
       "button",
       "title"
+    ]
+  },
+  {
+    "id": "hero-video-carousel",
+    "components": [
+      "hero-video-carousel-slide"
     ]
   },
   {
