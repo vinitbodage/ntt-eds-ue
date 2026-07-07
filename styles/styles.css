@@ -11,13 +11,18 @@
  */
 
 :root {
-  /* colors */
-  --background-color: white;
-  --light-color: #f8f8f8;
-  --dark-color: #505050;
-  --text-color: #131313;
-  --link-color: #3b63fb;
-  --link-hover-color: #1d3ecf;
+  /* NTT DATA brand colors */
+  --background-color: #fff;
+  --light-color: #f4f6f8;
+  --dark-color: #1a1a1a;
+  --text-color: #1a1a1a;
+  --text-muted-color: #5c6670;
+  --link-color: #0072ce;
+  --link-hover-color: #005aa3;
+  --ntt-navy: #0b1f3a;
+  --ntt-navy-dark: #071428;
+  --ntt-accent: #0072ce;
+  --ntt-border: #d9e2ec;
 
   /* fonts */
   --body-font-family: roboto, roboto-fallback, sans-serif;
@@ -37,7 +42,7 @@
   --heading-font-size-xs: 22px;
 
   /* nav height */
-  --nav-height: 64px;
+  --nav-height: 72px;
 }
 
 /* fallback fonts */
@@ -199,8 +204,8 @@ button.button:disabled {
 
 a.button.primary,
 button.button.primary {
-  border-color: var(--text-color);
-  background-color: var(--text-color);
+  border-color: var(--ntt-accent);
+  background-color: var(--ntt-accent);
   color: var(--background-color);
 }
 
@@ -208,9 +213,9 @@ a.button.primary:hover,
 a.button.primary:focus-visible,
 button.button.primary:hover,
 button.button.primary:focus-visible {
-  border-color: var(--dark-color);
-  background-color: var(--dark-color);
-  color: var(--light-color);
+  border-color: var(--link-hover-color);
+  background-color: var(--link-hover-color);
+  color: var(--background-color);
 }
 
 a.button.primary[aria-disabled="true"],
@@ -322,4 +327,26 @@ main .section.highlight {
   background-color: var(--light-color);
   margin: 0;
   padding: 40px 0;
+}
+
+main .section.navy {
+  background-color: var(--ntt-navy);
+  color: var(--background-color);
+  margin: 0;
+  padding: 56px 0;
+}
+
+main .section.navy h1,
+main .section.navy h2,
+main .section.navy h3,
+main .section.navy h4,
+main .section.navy h5,
+main .section.navy h6,
+main .section.navy p,
+main .section.navy a:any-link {
+  color: inherit;
+}
+
+main .section.navy a:any-link:hover {
+  color: #b8d9f5;
 }
