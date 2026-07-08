@@ -54,8 +54,14 @@
   color: #0072bc;
 }
 
+.feature-card .feature-card-cta-text {
+  text-decoration: none;
+}
+
 .feature-card .feature-card-cta-arrow {
   margin-left: 6px;
+  flex-shrink: 0;
+  text-decoration: none;
   transition: transform 0.2s ease;
 }
 
@@ -63,6 +69,12 @@
 .feature-card .feature-card-cta:focus-visible {
   color: #005aa3;
   text-decoration: none;
+}
+
+.feature-card .feature-card-cta:hover .feature-card-cta-text,
+.feature-card .feature-card-cta:focus-visible .feature-card-cta-text {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .feature-card .feature-card-cta:hover .feature-card-cta-arrow,

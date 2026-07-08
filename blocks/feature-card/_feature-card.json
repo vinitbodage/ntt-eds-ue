@@ -55,16 +55,17 @@
           "valueType": "string"
         },
         {
-          "component": "aem-content",
-          "name": "link",
-          "label": "CTA Link",
-          "valueType": "string"
-        },
-        {
-          "component": "text",
+          "component": "textarea",
           "name": "linkText",
           "label": "CTA Text",
           "valueType": "string"
+        },
+        {
+          "component": "aem-content",
+          "name": "link",
+          "label": "CTA Link",
+          "valueType": "string",
+          "description": "Destination URL for the call-to-action"
         }
       ]
     }

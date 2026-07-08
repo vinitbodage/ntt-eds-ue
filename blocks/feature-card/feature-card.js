@@ -21,11 +21,32 @@ function getDescriptionElement(block, heading, link) {
   return description;
 }
 
+function getCtaText(block, heading, link, description) {
+  const textRow = [...block.children].find((row) => {
+    if (row.tagName !== 'DIV') return false;
+    if (row.contains(heading) || row.contains(link) || row.contains(description)) return false;
+    if (row.querySelector('a[href]')) return false;
+    return Boolean(row.textContent?.trim());
+  });
+
+  return textRow?.textContent?.trim() || link?.textContent?.trim() || 'Learn more';
+}
+
 function wrapElement(element, wrapperClass) {
   const wrapper = document.createElement('div');
   wrapper.className = wrapperClass;
   wrapper.append(element);
   return wrapper;
+}
+
+function setCtaText(link, ctaText) {
+  let textSpan = link.querySelector('.feature-card-cta-text');
+  if (!textSpan) {
+    textSpan = document.createElement('span');
+    textSpan.className = 'feature-card-cta-text';
+    link.prepend(textSpan);
+  }
+  textSpan.textContent = ctaText;
 }
 
 function ensureCtaArrow(link) {
@@ -48,6 +69,7 @@ export default function decorate(block) {
   const heading = block.querySelector('h1, h2, h3, h4, h5, h6');
   const link = block.querySelector('a[href]');
   const description = getDescriptionElement(block, heading, link);
+  const ctaText = getCtaText(block, heading, link, description);
 
   const content = document.createElement('div');
   content.className = 'feature-card-content';
@@ -62,8 +84,14 @@ export default function decorate(block) {
     content.append(wrapElement(description, 'feature-card-description-wrapper'));
   }
 
-  if (link) {
+  if (link?.href) {
     link.classList.add('feature-card-cta');
+    link.textContent = '';
+    setCtaText(link, ctaText);
+    link.setAttribute(
+      'aria-label',
+      `${ctaText} — ${heading?.textContent?.trim() || ''}`.trim(),
+    );
     ensureCtaArrow(link);
     content.append(wrapElement(link, 'feature-card-cta-wrapper'));
   }
