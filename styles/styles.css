@@ -58,6 +58,18 @@
   src: local('Arial');
 }
 
+@font-face {
+  font-family: noto-serif-fallback;
+  size-adjust: 105%;
+  src: local('Georgia');
+}
+
+@font-face {
+  font-family: noto-sans-fallback;
+  size-adjust: 100%;
+  src: local('Arial');
+}
+
 @media (width >= 900px) {
   :root {
     /* body sizes */
