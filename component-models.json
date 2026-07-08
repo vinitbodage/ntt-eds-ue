@@ -146,6 +146,65 @@
     ]
   },
   {
+    "id": "card-grid-with-image-item",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Image",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "name": "imageAlt",
+        "label": "Image Alt Text",
+        "valueType": "string"
+      },
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Title",
+        "valueType": "string",
+        "maxLength": 120,
+        "description": "Maximum 120 characters"
+      },
+      {
+        "component": "select",
+        "name": "titleType",
+        "label": "Title Level",
+        "valueType": "string",
+        "value": "h3",
+        "options": [
+          {
+            "name": "H2",
+            "value": "h2"
+          },
+          {
+            "name": "H3",
+            "value": "h3"
+          },
+          {
+            "name": "H4",
+            "value": "h4"
+          }
+        ]
+      },
+      {
+        "component": "textarea",
+        "name": "linkText",
+        "label": "CTA Text",
+        "valueType": "string"
+      },
+      {
+        "component": "aem-content",
+        "name": "link",
+        "label": "CTA Link",
+        "valueType": "string"
+      }
+    ]
+  },
+  {
     "id": "card",
     "fields": [
       {
@@ -220,16 +279,17 @@
         "valueType": "string"
       },
       {
-        "component": "aem-content",
-        "name": "link",
-        "label": "CTA Link",
-        "valueType": "string"
-      },
-      {
-        "component": "text",
+        "component": "textarea",
         "name": "linkText",
         "label": "CTA Text",
         "valueType": "string"
+      },
+      {
+        "component": "aem-content",
+        "name": "link",
+        "label": "CTA Link",
+        "valueType": "string",
+        "description": "Destination URL for the call-to-action"
       }
     ]
   },

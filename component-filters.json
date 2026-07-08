@@ -16,11 +16,18 @@
       "hero-banner",
       "hero-video-carousel",
       "feature-card",
+      "card-grid-with-image",
       "cards",
       "tiles",
       "stats",
       "columns",
       "fragment"
+    ]
+  },
+  {
+    "id": "card-grid-with-image",
+    "components": [
+      "card-grid-with-image-item"
     ]
   },
   {
