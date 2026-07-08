@@ -17,6 +17,7 @@
       "hero-video-carousel",
       "cards",
       "tiles",
+      "spotlight",
       "stats",
       "columns",
       "fragment"
@@ -44,9 +45,21 @@
     ]
   },
   {
+    "id": "hero-banner",
+    "components": [
+      "hero-banner-slide"
+    ]
+  },
+  {
     "id": "hero-video-carousel",
     "components": [
       "hero-video-carousel-slide"
+    ]
+  },
+  {
+    "id": "spotlight",
+    "components": [
+      "spotlight-card"
     ]
   },
   {
