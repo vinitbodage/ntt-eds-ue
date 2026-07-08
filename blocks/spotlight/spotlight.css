@@ -1,0 +1,115 @@
+.spotlight > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.spotlight > ul > li {
+  border-radius: 4px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.spotlight > ul > li:hover {
+  box-shadow: 0 8px 24px rgb(11 31 58 / 16%);
+  transform: translateY(-2px);
+}
+
+.spotlight .spotlight-card-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 280px;
+  height: 100%;
+}
+
+.spotlight .spotlight-card-media {
+  position: absolute;
+  inset: 0;
+  line-height: 0;
+}
+
+.spotlight .spotlight-card-media picture,
+.spotlight .spotlight-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.spotlight .spotlight-card-media picture {
+  height: 100%;
+}
+
+.spotlight .spotlight-card-inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(11 31 58 / 5%) 20%, rgb(11 31 58 / 88%) 100%);
+  pointer-events: none;
+}
+
+.spotlight .spotlight-card-content {
+  position: relative;
+  z-index: 1;
+  margin: 20px;
+  color: var(--background-color);
+}
+
+.spotlight .spotlight-card-content :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 8px;
+  font-size: var(--heading-font-size-s);
+  line-height: 1.25;
+  color: var(--background-color);
+}
+
+.spotlight .spotlight-card-content p {
+  margin: 0 0 12px;
+  font-size: var(--body-font-size-xs);
+  line-height: 1.4;
+  color: rgb(255 255 255 / 92%);
+}
+
+.spotlight .spotlight-card-content p:last-child {
+  margin-bottom: 0;
+}
+
+.spotlight .spotlight-card-cta {
+  display: inline-block;
+  font-size: var(--body-font-size-xs);
+  font-weight: 500;
+  color: var(--background-color);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.spotlight .spotlight-card-cta:hover,
+.spotlight .spotlight-card-cta:focus-visible {
+  color: var(--link-color);
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
+@media (width >= 600px) {
+  .spotlight > ul {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .spotlight .spotlight-card-inner {
+    min-height: 320px;
+  }
+}
+
+@media (width >= 900px) {
+  .spotlight > ul {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .spotlight .spotlight-card-inner {
+    min-height: 360px;
+  }
+}
