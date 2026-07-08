@@ -31,6 +31,7 @@
   position: absolute;
   inset: 0;
   line-height: 0;
+  overflow: hidden;
 }
 
 .spotlight .spotlight-card-media picture,
@@ -39,6 +40,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.spotlight .image-hover-zoom {
+  transition: transform .9s cubic-bezier(.19, 1, .22, 1);
+}
+
+.spotlight > ul > li:hover .image-hover-zoom {
+  transform: scale(1.08);
 }
 
 .spotlight .spotlight-card-media picture {
@@ -79,15 +88,30 @@
 }
 
 .spotlight .spotlight-card-cta {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
   font-size: var(--body-font-size-xs);
   font-weight: 500;
   color: var(--background-color);
+  text-decoration: none;
+}
+
+.spotlight .spotlight-card-cta-icon {
+  display: inline-block;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.spotlight > ul > li:hover .spotlight-card-cta {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.spotlight .spotlight-card-cta:hover,
+.spotlight > ul > li:hover .spotlight-card-cta-icon {
+  transform: translateX(2px);
+}
+
 .spotlight .spotlight-card-cta:focus-visible {
   color: var(--link-color);
   outline: 2px solid var(--link-color);

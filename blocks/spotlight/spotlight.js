@@ -29,6 +29,47 @@ function removeLinkTargetCell(container) {
   });
 }
 
+function addCtaArrow(link) {
+  if (link.querySelector('.spotlight-card-cta-icon')) return;
+  const icon = document.createElement('span');
+  icon.className = 'spotlight-card-cta-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = '→';
+  link.append(icon);
+}
+
+function getDescription(li, heading, link) {
+  const paragraph = [...li.querySelectorAll('p')].find((p) => !p.querySelector('a'));
+  if (paragraph) return paragraph;
+
+  // AEM textarea fields render as plain text in a div, not wrapped in <p>
+  const cells = [...li.children];
+  const linkCell = link ? cells.find((cell) => cell.contains(link)) : null;
+
+  const descriptionCell = cells.find((cell) => {
+    if (cell.querySelector('picture, h1, h2, h3, h4, h5, h6, a[href]')) return false;
+    const text = cell.textContent.trim();
+    if (!text || LINK_TARGETS.includes(text)) return false;
+    if (heading && !(cell.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_PRECEDING)) {
+      return false;
+    }
+    if (linkCell && (cell.compareDocumentPosition(linkCell) & Node.DOCUMENT_POSITION_PRECEDING)) {
+      return false;
+    }
+    return true;
+  });
+
+  if (!descriptionCell) return null;
+
+  const existing = descriptionCell.querySelector('p');
+  if (existing && !existing.querySelector('a')) return existing;
+
+  const description = document.createElement('p');
+  description.textContent = descriptionCell.textContent.trim();
+  moveInstrumentation(descriptionCell, description);
+  return description;
+}
+
 /**
  * loads and decorates the spotlight block
  * @param {Element} block The block element
@@ -46,7 +87,7 @@ export default function decorate(block) {
     const picture = li.querySelector('picture');
     const heading = li.querySelector('h1, h2, h3, h4, h5, h6');
     const link = li.querySelector('a[href]');
-    const description = [...li.querySelectorAll('p')].find((p) => !p.querySelector('a'));
+    const description = getDescription(li, heading, link);
 
     if (heading) heading.textContent = truncate(heading.textContent, TITLE_MAX);
     if (description) description.textContent = truncate(description.textContent, DESC_MAX);
@@ -70,6 +111,7 @@ export default function decorate(block) {
       if (linkTarget === '_blank') {
         link.rel = 'noopener noreferrer';
       }
+      addCtaArrow(link);
       content.append(link);
     }
 
@@ -80,7 +122,9 @@ export default function decorate(block) {
 
   ul.querySelectorAll('picture > img').forEach((img) => {
     const optimizedPic = createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }]);
-    moveInstrumentation(img, optimizedPic.querySelector('img'));
+    const optimizedImg = optimizedPic.querySelector('img');
+    optimizedImg.classList.add('image-hover-zoom');
+    moveInstrumentation(img, optimizedImg);
     img.closest('picture').replaceWith(optimizedPic);
   });
 
