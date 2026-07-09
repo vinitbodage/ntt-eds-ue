@@ -157,38 +157,11 @@
       },
       {
         "component": "text",
-        "name": "imageAlt",
-        "label": "Image Alt Text",
-        "valueType": "string"
-      },
-      {
-        "component": "text",
         "name": "title",
         "label": "Title",
         "valueType": "string",
         "maxLength": 120,
         "description": "Maximum 120 characters"
-      },
-      {
-        "component": "select",
-        "name": "titleType",
-        "label": "Title Level",
-        "valueType": "string",
-        "value": "h3",
-        "options": [
-          {
-            "name": "H2",
-            "value": "h2"
-          },
-          {
-            "name": "H3",
-            "value": "h3"
-          },
-          {
-            "name": "H4",
-            "value": "h4"
-          }
-        ]
       },
       {
         "component": "textarea",
@@ -499,36 +472,9 @@
       },
       {
         "component": "text",
-        "name": "imageAlt",
-        "label": "Image Alt Text",
-        "valueType": "string"
-      },
-      {
-        "component": "text",
         "name": "title",
         "label": "Title",
         "valueType": "string"
-      },
-      {
-        "component": "select",
-        "name": "titleType",
-        "label": "Title Level",
-        "valueType": "string",
-        "value": "h3",
-        "options": [
-          {
-            "name": "H2",
-            "value": "h2"
-          },
-          {
-            "name": "H3",
-            "value": "h3"
-          },
-          {
-            "name": "H4",
-            "value": "h4"
-          }
-        ]
       },
       {
         "component": "textarea",
@@ -541,29 +487,6 @@
         "name": "link",
         "label": "Link",
         "valueType": "string"
-      },
-      {
-        "component": "text",
-        "name": "linkText",
-        "label": "Link Text",
-        "valueType": "string"
-      },
-      {
-        "component": "multiselect",
-        "name": "classes",
-        "label": "Text Color",
-        "valueType": "string[]",
-        "maxSize": 1,
-        "options": [
-          {
-            "name": "Light",
-            "value": "light"
-          },
-          {
-            "name": "Dark",
-            "value": "dark"
-          }
-        ]
       }
     ]
   }
