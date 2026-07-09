@@ -91,7 +91,7 @@
 .spotlight .spotlight-card-cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.35em;
+  gap: 8px;
   font-size: var(--body-font-size-xs);
   font-weight: 500;
   color: var(--background-color);
@@ -107,14 +107,19 @@
 
 .spotlight .spotlight-card-cta-icon {
   display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  align-self: center;
+  position: relative;
+  top: -1px;
   line-height: 1;
   transition: transform 0.2s ease;
 }
 
 .spotlight .spotlight-card-cta-icon img {
   display: block;
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
 }
 
 .spotlight > ul > li:hover .spotlight-card-cta {
