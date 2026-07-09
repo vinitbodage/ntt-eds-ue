@@ -4,6 +4,8 @@ import { moveInstrumentation } from '../../scripts/scripts.js';
 const TITLE_MAX = 15;
 const DESC_MAX = 40;
 const LINK_TARGETS = ['_self', '_blank'];
+const TITLE_TYPES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+const DEFAULT_TITLE_TAG = 'h3';
 
 function truncate(text, max) {
   const trimmed = (text || '').trim();
@@ -20,42 +22,98 @@ function looksLikeUrl(text) {
   return /^(https?:\/\/|\/|#)/.test(text) || /\.html(\?|$)/i.test(text);
 }
 
-function hasDescriptionContent(cell) {
-  if (!cell) return false;
-  if (cell.querySelector('p:not(:has(a))')) return true;
-  return Boolean(cell.textContent.trim());
+function isImageAltCell(cell, pictureCell) {
+  if (!cell || cell === pictureCell) return false;
+  const alt = pictureCell?.querySelector('img')?.getAttribute('alt')?.trim();
+  const text = cell.textContent.trim();
+  return Boolean(alt && text === alt && !cell.querySelector('h1, h2, h3, h4, h5, h6, a'));
+}
+
+function isTitleTypeCell(cell) {
+  const text = cell?.textContent.trim().toLowerCase();
+  return TITLE_TYPES.includes(text) && !cell?.querySelector('picture, a, h1, h2, h3, h4, h5, h6');
+}
+
+function getTitleType(cells) {
+  const titleTypeCell = cells.find(isTitleTypeCell);
+  const titleType = titleTypeCell?.textContent.trim().toLowerCase();
+  return TITLE_TYPES.includes(titleType) ? titleType : DEFAULT_TITLE_TAG;
+}
+
+function getContentCells(cells, pictureCell, linkCell, linkTargetCell) {
+  const imgAlt = pictureCell?.querySelector('img')?.getAttribute('alt')?.trim();
+
+  return cells.filter((cell) => {
+    if (cell === pictureCell || cell === linkCell || cell === linkTargetCell) return false;
+    if (cell.querySelector('picture') || isLinkTargetCell(cell) || isTitleTypeCell(cell)) return false;
+    const text = cell.textContent.trim();
+    if (!text) return false;
+    if (imgAlt && text === imgAlt && !cell.querySelector('h1, h2, h3, h4, h5, h6')) return false;
+    return true;
+  });
+}
+
+function ensureHeading(titleCell, existingHeading, titleTag = DEFAULT_TITLE_TAG) {
+  if (existingHeading) return existingHeading;
+
+  if (!titleCell) return null;
+
+  const heading = document.createElement(titleTag);
+  heading.textContent = titleCell.textContent.trim();
+  moveInstrumentation(titleCell, heading);
+  return heading;
 }
 
 function parseCardRow(row) {
   const cells = [...row.children];
+  const pictureCell = cells.find((cell) => cell.querySelector('picture'));
+  const picture = pictureCell?.querySelector('picture');
   const linkTargetCell = cells.find(isLinkTargetCell);
   const linkTarget = LINK_TARGETS.includes(linkTargetCell?.textContent.trim())
     ? linkTargetCell.textContent.trim()
     : '_self';
+  const linkCell = cells.find((cell) => cell.querySelector('a[href]'));
+  const linkArea = linkCell || cells.find((cell) => {
+    if (cell === pictureCell || cell === linkTargetCell) return false;
+    return looksLikeUrl(cell.textContent.trim());
+  });
 
-  const picture = cells.find((cell) => cell.querySelector('picture'))?.querySelector('picture');
-  const headingCell = cells.find((cell) => cell.querySelector('h1, h2, h3, h4, h5, h6'));
-  const heading = headingCell?.querySelector('h1, h2, h3, h4, h5, h6');
-  const headingIdx = cells.indexOf(headingCell);
-  const tailIdx = linkTargetCell ? cells.indexOf(linkTargetCell) : cells.length;
+  const existingHeading = row.querySelector('h1, h2, h3, h4, h5, h6');
+  const titleTag = getTitleType(cells);
+  const contentCells = getContentCells(cells, pictureCell, linkCell, linkTargetCell);
 
-  const fieldCells = cells.slice(headingIdx + 1, tailIdx);
+  let titleCell = null;
+  let descriptionCell = null;
 
-  // Model field order after title: description, link, linkText
-  const descriptionCell = fieldCells[0]
-    && hasDescriptionContent(fieldCells[0])
-    && !fieldCells[0].querySelector('a[href]')
-    ? fieldCells[0]
-    : null;
-  const linkArea = fieldCells[1] || null;
-  const linkTextCell = fieldCells[2]?.textContent.trim() ? fieldCells[2] : null;
+  if (existingHeading) {
+    titleCell = contentCells.find((cell) => cell.contains(existingHeading)) || null;
+    descriptionCell = contentCells.find((cell) => cell !== titleCell && !cell.querySelector('a[href]')) || null;
+  } else if (contentCells.length) {
+    [titleCell] = contentCells;
+    descriptionCell = contentCells[1] && !contentCells[1].querySelector('a[href]')
+      ? contentCells[1]
+      : null;
+  }
+
+  const heading = ensureHeading(titleCell, existingHeading, titleTag);
+
+  const linkTextCell = cells.find((cell) => {
+    if (cell === pictureCell || cell === linkTargetCell || cell === linkArea) return false;
+    if (titleCell && cell === titleCell) return false;
+    if (descriptionCell && cell === descriptionCell) return false;
+    if (cell.querySelector('picture, a[href]')) return false;
+    if (isLinkTargetCell(cell) || isImageAltCell(cell, pictureCell) || isTitleTypeCell(cell)) {
+      return false;
+    }
+    return Boolean(cell.textContent.trim());
+  });
 
   return {
     picture,
     heading,
     descriptionCell,
     linkArea,
-    linkTextCell: linkTextCell?.textContent.trim() ? linkTextCell : null,
+    linkTextCell,
     linkTarget,
   };
 }
@@ -122,6 +180,8 @@ function addCtaArrow(link) {
  * @param {Element} block The block element
  */
 export default function decorate(block) {
+  if (block.querySelector('.spotlight-card-inner')) return;
+
   const ul = document.createElement('ul');
   [...block.children].forEach((row) => {
     const {
