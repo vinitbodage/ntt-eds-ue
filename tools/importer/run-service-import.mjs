@@ -7,15 +7,15 @@ import path from 'path';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(__dirname, '../..');
-const options = readFileSync(path.join(__dirname, 'xwalk-options.json'), 'utf8');
+const importDir = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(importDir, '../..');
+const options = readFileSync(path.join(importDir, 'xwalk-options.json'), 'utf8');
 
 const args = [
   'aem-import-helper',
   'import',
-  '--urls', path.join(__dirname, 'urls.txt'),
-  '--importjs', path.join(__dirname, 'import.js'),
+  '--urls', path.join(importDir, 'urls.txt'),
+  '--importjs', path.join(importDir, 'import.js'),
   '--options', options,
   '--models', path.join(root, 'component-models.json'),
   '--filters', path.join(root, 'component-filters.json'),

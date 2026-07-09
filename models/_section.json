@@ -54,6 +54,8 @@
         "hero",
         "hero-banner",
         "hero-video-carousel",
+        "feature-card",
+        "card-grid-with-image",
         "cards",
         "tiles",
         "spotlight",

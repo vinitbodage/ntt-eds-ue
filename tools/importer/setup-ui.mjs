@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Ensures helix-importer-ui is present for `aem import`.
  * The AEM CLI clones this repo on first run; a failed clone leaves an empty
@@ -8,8 +9,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const UI_DIR = path.join(__dirname, 'helix-importer-ui');
+const importDir = path.dirname(fileURLToPath(import.meta.url));
+const UI_DIR = path.join(importDir, 'helix-importer-ui');
 const UI_REPO = 'https://github.com/adobe/helix-importer-ui';
 
 function removeDir(dir) {
