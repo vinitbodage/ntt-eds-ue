@@ -20,12 +20,6 @@ function looksLikeUrl(text) {
   return /^(https?:\/\/|\/|#)/.test(text) || /\.html(\?|$)/i.test(text);
 }
 
-function isLinkCell(cell) {
-  if (!cell) return false;
-  if (cell.querySelector('a[href]')) return true;
-  return looksLikeUrl(cell.textContent.trim());
-}
-
 function hasDescriptionContent(cell) {
   if (!cell) return false;
   if (cell.querySelector('p:not(:has(a))')) return true;
@@ -46,17 +40,15 @@ function parseCardRow(row) {
   const tailIdx = linkTargetCell ? cells.indexOf(linkTargetCell) : cells.length;
 
   const fieldCells = cells.slice(headingIdx + 1, tailIdx);
-  const linkIdx = fieldCells.findIndex(isLinkCell);
 
-  let descriptionCell = null;
-  if (linkIdx > 0 && hasDescriptionContent(fieldCells[0])) {
-    descriptionCell = fieldCells[0];
-  }
-
-  const linkArea = linkIdx >= 0 ? fieldCells[linkIdx] : null;
-  const linkTextCell = (linkIdx > 1
-    ? fieldCells.slice(1, linkIdx).find((cell) => cell.textContent.trim())
-    : null) || (linkIdx >= 0 ? fieldCells[linkIdx + 1] : fieldCells[1]);
+  // Model field order after title: description, link, linkText
+  const descriptionCell = fieldCells[0]
+    && hasDescriptionContent(fieldCells[0])
+    && !fieldCells[0].querySelector('a[href]')
+    ? fieldCells[0]
+    : null;
+  const linkArea = fieldCells[1] || null;
+  const linkTextCell = fieldCells[2]?.textContent.trim() ? fieldCells[2] : null;
 
   return {
     picture,
@@ -73,6 +65,7 @@ function getDescriptionElement(descriptionCell) {
 
   const paragraph = descriptionCell.querySelector('p');
   if (paragraph && !paragraph.querySelector('a')) {
+    moveInstrumentation(descriptionCell, paragraph);
     return paragraph;
   }
 
@@ -85,15 +78,12 @@ function getDescriptionElement(descriptionCell) {
 function buildCtaLink({ linkArea, linkTextCell, linkTarget }) {
   const existingAnchor = linkArea?.querySelector('a[href]');
   let href = existingAnchor?.getAttribute('href') || '';
-  let label = existingAnchor?.textContent.trim() || '';
+  const authoredLabel = linkTextCell?.textContent.trim() || '';
+  const label = authoredLabel || existingAnchor?.textContent.trim() || '';
 
   if (!href && linkArea) {
     const text = linkArea.textContent.trim();
     if (looksLikeUrl(text)) href = text;
-  }
-
-  if (!label && linkTextCell) {
-    label = linkTextCell.textContent.trim();
   }
 
   if (!href) return null;
