@@ -11,22 +11,101 @@ function truncate(text, max) {
   return trimmed.slice(0, max).trim();
 }
 
-function getLinkTarget(row) {
-  const cell = [...row.children].find((child) => {
-    const text = child.textContent.trim();
-    return LINK_TARGETS.includes(text);
-  });
-  const target = cell?.textContent.trim();
-  return LINK_TARGETS.includes(target) ? target : '_self';
+function isLinkTargetCell(cell) {
+  const text = cell?.textContent.trim();
+  return LINK_TARGETS.includes(text) && !cell?.querySelector('picture, h1, h2, h3, h4, h5, h6, a');
 }
 
-function removeLinkTargetCell(container) {
-  [...container.children].forEach((child) => {
-    const text = child.textContent.trim();
-    if (LINK_TARGETS.includes(text) && !child.querySelector('a, picture, h1, h2, h3, h4, h5, h6, p')) {
-      child.remove();
-    }
-  });
+function looksLikeUrl(text) {
+  return /^(https?:\/\/|\/|#)/.test(text) || /\.html(\?|$)/i.test(text);
+}
+
+function hasDescriptionContent(cell) {
+  if (!cell) return false;
+  if (cell.querySelector('p:not(:has(a))')) return true;
+  return Boolean(cell.textContent.trim());
+}
+
+function parseCardRow(row) {
+  const cells = [...row.children];
+  const linkTargetCell = cells.find(isLinkTargetCell);
+  const linkTarget = LINK_TARGETS.includes(linkTargetCell?.textContent.trim())
+    ? linkTargetCell.textContent.trim()
+    : '_self';
+
+  const picture = cells.find((cell) => cell.querySelector('picture'))?.querySelector('picture');
+  const headingCell = cells.find((cell) => cell.querySelector('h1, h2, h3, h4, h5, h6'));
+  const heading = headingCell?.querySelector('h1, h2, h3, h4, h5, h6');
+  const headingIdx = cells.indexOf(headingCell);
+  const tailIdx = linkTargetCell ? cells.indexOf(linkTargetCell) : cells.length;
+
+  const fieldCells = cells.slice(headingIdx + 1, tailIdx);
+
+  // Model field order after title: description, link, linkText
+  const descriptionCell = fieldCells[0]
+    && hasDescriptionContent(fieldCells[0])
+    && !fieldCells[0].querySelector('a[href]')
+    ? fieldCells[0]
+    : null;
+  const linkArea = fieldCells[1] || null;
+  const linkTextCell = fieldCells[2]?.textContent.trim() ? fieldCells[2] : null;
+
+  return {
+    picture,
+    heading,
+    descriptionCell,
+    linkArea,
+    linkTextCell: linkTextCell?.textContent.trim() ? linkTextCell : null,
+    linkTarget,
+  };
+}
+
+function getDescriptionElement(descriptionCell) {
+  if (!descriptionCell) return null;
+
+  const paragraph = descriptionCell.querySelector('p');
+  if (paragraph && !paragraph.querySelector('a')) {
+    moveInstrumentation(descriptionCell, paragraph);
+    return paragraph;
+  }
+
+  const description = document.createElement('p');
+  description.textContent = descriptionCell.textContent.trim();
+  moveInstrumentation(descriptionCell, description);
+  return description;
+}
+
+function buildCtaLink({ linkArea, linkTextCell, linkTarget }) {
+  const existingAnchor = linkArea?.querySelector('a[href]');
+  let href = existingAnchor?.getAttribute('href') || '';
+  const authoredLabel = linkTextCell?.textContent.trim() || '';
+  const label = authoredLabel || existingAnchor?.textContent.trim() || '';
+
+  if (!href && linkArea) {
+    const text = linkArea.textContent.trim();
+    if (looksLikeUrl(text)) href = text;
+  }
+
+  if (!href) return null;
+
+  let anchor = existingAnchor;
+  if (!anchor) {
+    anchor = document.createElement('a');
+    anchor.href = href;
+    if (linkArea) moveInstrumentation(linkArea, anchor);
+    else if (linkTextCell) moveInstrumentation(linkTextCell, anchor);
+  } else if (linkArea) {
+    moveInstrumentation(linkArea, anchor);
+  }
+
+  if (label) anchor.textContent = label;
+  anchor.classList.add('spotlight-card-cta');
+  anchor.target = linkTarget;
+  if (linkTarget === '_blank') {
+    anchor.rel = 'noopener noreferrer';
+  }
+
+  return anchor;
 }
 
 function addCtaArrow(link) {
@@ -34,40 +113,8 @@ function addCtaArrow(link) {
   const icon = document.createElement('span');
   icon.className = 'spotlight-card-cta-icon';
   icon.setAttribute('aria-hidden', 'true');
-  icon.textContent = '→';
+  icon.innerHTML = '<svg viewBox="0 0 16 16" width="16" height="16" focusable="false" aria-hidden="true"><path fill="currentColor" d="M8.7 3.3a1 1 0 0 0 0 1.4L10.59 6.5H3.5a1 1 0 0 0 0 2h7.09l-1.89 1.8a1 1 0 1 0 1.38 1.44l3.5-3.33a1 1 0 0 0 .04-1.38l-3.5-3.33a1 1 0 0 0-1.42.04Z"/></svg>';
   link.append(icon);
-}
-
-function getDescription(li, heading, link) {
-  const paragraph = [...li.querySelectorAll('p')].find((p) => !p.querySelector('a'));
-  if (paragraph) return paragraph;
-
-  // AEM textarea fields render as plain text in a div, not wrapped in <p>
-  const cells = [...li.children];
-  const linkCell = link ? cells.find((cell) => cell.contains(link)) : null;
-
-  const descriptionCell = cells.find((cell) => {
-    if (cell.querySelector('picture, h1, h2, h3, h4, h5, h6, a[href]')) return false;
-    const text = cell.textContent.trim();
-    if (!text || LINK_TARGETS.includes(text)) return false;
-    if (heading && !(cell.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_PRECEDING)) {
-      return false;
-    }
-    if (linkCell && (cell.compareDocumentPosition(linkCell) & Node.DOCUMENT_POSITION_PRECEDING)) {
-      return false;
-    }
-    return true;
-  });
-
-  if (!descriptionCell) return null;
-
-  const existing = descriptionCell.querySelector('p');
-  if (existing && !existing.querySelector('a')) return existing;
-
-  const description = document.createElement('p');
-  description.textContent = descriptionCell.textContent.trim();
-  moveInstrumentation(descriptionCell, description);
-  return description;
 }
 
 /**
@@ -77,20 +124,25 @@ function getDescription(li, heading, link) {
 export default function decorate(block) {
   const ul = document.createElement('ul');
   [...block.children].forEach((row) => {
-    const linkTarget = getLinkTarget(row);
+    const {
+      picture,
+      heading,
+      descriptionCell,
+      linkArea,
+      linkTextCell,
+      linkTarget,
+    } = parseCardRow(row);
+
     const li = document.createElement('li');
     moveInstrumentation(row, li);
 
-    while (row.firstElementChild) li.append(row.firstElementChild);
-    removeLinkTargetCell(li);
-
-    const picture = li.querySelector('picture');
-    const heading = li.querySelector('h1, h2, h3, h4, h5, h6');
-    const link = li.querySelector('a[href]');
-    const description = getDescription(li, heading, link);
-
     if (heading) heading.textContent = truncate(heading.textContent, TITLE_MAX);
+
+    const description = getDescriptionElement(descriptionCell);
     if (description) description.textContent = truncate(description.textContent, DESC_MAX);
+
+    const link = buildCtaLink({ linkArea, linkTextCell, linkTarget });
+    if (link) addCtaArrow(link);
 
     const inner = document.createElement('div');
     inner.className = 'spotlight-card-inner';
@@ -105,18 +157,10 @@ export default function decorate(block) {
 
     if (heading) content.append(heading);
     if (description) content.append(description);
-    if (link) {
-      link.classList.add('spotlight-card-cta');
-      link.target = linkTarget;
-      if (linkTarget === '_blank') {
-        link.rel = 'noopener noreferrer';
-      }
-      addCtaArrow(link);
-      content.append(link);
-    }
+    if (link) content.append(link);
 
     inner.append(content);
-    li.replaceChildren(inner);
+    li.append(inner);
     ul.append(li);
   });
 

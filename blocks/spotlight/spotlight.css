@@ -97,10 +97,22 @@
   text-decoration: none;
 }
 
+.spotlight .spotlight-card-cta:focus-visible {
+  color: var(--link-color);
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
 .spotlight .spotlight-card-cta-icon {
-  display: inline-block;
+  display: inline-flex;
   line-height: 1;
   transition: transform 0.2s ease;
+}
+
+.spotlight .spotlight-card-cta-icon svg {
+  display: block;
+  width: 1em;
+  height: 1em;
 }
 
 .spotlight > ul > li:hover .spotlight-card-cta {
@@ -110,12 +122,6 @@
 
 .spotlight > ul > li:hover .spotlight-card-cta-icon {
   transform: translateX(2px);
-}
-
-.spotlight .spotlight-card-cta:focus-visible {
-  color: var(--link-color);
-  outline: 2px solid var(--link-color);
-  outline-offset: 2px;
 }
 
 @media (width >= 600px) {
