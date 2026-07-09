@@ -194,68 +194,52 @@
     ]
   },
   {
-    "id": "hero-banner",
+    "id": "hero-banner-slide",
     "fields": [
       {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Banner Image",
+        "multi": false
+      },
+      {
         "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Image Alt Text",
+        "value": ""
+      },
+      {
+        "component": "text",
+        "valueType": "string",
         "name": "title",
         "label": "Banner Title",
-        "valueType": "string",
-        "maxLength": 20,
-        "description": "Maximum 20 characters"
-      },
-      {
-        "component": "select",
-        "name": "titleType",
-        "label": "Title Level",
-        "valueType": "string",
-        "value": "h2",
-        "options": [
-          {
-            "name": "H1",
-            "value": "h1"
-          },
-          {
-            "name": "H2",
-            "value": "h2"
-          }
-        ]
+        "validation": {
+          "maxLength": 20,
+          "customErrorMsg": "Banner title must be 20 characters or less."
+        }
       },
       {
         "component": "text",
+        "valueType": "string",
         "name": "description",
         "label": "Description",
-        "valueType": "string",
-        "maxLength": 30,
-        "description": "Maximum 30 characters"
+        "validation": {
+          "maxLength": 30,
+          "customErrorMsg": "Description must be 30 characters or less."
+        }
       },
       {
         "component": "aem-content",
         "name": "link",
-        "label": "Banner Link",
-        "valueType": "string",
-        "description": "Destination when the banner is clicked"
+        "label": "Banner Link"
       },
       {
-        "component": "container",
-        "name": "images",
-        "label": "Banner Images",
-        "collapsible": false,
-        "multi": true,
-        "fields": [
-          {
-            "component": "reference",
-            "name": "image",
-            "label": "Image",
-            "valueType": "string"
-          },
-          {
-            "component": "text",
-            "name": "imageAlt",
-            "label": "Alt Text",
-            "valueType": "string"
-          }
-        ]
+        "component": "text",
+        "valueType": "string",
+        "name": "linkTitle",
+        "label": "Link Title"
       }
     ]
   },
@@ -361,6 +345,73 @@
         "value": "",
         "label": "Text",
         "valueType": "string"
+      }
+    ]
+  },
+  {
+    "id": "spotlight-card",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Background Image",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "name": "imageAlt",
+        "label": "Image Alt Text",
+        "valueType": "string"
+      },
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Title",
+        "valueType": "string",
+        "validation": {
+          "maxLength": 15,
+          "customErrorMsg": "Title must be 15 characters or less."
+        }
+      },
+      {
+        "component": "textarea",
+        "name": "description",
+        "label": "Description",
+        "valueType": "string",
+        "validation": {
+          "maxLength": 40,
+          "customErrorMsg": "Description must be 40 characters or less."
+        }
+      },
+      {
+        "component": "aem-content",
+        "name": "link",
+        "label": "Link URL",
+        "valueType": "string"
+      },
+      {
+        "component": "text",
+        "name": "linkText",
+        "label": "Link Label",
+        "valueType": "string"
+      },
+      {
+        "component": "select",
+        "name": "linkTarget",
+        "label": "Link Target",
+        "valueType": "string",
+        "value": "_self",
+        "options": [
+          {
+            "name": "Same window",
+            "value": "_self"
+          },
+          {
+            "name": "New tab",
+            "value": "_blank"
+          }
+        ]
       }
     ]
   },
