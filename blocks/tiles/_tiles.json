@@ -25,8 +25,8 @@
             "template": {
               "name": "Tile",
               "model": "tile",
-              "titleType": "h3",
-              "classes": ["light"]
+              "classes": ["light"],
+              "text": "<h3>Title</h3><p>Description</p><p><a href=\"#\">Learn more</a></p>"
             }
           }
         }
@@ -45,55 +45,12 @@
           "multi": false
         },
         {
-          "component": "text",
-          "name": "imageAlt",
-          "label": "Image Alt Text",
-          "valueType": "string"
-        },
-        {
-          "component": "text",
-          "name": "title",
-          "label": "Title",
-          "valueType": "string"
-        },
-        {
-          "component": "select",
-          "name": "titleType",
-          "label": "Title Level",
+          "component": "richtext",
+          "name": "text",
+          "value": "",
+          "label": "Text",
           "valueType": "string",
-          "value": "h3",
-          "options": [
-            {
-              "name": "H2",
-              "value": "h2"
-            },
-            {
-              "name": "H3",
-              "value": "h3"
-            },
-            {
-              "name": "H4",
-              "value": "h4"
-            }
-          ]
-        },
-        {
-          "component": "textarea",
-          "name": "description",
-          "label": "Description",
-          "valueType": "string"
-        },
-        {
-          "component": "aem-content",
-          "name": "link",
-          "label": "Link",
-          "valueType": "string"
-        },
-        {
-          "component": "text",
-          "name": "linkText",
-          "label": "Link Text",
-          "valueType": "string"
+          "description": "Use a heading for the title, a paragraph for the description, and a link for the CTA."
         },
         {
           "component": "multiselect",

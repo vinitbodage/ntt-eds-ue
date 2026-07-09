@@ -242,10 +242,10 @@
                 "template": {
                   "name": "Tile",
                   "model": "tile",
-                  "titleType": "h3",
                   "classes": [
                     "light"
-                  ]
+                  ],
+                  "text": "<h3>Title</h3><p>Description</p><p><a href=\"#\">Learn more</a></p>"
                 }
               }
             }
