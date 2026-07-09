@@ -59,12 +59,6 @@
     ]
   },
   {
-    "id": "hero-video-carousel",
-    "components": [
-      "hero-video-carousel-slide"
-    ]
-  },
-  {
     "id": "spotlight",
     "components": [
       "spotlight-card"
