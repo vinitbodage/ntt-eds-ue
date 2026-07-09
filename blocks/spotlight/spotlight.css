@@ -74,6 +74,7 @@
   font-size: var(--heading-font-size-s);
   line-height: 1.25;
   color: var(--background-color);
+  text-transform: capitalize;
 }
 
 .spotlight .spotlight-card-content p {
@@ -95,6 +96,7 @@
   font-weight: 500;
   color: var(--background-color);
   text-decoration: none;
+  text-transform: capitalize;
 }
 
 .spotlight .spotlight-card-cta:focus-visible {
@@ -109,10 +111,10 @@
   transition: transform 0.2s ease;
 }
 
-.spotlight .spotlight-card-cta-icon svg {
+.spotlight .spotlight-card-cta-icon img {
   display: block;
-  width: 1em;
-  height: 1em;
+  width: 24px;
+  height: 24px;
 }
 
 .spotlight > ul > li:hover .spotlight-card-cta {
