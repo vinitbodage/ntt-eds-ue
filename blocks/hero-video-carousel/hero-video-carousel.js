@@ -1,25 +1,37 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { moveInstrumentation } from '../../scripts/scripts.js';
 
-function isConfigRow(row) {
+function isLegacyConfigRow(row) {
   if (row.children.length !== 1) return false;
   const cell = row.querySelector(':scope > div');
   if (!cell) return false;
-  if (row.querySelector('picture, img, video, h1, h2, h3, h4, h5, h6')) return false;
+  if (row.querySelector('picture, img, video, h1, h2, h3, h4, h5, h6, hr')) return false;
   const text = cell.textContent.trim();
   return text === 'true' || text === 'false' || !Number.isNaN(Number(text));
 }
 
-function parseConfig(rows) {
-  const config = { autoplayDuration: 8, autoplay: true };
-  const slideRows = [];
+function applyConfigRow(row, config) {
+  const cells = [...row.children];
 
-  rows.forEach((row) => {
-    if (!isConfigRow(row)) {
-      slideRows.push(row);
-      return;
+  if (cells.length === 2 && !row.querySelector('picture, img, video, h1, h2, h3, h4, h5, h6, hr')) {
+    const key = cells[0].textContent.trim().toLowerCase();
+    const value = cells[1].textContent.trim();
+
+    if (key.includes('autoplay duration') || key === 'autoplayduration') {
+      const num = Number(value);
+      if (!Number.isNaN(num)) {
+        config.autoplayDuration = num;
+        return true;
+      }
     }
 
+    if (key === 'autoplay') {
+      config.autoplay = value.toLowerCase() === 'true';
+      return true;
+    }
+  }
+
+  if (isLegacyConfigRow(row)) {
     const text = row.textContent.trim();
     if (text === 'true' || text === 'false') {
       config.autoplay = text === 'true';
@@ -27,42 +39,142 @@ function parseConfig(rows) {
       const value = Number(text);
       if (!Number.isNaN(value)) config.autoplayDuration = value;
     }
-  });
+    return true;
+  }
 
-  return { config, slideRows };
+  return false;
 }
 
-function getVideoLink(row) {
-  const cells = [...row.children];
-  const firstLink = cells[0]?.querySelector('a[href]');
-  if (firstLink) return firstLink;
+function parseConfig(block) {
+  const config = { autoplayDuration: 8, autoplay: true };
+  const contentRows = [];
 
-  return [...row.querySelectorAll('a[href]')].find((anchor) => (
-    /\.(mp4|webm|ogg)(\?|$)/i.test(anchor.href) || anchor.href.includes('video')
+  [...block.children].forEach((row) => {
+    if (applyConfigRow(row, config)) return;
+    contentRows.push(row);
+  });
+
+  return { config, contentRows };
+}
+
+function getSlidesCell(row) {
+  const cells = [...row.children];
+  const hrCell = cells.find((cell) => cell.querySelector('hr'));
+  if (hrCell) return hrCell;
+  if (cells.length === 1) return cells[0];
+  return row;
+}
+
+function isVideoLink(anchor) {
+  return /\.(mp4|webm|ogg)(\?|$)/i.test(anchor.href) || anchor.href.includes('video');
+}
+
+function getVideoLink(root) {
+  return [...root.querySelectorAll('a[href]')].find(isVideoLink);
+}
+
+function getCtaLink(root, videoLink) {
+  return [...root.querySelectorAll('a[href]')].find((anchor) => (
+    anchor !== videoLink && !isVideoLink(anchor)
   ));
 }
 
-function getCtaLink(row, videoLink) {
-  return [...row.querySelectorAll('a[href]')].find((anchor) => anchor !== videoLink);
+function getCtaTextElement(root, videoLink, ctaLink) {
+  return [...root.querySelectorAll('p')].find((paragraph) => {
+    if (paragraph.querySelector('a[href]')) return false;
+    if (videoLink && paragraph.contains(videoLink)) return false;
+    if (ctaLink && paragraph === ctaLink.parentElement) return false;
+    return Boolean(paragraph.textContent.trim());
+  });
 }
 
-function ensureCtaLabel(anchor) {
-  const text = anchor.textContent.trim();
-  if (!text) {
-    anchor.textContent = 'Read more';
+function parseSlideContent(root) {
+  const videoLink = getVideoLink(root);
+  const picture = root.querySelector('picture');
+  const heading = root.querySelector('h1, h2, h3, h4, h5, h6');
+  const ctaLink = getCtaLink(root, videoLink);
+  const ctaText = getCtaTextElement(root, videoLink, ctaLink);
+
+  if (ctaLink && ctaText && !ctaLink.textContent.trim()) {
+    ctaLink.textContent = ctaText.textContent.trim();
+    moveInstrumentation(ctaText, ctaLink);
+    ctaText.remove();
   }
-  if (!anchor.textContent.includes('→')) {
+
+  return {
+    videoLink, picture, heading, ctaLink,
+  };
+}
+
+function isSlideChunk(elements) {
+  return elements.some((el) => (
+    el.matches?.('picture, h1, h2, h3, h4, h5, h6')
+    || el.querySelector?.('picture, img, a[href], h1, h2, h3, h4, h5, h6')
+  ));
+}
+
+function splitElementsByHr(cell) {
+  const chunks = [];
+  let buffer = [];
+
+  [...cell.childNodes].forEach((node) => {
+    if (node.nodeName === 'HR') {
+      if (buffer.length) {
+        chunks.push(buffer);
+        buffer = [];
+      }
+      return;
+    }
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      buffer.push(node);
+    }
+  });
+
+  if (buffer.length) chunks.push(buffer);
+  return chunks.filter(isSlideChunk);
+}
+
+function wrapElements(elements) {
+  const wrapper = document.createElement('div');
+  elements.forEach((element) => wrapper.append(element));
+  return wrapper;
+}
+
+function parseSlides(contentRows) {
+  if (contentRows.length === 0) return [];
+
+  const slidesContainer = contentRows.find((row) => row.querySelector('hr'));
+  if (slidesContainer) {
+    const cell = getSlidesCell(slidesContainer);
+    return splitElementsByHr(cell).map((elements) => ({
+      elements,
+      row: slidesContainer,
+    }));
+  }
+
+  return contentRows.map((row) => ({
+    elements: [...row.children],
+    row,
+  }));
+}
+
+function formatCtaLink(anchor) {
+  const text = anchor.textContent.trim();
+  if (!text) return;
+
+  anchor.classList.add('button', 'accent');
+  if (!text.includes('→')) {
     anchor.append(' →');
   }
 }
 
 function optimizePosterImage(picture, isFirstSlide) {
   const img = picture?.querySelector('img');
-  if (!img) return { posterSrc: '', posterAlt: '' };
+  if (!img) return { posterSrc: '', posterAlt: '', posterEl: null };
 
   if (!isFirstSlide) {
     img.setAttribute('loading', 'lazy');
-    return { posterSrc: img.src, posterAlt: img.alt || '' };
+    return { posterSrc: img.src, posterAlt: img.alt || '', posterEl: img };
   }
 
   const optimizedPic = createOptimizedPicture(
@@ -76,30 +188,24 @@ function optimizePosterImage(picture, isFirstSlide) {
   optimizedImg.setAttribute('fetchpriority', 'high');
   optimizedImg.setAttribute('loading', 'eager');
   picture.replaceWith(optimizedPic);
-  return { posterSrc: optimizedImg.src, posterAlt: optimizedImg.alt || '' };
+  return { posterSrc: optimizedImg.src, posterAlt: optimizedImg.alt || '', posterEl: optimizedImg };
 }
 
 function buildMedia(videoLink, picture, isFirstSlide) {
   const media = document.createElement('div');
   media.className = 'hero-video-carousel-media';
-  const { posterSrc, posterAlt } = optimizePosterImage(picture, isFirstSlide);
+  const { posterSrc, posterAlt, posterEl } = optimizePosterImage(picture, isFirstSlide);
   const hasVideo = Boolean(videoLink?.href);
 
   if (!hasVideo) {
-    if (posterSrc) {
-      const poster = document.createElement('img');
-      poster.className = 'hero-video-carousel-poster';
-      poster.src = posterSrc;
-      poster.alt = posterAlt;
-      if (isFirstSlide) {
-        poster.setAttribute('fetchpriority', 'high');
-        poster.setAttribute('loading', 'eager');
+    if (posterEl) {
+      const poster = posterEl.closest('picture') || posterEl;
+      if (poster instanceof HTMLImageElement) {
+        poster.classList.add('hero-video-carousel-poster');
       } else {
-        poster.setAttribute('loading', 'lazy');
+        poster.classList.add('hero-video-carousel-poster-wrap');
       }
-      if (picture) {
-        moveInstrumentation(picture, poster);
-      }
+      moveInstrumentation(picture || posterEl, posterEl);
       media.append(poster);
     }
     return {
@@ -132,9 +238,10 @@ function buildMedia(videoLink, picture, isFirstSlide) {
     source.dataset.type = /\.webm(\?|$)/i.test(videoLink.href) ? 'video/webm' : 'video/mp4';
   }
   video.append(source);
-
-  if (videoLink) {
-    moveInstrumentation(videoLink.closest('div') || videoLink, video);
+  moveInstrumentation(videoLink, video);
+  if (posterEl) {
+    moveInstrumentation(posterEl, video);
+    posterEl.closest('picture')?.remove();
   }
 
   const loadVideo = () => {
@@ -363,7 +470,8 @@ function initCarousel(block, slideItems, config, liveRegion) {
  * @param {Element} block The block element
  */
 export default function decorate(block) {
-  const { config, slideRows } = parseConfig([...block.children]);
+  const { config, contentRows } = parseConfig(block);
+  const parsedSlides = parseSlides(contentRows);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   block.dataset.autoplayDuration = String(config.autoplayDuration);
@@ -394,15 +502,14 @@ export default function decorate(block) {
 
   const slideItems = [];
 
-  slideRows.forEach((row, index) => {
+  parsedSlides.forEach(({ elements }, index) => {
+    const source = wrapElements(elements);
+    const {
+      videoLink, picture, heading, ctaLink,
+    } = parseSlideContent(source);
+
     const slide = document.createElement('li');
     slide.className = 'hero-video-carousel-slide';
-    moveInstrumentation(row, slide);
-
-    const videoLink = getVideoLink(row);
-    const picture = row.querySelector('picture');
-    const heading = row.querySelector('h1, h2, h3, h4, h5, h6');
-    const ctaLink = getCtaLink(row, videoLink);
 
     const {
       media,
@@ -420,9 +527,8 @@ export default function decorate(block) {
       copy.append(heading);
     }
 
-    if (ctaLink) {
-      ensureCtaLabel(ctaLink);
-      ctaLink.classList.add('button', 'accent');
+    if (ctaLink?.textContent.trim()) {
+      formatCtaLink(ctaLink);
 
       const ctaWrapper = document.createElement('p');
       ctaWrapper.className = 'button-wrapper';
@@ -446,6 +552,13 @@ export default function decorate(block) {
     slides.append(slide);
     copies.append(copy);
     progress.append(segment);
+  });
+
+  const uniqueRows = [...new Set(parsedSlides.map(({ row }) => row))];
+  uniqueRows.forEach((row) => {
+    const copiesForRow = slideItems.filter((_, index) => parsedSlides[index].row === row);
+    const target = copiesForRow.length > 1 ? copies : copiesForRow[0]?.copy;
+    if (target) moveInstrumentation(row, target);
   });
 
   content.append(liveRegion, progress, copies);
