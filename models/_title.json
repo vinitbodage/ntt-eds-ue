@@ -54,6 +54,34 @@
               "value": "h6"
             }
           ]
+        },
+        {
+          "component": "number",
+          "name": "marginTop",
+          "label": "Margin Top (px)",
+          "valueType": "number",
+          "value": 0
+        },
+        {
+          "component": "number",
+          "name": "marginBottom",
+          "label": "Margin Bottom (px)",
+          "valueType": "number",
+          "value": 0
+        },
+        {
+          "component": "number",
+          "name": "marginLeft",
+          "label": "Margin Left (px)",
+          "valueType": "number",
+          "value": 0
+        },
+        {
+          "component": "number",
+          "name": "marginRight",
+          "label": "Margin Right (px)",
+          "valueType": "number",
+          "value": 0
         }
       ]
     }
