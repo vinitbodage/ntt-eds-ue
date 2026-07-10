@@ -1,11 +1,5 @@
-const MARGIN_PROPS = ['marginTop', 'marginBottom', 'marginLeft', 'marginRight'];
-
-const MARGIN_STYLES = {
-  marginTop: 'marginTop',
-  marginBottom: 'marginBottom',
-  marginLeft: 'marginLeft',
-  marginRight: 'marginRight',
-};
+const TITLE_WITH_MARGIN_MODEL = 'title-with-margin';
+const MARGIN_PROPS = ['marginTop', 'marginBottom'];
 
 function parseMargin(value) {
   const parsed = Number.parseInt(String(value ?? '0').trim(), 10);
@@ -44,29 +38,29 @@ function applyMargins(heading, margins) {
   MARGIN_PROPS.forEach((prop) => {
     const value = margins[prop];
     if (value > 0) {
-      heading.style[MARGIN_STYLES[prop]] = `${value}px`;
+      heading.style[prop] = `${value}px`;
     }
   });
 }
 
-function decorateTitleContainer(container) {
+function decorateTitleWithMargin(container) {
   const heading = container.querySelector(
     ':scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6',
   );
   if (!heading) return;
 
   const margins = {};
-  let hasMargins = false;
+  let hasInstrumentedMargins = false;
 
   MARGIN_PROPS.forEach((prop) => {
     const value = readMarginProp(container, prop);
     if (value !== null) {
       margins[prop] = value;
-      hasMargins = true;
+      hasInstrumentedMargins = true;
     }
   });
 
-  if (!hasMargins) {
+  if (!hasInstrumentedMargins) {
     const deliveryMargins = readDeliveryMargins(container, heading);
     if (!deliveryMargins) return;
     applyMargins(heading, deliveryMargins);
@@ -77,19 +71,10 @@ function decorateTitleContainer(container) {
 }
 
 /**
- * Applies authorable margins to title components.
+ * Applies authorable margins to Title with Margin components only.
  * @param {Element} main The main container element
  */
 export default function decorateTitles(main) {
-  main.querySelectorAll('[data-aue-model="title"]').forEach(decorateTitleContainer);
-
-  main.querySelectorAll('.default-content-wrapper').forEach((wrapper) => {
-    if (wrapper.querySelector('[data-aue-model="title"]')) return;
-    const heading = wrapper.querySelector(
-      ':scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6',
-    );
-    if (!heading) return;
-    const deliveryMargins = readDeliveryMargins(wrapper, heading);
-    if (deliveryMargins) applyMargins(heading, deliveryMargins);
-  });
+  main.querySelectorAll(`[data-aue-model="${TITLE_WITH_MARGIN_MODEL}"]`)
+    .forEach(decorateTitleWithMargin);
 }

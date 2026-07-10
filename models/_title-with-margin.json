@@ -1,14 +1,14 @@
 {
   "definitions": [
     {
-      "title": "Title",
-      "id": "title",
+      "title": "Title with Margin",
+      "id": "title-with-margin",
       "plugins": {
         "xwalk": {
           "page": {
             "resourceType": "core/franklin/components/title/v1/title",
             "template": {
-              "model": "title"
+              "model": "title-with-margin"
             }
           }
         }
@@ -17,7 +17,7 @@
   ],
   "models": [
     {
-      "id": "title",
+      "id": "title-with-margin",
       "fields": [
         {
           "component": "text",
@@ -54,6 +54,20 @@
               "value": "h6"
             }
           ]
+        },
+        {
+          "component": "number",
+          "name": "marginTop",
+          "label": "Margin Top (px)",
+          "valueType": "number",
+          "value": 0
+        },
+        {
+          "component": "number",
+          "name": "marginBottom",
+          "label": "Margin Bottom (px)",
+          "valueType": "number",
+          "value": 0
         }
       ]
     }

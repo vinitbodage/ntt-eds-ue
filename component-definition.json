@@ -31,6 +31,20 @@
           }
         },
         {
+          "title": "Title with Margin",
+          "id": "title-with-margin",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/title/v1/title",
+                "template": {
+                  "model": "title-with-margin"
+                }
+              }
+            }
+          }
+        },
+        {
           "title": "Image",
           "id": "image",
           "plugins": {
