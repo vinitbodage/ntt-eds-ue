@@ -306,11 +306,13 @@ function initCarousel(block, slideItems, config, liveRegion) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canAutoRotate = slideItems.length > 1 && config.autoplay && !reducedMotion;
 
+  const durationMs = Math.max(config.autoplayDuration, 1) * 1000;
+
   let activeIndex = 0;
   let timer = null;
+  let slideTimerStartedAt = 0;
+  let slideTimeRemaining = durationMs;
   let isUserPaused = false;
-
-  const durationMs = Math.max(config.autoplayDuration, 1) * 1000;
 
   const updateLiveRegion = (index) => {
     const heading = slideItems[index]?.copy.querySelector('h1, h2, h3, h4, h5, h6');
@@ -323,21 +325,26 @@ function initCarousel(block, slideItems, config, liveRegion) {
 
   const resetSegmentProgress = () => {
     slideItems.forEach((item, i) => {
-      item.segmentFill.classList.remove('is-animating', 'is-complete');
-      item.segmentFill.getBoundingClientRect();
+      item.segmentFill.classList.remove('is-animating');
+      item.segmentFill.style.animationDuration = '';
+
+      if (i < activeIndex) {
+        item.segmentFill.classList.add('is-complete');
+        return;
+      }
+
+      item.segmentFill.classList.remove('is-complete');
       if (i !== activeIndex) return;
 
       if (canAutoRotate && !isUserPaused) {
         item.segmentFill.style.animationDuration = `${durationMs}ms`;
+        item.segmentFill.getBoundingClientRect();
         item.segmentFill.classList.add('is-animating');
         return;
       }
 
-      item.segmentFill.style.animationDuration = '';
       if (!canAutoRotate && !reducedMotion) {
         item.segmentFill.classList.add('is-complete');
-      } else {
-        item.segmentFill.classList.remove('is-complete');
       }
     });
   };
@@ -347,10 +354,18 @@ function initCarousel(block, slideItems, config, liveRegion) {
       window.clearTimeout(timer);
       timer = null;
     }
+    if (slideTimerStartedAt) {
+      slideTimeRemaining = Math.max(
+        slideTimeRemaining - (Date.now() - slideTimerStartedAt),
+        0,
+      );
+      slideTimerStartedAt = 0;
+    }
   };
 
   function goToSlide(index) {
     stopTimer();
+    slideTimeRemaining = durationMs;
     activeIndex = index;
 
     slideItems.forEach((item, i) => {
@@ -375,16 +390,32 @@ function initCarousel(block, slideItems, config, liveRegion) {
     }
 
     if (canAutoRotate && !isUserPaused) {
+      slideTimerStartedAt = Date.now();
       timer = window.setTimeout(() => {
+        slideTimerStartedAt = 0;
         goToSlide((activeIndex + 1) % slideItems.length);
       }, durationMs);
     }
   }
 
+  function startSlideTimer(ms = slideTimeRemaining) {
+    stopTimer();
+    slideTimeRemaining = ms;
+    if (slideTimeRemaining <= 0) {
+      goToSlide((activeIndex + 1) % slideItems.length);
+      return;
+    }
+    slideTimerStartedAt = Date.now();
+    timer = window.setTimeout(() => {
+      slideTimerStartedAt = 0;
+      goToSlide((activeIndex + 1) % slideItems.length);
+    }, slideTimeRemaining);
+  }
+
   const syncToggle = () => {
     toggle.replaceChildren(buildToggleIcon(isUserPaused));
     toggle.setAttribute('aria-label', isUserPaused ? 'Play carousel' : 'Pause carousel');
-    toggle.setAttribute('aria-pressed', isUserPaused ? 'false' : 'true');
+    toggle.setAttribute('aria-pressed', isUserPaused ? 'true' : 'false');
     block.classList.toggle('is-paused', isUserPaused);
     block.classList.toggle('is-reduced-motion', reducedMotion);
   };
@@ -404,15 +435,9 @@ function initCarousel(block, slideItems, config, liveRegion) {
     if (isUserPaused) {
       stopTimer();
       pauseAllVideos();
-      slideItems.forEach((item) => item.segmentFill.classList.remove('is-animating'));
     } else {
       slideItems[activeIndex].playVideo();
-      resetSegmentProgress();
-      if (canAutoRotate) {
-        timer = window.setTimeout(() => {
-          goToSlide((activeIndex + 1) % slideItems.length);
-        }, durationMs);
-      }
+      if (canAutoRotate) startSlideTimer(slideTimeRemaining);
     }
 
     syncToggle();
@@ -434,35 +459,6 @@ function initCarousel(block, slideItems, config, liveRegion) {
   }
 
   syncToggle();
-
-  block.addEventListener('mouseenter', () => {
-    if (isUserPaused || !canAutoRotate) return;
-    stopTimer();
-    slideItems[activeIndex]?.segmentFill.classList.remove('is-animating');
-  });
-
-  block.addEventListener('mouseleave', () => {
-    if (isUserPaused || !canAutoRotate) return;
-    resetSegmentProgress();
-    timer = window.setTimeout(() => {
-      goToSlide((activeIndex + 1) % slideItems.length);
-    }, durationMs);
-  });
-
-  block.addEventListener('focusin', (event) => {
-    if (event.target.closest('.hero-video-carousel-toggle, .hero-video-carousel-segment')) return;
-    if (isUserPaused || !canAutoRotate) return;
-    stopTimer();
-  });
-
-  block.addEventListener('focusout', (event) => {
-    if (block.contains(event.relatedTarget)) return;
-    if (isUserPaused || !canAutoRotate) return;
-    resetSegmentProgress();
-    timer = window.setTimeout(() => {
-      goToSlide((activeIndex + 1) % slideItems.length);
-    }, durationMs);
-  });
 }
 
 /**
@@ -566,6 +562,7 @@ export default function decorate(block) {
   const toggle = document.createElement('button');
   toggle.type = 'button';
   toggle.className = 'hero-video-carousel-toggle';
+  toggle.append(buildToggleIcon(false));
 
   inner.append(slides, content, toggle);
   block.replaceChildren(inner);
