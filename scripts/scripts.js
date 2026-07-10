@@ -10,6 +10,7 @@ import {
   loadSections,
   loadCSS,
 } from './aem.js';
+import decorateTitles from './title.js';
 
 /**
  * Moves all the attributes from a given elmenet to another given element.
@@ -118,6 +119,7 @@ export function decorateMain(main) {
   decorateIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
+  decorateTitles(main);
   decorateBlocks(main);
   decorateButtons(main);
 }
