@@ -21,6 +21,9 @@
     "...": "./_section.json#/models"
   },
   {
+    "...": "./_header-section.json#/models"
+  },
+  {
     "...": "../blocks/*/_*.json#/models"
   }
 ]

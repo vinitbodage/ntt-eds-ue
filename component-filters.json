@@ -2,7 +2,8 @@
   {
     "id": "main",
     "components": [
-      "section"
+      "section",
+      "header-section"
     ]
   },
   {
@@ -23,7 +24,12 @@
       "spotlight",
       "stats",
       "columns",
-      "fragment",
+      "fragment"
+    ]
+  },
+  {
+    "id": "header-section",
+    "components": [
       "navigation"
     ]
   },
