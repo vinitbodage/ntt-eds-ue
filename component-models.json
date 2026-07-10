@@ -646,8 +646,8 @@
         "label": "Title",
         "valueType": "string",
         "validation": {
-          "maxLength": 15,
-          "customErrorMsg": "Title must be 15 characters or less."
+          "maxLength": 40,
+          "customErrorMsg": "Title must be 40 characters or less."
         }
       },
       {
@@ -656,8 +656,8 @@
         "label": "Description",
         "valueType": "string",
         "validation": {
-          "maxLength": 40,
-          "customErrorMsg": "Description must be 40 characters or less."
+          "maxLength": 100,
+          "customErrorMsg": "Description must be 100 characters or less."
         }
       },
       {
