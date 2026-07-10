@@ -13,6 +13,7 @@ header nav.navigation {
   font-family: var(--body-font-family);
   color: #fff;
   --nav-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --ntt-nav-underline: #ffc400;
 }
 
 /* single bar: logo | links | utilities | hamburger */
@@ -51,6 +52,9 @@ header nav.navigation {
 .navigation .nav-sections {
   flex: 1 1 auto;
   min-width: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: stretch;
 }
 
 .navigation .nav-sections > ul {
@@ -61,10 +65,33 @@ header nav.navigation {
   list-style: none;
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 .navigation .nav-sections > ul > li {
+  position: relative;
+  display: flex;
+  align-items: center;
   flex: 0 0 auto;
+  height: 100%;
+}
+
+.navigation .nav-sections > ul > li::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  bottom: 0;
+  width: calc(100% + 10px);
+  height: 3px;
+  background-color: var(--ntt-nav-underline);
+  opacity: 0;
+  transition: opacity var(--nav-transition);
+}
+
+.navigation .nav-sections > ul > li:hover::before,
+.navigation .nav-sections > ul > li:focus-within::before,
+.navigation .nav-sections > ul > li:has(> a:active)::before {
+  opacity: 1;
 }
 
 .navigation .nav-sections > ul > li > a {
@@ -80,8 +107,9 @@ header nav.navigation {
 }
 
 .navigation .nav-sections > ul > li > a:hover,
-.navigation .nav-sections > ul > li > a:focus-visible {
-  color: rgb(255 255 255 / 80%);
+.navigation .nav-sections > ul > li > a:focus-visible,
+.navigation .nav-sections > ul > li > a:active {
+  color: inherit;
 }
 
 /* utilities — always visible */
@@ -244,6 +272,7 @@ header nav.navigation {
 
 .navigation .nav-drawer-item > a,
 .navigation .nav-drawer-toggle {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -260,11 +289,35 @@ header nav.navigation {
   cursor: pointer;
 }
 
+.navigation .nav-drawer-item > a::before,
+.navigation .nav-drawer-toggle::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--ntt-nav-underline);
+  opacity: 0;
+  transition: opacity var(--nav-transition);
+}
+
 .navigation .nav-drawer-item > a:hover,
 .navigation .nav-drawer-item > a:focus-visible,
+.navigation .nav-drawer-item > a:active,
 .navigation .nav-drawer-toggle:hover,
-.navigation .nav-drawer-toggle:focus-visible {
+.navigation .nav-drawer-toggle:focus-visible,
+.navigation .nav-drawer-toggle:active {
   background-color: rgb(255 255 255 / 8%);
+}
+
+.navigation .nav-drawer-item > a:hover::before,
+.navigation .nav-drawer-item > a:focus-visible::before,
+.navigation .nav-drawer-item > a:active::before,
+.navigation .nav-drawer-toggle:hover::before,
+.navigation .nav-drawer-toggle:focus-visible::before,
+.navigation .nav-drawer-toggle:active::before {
+  opacity: 1;
 }
 
 .navigation .nav-drawer-toggle::after {
@@ -300,6 +353,7 @@ header nav.navigation {
 }
 
 .navigation .nav-drawer-submenu a {
+  position: relative;
   display: block;
   padding: 12px 24px 12px 40px;
   color: rgb(255 255 255 / 85%);
@@ -307,10 +361,29 @@ header nav.navigation {
   text-decoration: none;
 }
 
+.navigation .nav-drawer-submenu a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--ntt-nav-underline);
+  opacity: 0;
+  transition: opacity var(--nav-transition);
+}
+
 .navigation .nav-drawer-submenu a:hover,
-.navigation .nav-drawer-submenu a:focus-visible {
+.navigation .nav-drawer-submenu a:focus-visible,
+.navigation .nav-drawer-submenu a:active {
   color: #fff;
   background-color: rgb(255 255 255 / 6%);
+}
+
+.navigation .nav-drawer-submenu a:hover::after,
+.navigation .nav-drawer-submenu a:focus-visible::after,
+.navigation .nav-drawer-submenu a:active::after {
+  opacity: 1;
 }
 
 /* contact link — last item in mobile drawer */
@@ -320,6 +393,7 @@ header nav.navigation {
 }
 
 .navigation .nav-drawer-contact-link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -332,9 +406,28 @@ header nav.navigation {
   text-decoration: none;
 }
 
+.navigation .nav-drawer-contact-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--ntt-nav-underline);
+  opacity: 0;
+  transition: opacity var(--nav-transition);
+}
+
 .navigation .nav-drawer-contact-link:hover,
-.navigation .nav-drawer-contact-link:focus-visible {
+.navigation .nav-drawer-contact-link:focus-visible,
+.navigation .nav-drawer-contact-link:active {
   background-color: rgb(255 255 255 / 8%);
+}
+
+.navigation .nav-drawer-contact-link:hover::before,
+.navigation .nav-drawer-contact-link:focus-visible::before,
+.navigation .nav-drawer-contact-link:active::before {
+  opacity: 1;
 }
 
 .navigation .nav-drawer-contact-link .icon {
