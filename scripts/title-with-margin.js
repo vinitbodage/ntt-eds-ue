@@ -1,6 +1,11 @@
 const TITLE_WITH_MARGIN_MODEL = 'title-with-margin';
 const MARGIN_PROPS = ['marginTop', 'marginBottom'];
 
+const MARGIN_VARS = {
+  marginTop: '--title-margin-top',
+  marginBottom: '--title-margin-bottom',
+};
+
 function parseMargin(value) {
   const parsed = Number.parseInt(String(value ?? '0').trim(), 10);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
@@ -38,16 +43,18 @@ function applyMargins(heading, margins) {
   MARGIN_PROPS.forEach((prop) => {
     const value = margins[prop];
     if (value > 0) {
-      heading.style[prop] = `${value}px`;
+      heading.style.setProperty(MARGIN_VARS[prop], `${value}px`);
     }
   });
 }
 
-function decorateTitleWithMargin(container) {
+function decorateTitleWithMarginContainer(container) {
   const heading = container.querySelector(
     ':scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6',
   );
   if (!heading) return;
+
+  container.classList.add('title-with-margin');
 
   const margins = {};
   let hasInstrumentedMargins = false;
@@ -74,7 +81,7 @@ function decorateTitleWithMargin(container) {
  * Applies authorable margins to Title with Margin components only.
  * @param {Element} main The main container element
  */
-export default function decorateTitles(main) {
+export default function decorateTitlesWithMargin(main) {
   main.querySelectorAll(`[data-aue-model="${TITLE_WITH_MARGIN_MODEL}"]`)
-    .forEach(decorateTitleWithMargin);
+    .forEach(decorateTitleWithMarginContainer);
 }
