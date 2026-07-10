@@ -1,7 +1,10 @@
 import { createOptimizedPicture, decorateIcons } from '../../scripts/aem.js';
 import { moveInstrumentation } from '../../scripts/scripts.js';
 
-const TOOL_STYLES = ['primary', 'globe', 'search'];
+const TOOL_STYLES = ['primary', 'globe', 'search', 'contact'];
+const DEFAULT_LOGO_SRC = `${window.hlx.codeBasePath}/icons/nttdata-logo.svg`;
+const DEFAULT_CONTACT_HREF = 'https://www.nttdata.com/global/en/contact-us';
+const DESKTOP_BREAKPOINT = 1024;
 
 function splitByHr(root) {
   const chunks = [];
@@ -295,6 +298,19 @@ function buildTool(tool) {
     return button;
   }
 
+  if (tool.style === 'contact') {
+    const link = document.createElement('a');
+    link.href = tool.href || DEFAULT_CONTACT_HREF;
+    link.className = 'nav-tool nav-tool-contact';
+    link.setAttribute('aria-label', tool.label || 'Contact Us');
+    applyLinkAttributes(link, tool.target);
+    const icon = document.createElement('span');
+    icon.className = 'icon icon-contact';
+    link.append(icon);
+    decorateIcons(link);
+    return link;
+  }
+
   if (tool.style === 'globe') {
     const link = document.createElement('a');
     link.href = tool.href || '#';
@@ -326,6 +342,181 @@ function buildTool(tool) {
   return link;
 }
 
+function hasContactTool(tools) {
+  return tools.some((tool) => tool.style === 'contact');
+}
+
+function getContactTool(tools) {
+  const contact = tools.find((tool) => tool.style === 'contact');
+  if (contact) return contact;
+  return {
+    label: 'Contact Us',
+    href: DEFAULT_CONTACT_HREF,
+    target: '_self',
+    icon: null,
+    style: 'contact',
+  };
+}
+
+function isContactNavItem(item, contactTool) {
+  const label = item.label?.trim().toLowerCase();
+  const itemHref = item.href?.replace(/\/$/, '') || '';
+  const contactHref = (contactTool.href || DEFAULT_CONTACT_HREF).replace(/\/$/, '');
+  return label === 'contact us' || itemHref === contactHref;
+}
+
+function buildDrawerSubmenuLinks(item) {
+  const links = [];
+
+  if (item.megaColumns?.length) {
+    item.megaColumns.forEach((column) => {
+      column.links.forEach((subLink) => {
+        links.push(subLink);
+      });
+    });
+  }
+
+  return links;
+}
+
+function buildDrawerItem(item) {
+  const li = document.createElement('li');
+  li.className = 'nav-drawer-item';
+  const submenuLinks = buildDrawerSubmenuLinks(item);
+
+  if (submenuLinks.length) {
+    li.classList.add('nav-drawer-item--has-children');
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'nav-drawer-toggle';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.textContent = item.label;
+
+    const submenu = document.createElement('ul');
+    submenu.className = 'nav-drawer-submenu';
+    submenuLinks.forEach((subLink) => {
+      const subLi = document.createElement('li');
+      subLi.append(buildLink(subLink.label, subLink.href, subLink.target, subLink.icon));
+      submenu.append(subLi);
+    });
+
+    toggle.addEventListener('click', () => {
+      const isOpen = li.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    li.append(toggle, submenu);
+    return li;
+  }
+
+  li.append(buildLink(item.label, item.href, item.target, item.icon));
+  return li;
+}
+
+function buildDrawerContact(tool) {
+  const li = document.createElement('li');
+  li.className = 'nav-drawer-item nav-drawer-contact';
+
+  const link = document.createElement('a');
+  link.href = tool.href || DEFAULT_CONTACT_HREF;
+  link.className = 'nav-drawer-contact-link';
+  applyLinkAttributes(link, tool.target);
+
+  const icon = document.createElement('span');
+  icon.className = 'icon icon-contact';
+  link.append(icon);
+
+  const label = document.createElement('span');
+  label.className = 'nav-drawer-contact-label';
+  label.textContent = tool.label || 'Contact Us';
+  link.append(label);
+
+  decorateIcons(link);
+  li.append(link);
+  return li;
+}
+
+function buildHamburger() {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'nav-hamburger';
+  button.setAttribute('aria-expanded', 'false');
+  button.setAttribute('aria-controls', 'nav-drawer');
+  button.setAttribute('aria-label', 'Open menu');
+  button.innerHTML = '<span></span><span></span><span></span>';
+  return button;
+}
+
+function closeNavMenu(nav, hamburger) {
+  nav.classList.remove('nav-open');
+  document.body.classList.remove('nav-scroll-lock');
+  hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.setAttribute('aria-label', 'Open menu');
+  nav.querySelector('.nav-overlay')?.setAttribute('aria-hidden', 'true');
+  const drawer = nav.querySelector('.nav-drawer');
+  drawer?.setAttribute('aria-hidden', 'true');
+  if (drawer) drawer.inert = true;
+}
+
+function openNavMenu(nav, hamburger) {
+  nav.classList.add('nav-open');
+  document.body.classList.add('nav-scroll-lock');
+  hamburger.setAttribute('aria-expanded', 'true');
+  hamburger.setAttribute('aria-label', 'Close menu');
+  nav.querySelector('.nav-overlay')?.setAttribute('aria-hidden', 'false');
+  const drawer = nav.querySelector('.nav-drawer');
+  drawer?.setAttribute('aria-hidden', 'false');
+  if (drawer) drawer.inert = false;
+  drawer?.querySelector('.nav-drawer-item > a, .nav-drawer-toggle')?.focus();
+}
+
+function toggleNavMenu(nav, hamburger) {
+  if (nav.classList.contains('nav-open')) {
+    closeNavMenu(nav, hamburger);
+    hamburger.focus();
+  } else {
+    openNavMenu(nav, hamburger);
+  }
+}
+
+function setupNavInteractions(nav, hamburger) {
+  const overlay = nav.querySelector('.nav-overlay');
+  const drawer = nav.querySelector('.nav-drawer');
+  const mediaQuery = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`);
+
+  hamburger.addEventListener('click', () => toggleNavMenu(nav, hamburger));
+  overlay?.addEventListener('click', () => {
+    closeNavMenu(nav, hamburger);
+    hamburger.focus();
+  });
+
+  drawer?.addEventListener('click', (event) => {
+    if (event.target.closest('a')) {
+      closeNavMenu(nav, hamburger);
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && nav.classList.contains('nav-open')) {
+      closeNavMenu(nav, hamburger);
+      hamburger.focus();
+    }
+  });
+
+  const handleBreakpointChange = () => {
+    if (mediaQuery.matches && nav.classList.contains('nav-open')) {
+      closeNavMenu(nav, hamburger);
+    }
+  };
+
+  if (mediaQuery.addEventListener) {
+    mediaQuery.addEventListener('change', handleBreakpointChange);
+  } else {
+    mediaQuery.addListener(handleBreakpointChange);
+  }
+}
+
 /**
  * loads and decorates the navigation block
  * @param {Element} block The block element
@@ -344,49 +535,94 @@ export default function decorate(block) {
 
   const brand = document.createElement('div');
   brand.className = 'nav-brand';
-  if (logo || logoLink) {
-    const brandAnchor = document.createElement('a');
-    brandAnchor.href = logoLink?.href || '/';
-    brandAnchor.title = logoLink?.title || 'Home';
-    if (logo) {
-      const img = logo.tagName === 'IMG' ? logo : logo.querySelector('img');
-      if (img) {
-        if (img.src.includes('.svg')) {
-          const logoImg = document.createElement('img');
-          logoImg.src = img.src;
-          logoImg.alt = img.alt || 'NTT DATA';
-          moveInstrumentation(img, logoImg);
-          brandAnchor.append(logoImg);
-        } else {
-          const pic = createOptimizedPicture(img.src, img.alt || 'NTT DATA', false, [{ width: '280' }]);
-          moveInstrumentation(img, pic.querySelector('img'));
-          brandAnchor.append(pic);
-        }
+  const brandAnchor = document.createElement('a');
+  brandAnchor.href = logoLink?.href || '/';
+  brandAnchor.title = logoLink?.title || 'NTT DATA Home';
+
+  if (logo) {
+    const img = logo.tagName === 'IMG' ? logo : logo.querySelector('img');
+    if (img) {
+      if (img.src.includes('.svg')) {
+        const logoImg = document.createElement('img');
+        logoImg.src = img.src;
+        logoImg.alt = img.alt || 'NTT DATA';
+        moveInstrumentation(img, logoImg);
+        brandAnchor.append(logoImg);
+      } else {
+        const pic = createOptimizedPicture(img.src, img.alt || 'NTT DATA', false, [{ width: '280' }]);
+        moveInstrumentation(img, pic.querySelector('img'));
+        brandAnchor.append(pic);
       }
-    } else {
-      brandAnchor.textContent = logoLink?.textContent.trim() || 'NTT DATA';
     }
-    brand.append(brandAnchor);
+  } else {
+    const logoImg = document.createElement('img');
+    logoImg.src = DEFAULT_LOGO_SRC;
+    logoImg.alt = 'NTT DATA';
+    brandAnchor.append(logoImg);
   }
+
+  brand.append(brandAnchor);
   bar.append(brand);
 
   const sections = document.createElement('div');
   sections.className = 'nav-sections';
+  const resolvedTools = [...tools];
+  if (!hasContactTool(resolvedTools)) {
+    resolvedTools.push({
+      label: 'Contact Us',
+      href: DEFAULT_CONTACT_HREF,
+      target: '_self',
+      icon: null,
+      style: 'contact',
+    });
+  }
+  const contactTool = getContactTool(resolvedTools);
+
   const list = document.createElement('ul');
   navItems.forEach((item) => {
-    list.append(buildNavItem(item));
+    if (!isContactNavItem(item, contactTool)) {
+      list.append(buildNavItem(item));
+    }
   });
   sections.append(list);
   bar.append(sections);
 
   const toolsEl = document.createElement('div');
   toolsEl.className = 'nav-tools';
-  tools.forEach((tool) => {
+  resolvedTools.forEach((tool) => {
     toolsEl.append(buildTool(tool));
   });
   bar.append(toolsEl);
 
-  nav.append(bar);
+  const hamburger = buildHamburger();
+  bar.append(hamburger);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'nav-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+
+  const drawer = document.createElement('aside');
+  drawer.className = 'nav-drawer';
+  drawer.id = 'nav-drawer';
+  drawer.setAttribute('aria-hidden', 'true');
+  drawer.setAttribute('aria-label', 'Main menu');
+
+  const drawerNav = document.createElement('nav');
+  drawerNav.className = 'nav-drawer-nav';
+  const drawerList = document.createElement('ul');
+  drawerList.className = 'nav-drawer-list';
+  navItems.forEach((item) => {
+    if (!isContactNavItem(item, contactTool)) {
+      drawerList.append(buildDrawerItem(item));
+    }
+  });
+  drawerList.append(buildDrawerContact(contactTool));
+  drawerNav.append(drawerList);
+  drawer.append(drawerNav);
+  drawer.inert = true;
+
+  nav.append(bar, overlay, drawer);
+  setupNavInteractions(nav, hamburger);
 
   moveInstrumentation(block, nav);
   block.replaceChildren(nav);
