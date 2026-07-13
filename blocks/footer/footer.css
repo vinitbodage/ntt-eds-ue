@@ -8,22 +8,37 @@ footer a:any-link {
   color: inherit;
 }
 
-footer a:any-link:hover {
-  color: var(--background-color);
+footer a:any-link:hover,
+footer a:any-link:focus-visible {
+  color: #fff;
 }
 
-footer .footer > div {
-  margin: auto;
-  max-width: 1200px;
-  padding: 40px 24px 24px;
+footer .footer {
+  width: 100%;
 }
 
-footer .footer p {
+footer .footer > .section {
+  max-width: none;
   margin: 0;
+  padding: 0;
+}
+
+footer .footer > .section > div {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+footer .footer .connect-cta {
+  width: 100%;
+}
+
+footer .footer .footer-site {
+  width: 100%;
 }
 
 @media (width >= 900px) {
-  footer .footer > div {
-    padding: 40px 32px 24px;
+  footer .footer > .section > div {
+    padding: 0;
   }
 }
