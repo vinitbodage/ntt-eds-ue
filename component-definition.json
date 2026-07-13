@@ -31,20 +31,6 @@
           }
         },
         {
-          "title": "Title with Margin",
-          "id": "title-with-margin",
-          "plugins": {
-            "xwalk": {
-              "page": {
-                "resourceType": "core/franklin/components/title/v1/title",
-                "template": {
-                  "model": "title-with-margin"
-                }
-              }
-            }
-          }
-        },
-        {
           "title": "Image",
           "id": "image",
           "plugins": {
@@ -353,6 +339,22 @@
                     "light"
                   ],
                   "text": "<h3>Title</h3><p>Description</p><p><a href=\"#\">Learn more</a></p>"
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "Title with Margin",
+          "id": "title-with-margin",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/block/v1/block",
+                "template": {
+                  "name": "Title with Margin",
+                  "model": "title-with-margin",
+                  "titleType": "h2"
                 }
               }
             }

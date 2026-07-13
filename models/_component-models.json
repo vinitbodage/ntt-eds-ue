@@ -9,9 +9,6 @@
     "...": "./_title.json#/models"
   },
   {
-    "...": "./_title-with-margin.json#/models"
-  },
-  {
     "...": "./_text.json#/models"
   },
   {

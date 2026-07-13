@@ -1,4 +1,0 @@
-.title-with-margin > :is(h1, h2, h3, h4, h5, h6) {
-  margin-top: var(--title-margin-top);
-  margin-bottom: var(--title-margin-bottom);
-}

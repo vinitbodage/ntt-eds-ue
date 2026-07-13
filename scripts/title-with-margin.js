@@ -1,10 +1,10 @@
 const TITLE_WITH_MARGIN_MODEL = 'title-with-margin';
 const MARGIN_PROPS = ['marginTop', 'marginBottom'];
 
-const MARGIN_VARS = {
-  marginTop: '--title-margin-top',
-  marginBottom: '--title-margin-bottom',
-};
+function isAuthoring() {
+  const { classList } = document.documentElement;
+  return classList.contains('adobe-ue-edit') || classList.contains('adobe-ue-preview');
+}
 
 function parseMargin(value) {
   const parsed = Number.parseInt(String(value ?? '0').trim(), 10);
@@ -17,15 +17,19 @@ function isMarginValueCell(element) {
   return text !== '' && /^\d+$/.test(text);
 }
 
-function readMarginProp(container, prop) {
+function readMarginProp(container, prop, removeCell) {
   const field = container.querySelector(`[data-aue-prop="${prop}"]`);
   if (!field) return null;
   const value = parseMargin(field.textContent);
-  field.remove();
+  if (removeCell) {
+    field.remove();
+  } else {
+    field.classList.add('title-with-margin-config');
+  }
   return value;
 }
 
-function readDeliveryMargins(container, heading) {
+function readDeliveryMargins(container, heading, removeCells) {
   const cells = [...container.children].filter(
     (child) => child !== heading && isMarginValueCell(child),
   );
@@ -34,7 +38,11 @@ function readDeliveryMargins(container, heading) {
   const margins = {};
   MARGIN_PROPS.forEach((prop, index) => {
     margins[prop] = parseMargin(cells[index].textContent);
-    cells[index].remove();
+    if (removeCells) {
+      cells[index].remove();
+    } else {
+      cells[index].classList.add('title-with-margin-config');
+    }
   });
   return margins;
 }
@@ -43,24 +51,17 @@ function applyMargins(heading, margins) {
   MARGIN_PROPS.forEach((prop) => {
     const value = margins[prop];
     if (value > 0) {
-      heading.style.setProperty(MARGIN_VARS[prop], `${value}px`);
+      heading.style[prop] = `${value}px`;
     }
   });
 }
 
-function decorateTitleWithMarginContainer(container) {
-  const heading = container.querySelector(
-    ':scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6',
-  );
-  if (!heading) return;
-
-  container.classList.add('title-with-margin');
-
+function readMargins(container, heading, removeCells) {
   const margins = {};
   let hasInstrumentedMargins = false;
 
   MARGIN_PROPS.forEach((prop) => {
-    const value = readMarginProp(container, prop);
+    const value = readMarginProp(container, prop, removeCells);
     if (value !== null) {
       margins[prop] = value;
       hasInstrumentedMargins = true;
@@ -68,20 +69,62 @@ function decorateTitleWithMarginContainer(container) {
   });
 
   if (!hasInstrumentedMargins) {
-    const deliveryMargins = readDeliveryMargins(container, heading);
-    if (!deliveryMargins) return;
-    applyMargins(heading, deliveryMargins);
-    return;
+    return readDeliveryMargins(container, heading, removeCells);
   }
 
-  applyMargins(heading, margins);
+  return margins;
+}
+
+function decorateLegacyTitleWithMargin(container) {
+  const heading = container.querySelector(
+    ':scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6',
+  );
+  if (!heading) return;
+
+  container.classList.add('title-with-margin');
+
+  const removeCells = !isAuthoring();
+  const margins = readMargins(container, heading, removeCells);
+  if (margins) applyMargins(heading, margins);
+}
+
+function findLegacyContainers(main) {
+  const containers = new Set();
+
+  main.querySelectorAll(`[data-aue-model="${TITLE_WITH_MARGIN_MODEL}"]:not(.block)`)
+    .forEach((container) => containers.add(container));
+
+  main.querySelectorAll('[data-aue-prop="marginTop"], [data-aue-prop="marginBottom"]')
+    .forEach((field) => {
+      const container = field.closest(`[data-aue-model="${TITLE_WITH_MARGIN_MODEL}"]`)
+        || field.parentElement;
+      if (container && !container.classList.contains('title-with-margin')) {
+        containers.add(container);
+      }
+    });
+
+  main.querySelectorAll('.default-content-wrapper').forEach((wrapper) => {
+    if (wrapper.closest('.title-with-margin')) return;
+    const heading = wrapper.querySelector(
+      ':scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6',
+    );
+    if (!heading) return;
+    const marginCells = [...wrapper.children].filter(
+      (child) => child !== heading && isMarginValueCell(child),
+    );
+    if (marginCells.length >= MARGIN_PROPS.length) {
+      containers.add(wrapper);
+    }
+  });
+
+  return [...containers];
 }
 
 /**
- * Applies authorable margins to Title with Margin components only.
+ * Decorates legacy default-content Title with Margin instances.
+ * New content should use the title-with-margin block instead.
  * @param {Element} main The main container element
  */
 export default function decorateTitlesWithMargin(main) {
-  main.querySelectorAll(`[data-aue-model="${TITLE_WITH_MARGIN_MODEL}"]`)
-    .forEach(decorateTitleWithMarginContainer);
+  findLegacyContainers(main).forEach(decorateLegacyTitleWithMargin);
 }
