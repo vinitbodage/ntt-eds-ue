@@ -95,24 +95,6 @@ header nav.navigation {
   opacity: 1;
 }
 
-.navigation .nav-sections > ul > li > a {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 0;
-  color: inherit;
-  font-size: var(--body-font-size-xs);
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.navigation .nav-sections > ul > li > a:hover,
-.navigation .nav-sections > ul > li > a:focus-visible,
-.navigation .nav-sections > ul > li > a:active {
-  color: inherit;
-}
-
 /* utilities — always visible */
 .navigation .nav-tools {
   display: flex;
@@ -140,14 +122,25 @@ header nav.navigation {
 }
 
 .navigation .nav-tool:hover,
-.navigation .nav-tool:focus-visible,
-.navigation .nav-tools a:hover,
-.navigation .nav-tools a:focus-visible {
+.navigation .nav-tool:focus-visible {
   color: rgb(255 255 255 / 80%);
 }
 
 .navigation .nav-tool-label {
   display: none;
+}
+
+/* link icon + external */
+.navigation .nav-link-icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+}
+
+.navigation .nav-link-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .navigation .nav-tool .icon,
@@ -303,24 +296,6 @@ header nav.navigation {
   transition: opacity var(--nav-transition);
 }
 
-.navigation .nav-drawer-item > a:hover,
-.navigation .nav-drawer-item > a:focus-visible,
-.navigation .nav-drawer-item > a:active,
-.navigation .nav-drawer-toggle:hover,
-.navigation .nav-drawer-toggle:focus-visible,
-.navigation .nav-drawer-toggle:active {
-  background-color: rgb(255 255 255 / 8%);
-}
-
-.navigation .nav-drawer-item > a:hover::before,
-.navigation .nav-drawer-item > a:focus-visible::before,
-.navigation .nav-drawer-item > a:active::before,
-.navigation .nav-drawer-toggle:hover::before,
-.navigation .nav-drawer-toggle:focus-visible::before,
-.navigation .nav-drawer-toggle:active::before {
-  opacity: 1;
-}
-
 .navigation .nav-drawer-toggle::after {
   content: '';
   flex: 0 0 auto;
@@ -374,19 +349,6 @@ header nav.navigation {
   transition: opacity var(--nav-transition);
 }
 
-.navigation .nav-drawer-submenu a:hover,
-.navigation .nav-drawer-submenu a:focus-visible,
-.navigation .nav-drawer-submenu a:active {
-  color: #fff;
-  background-color: rgb(255 255 255 / 6%);
-}
-
-.navigation .nav-drawer-submenu a:hover::after,
-.navigation .nav-drawer-submenu a:focus-visible::after,
-.navigation .nav-drawer-submenu a:active::after {
-  opacity: 1;
-}
-
 /* contact link — last item in mobile drawer */
 .navigation .nav-drawer-contact {
   border-bottom: 0;
@@ -419,18 +381,6 @@ header nav.navigation {
   transition: opacity var(--nav-transition);
 }
 
-.navigation .nav-drawer-contact-link:hover,
-.navigation .nav-drawer-contact-link:focus-visible,
-.navigation .nav-drawer-contact-link:active {
-  background-color: rgb(255 255 255 / 8%);
-}
-
-.navigation .nav-drawer-contact-link:hover::before,
-.navigation .nav-drawer-contact-link:focus-visible::before,
-.navigation .nav-drawer-contact-link:active::before {
-  opacity: 1;
-}
-
 .navigation .nav-drawer-contact-link .icon {
   display: inline-flex;
   width: 24px;
@@ -448,17 +398,72 @@ header nav.navigation {
   flex: 1 1 auto;
 }
 
-/* link icon + external */
-.navigation .nav-link-icon {
+/* desktop nav links — base styles after lower-specificity drawer links */
+.navigation .nav-sections > ul > li > a {
   display: inline-flex;
-  width: 20px;
-  height: 20px;
+  align-items: center;
+  padding: 8px 0;
+  color: inherit;
+  font-size: var(--body-font-size-xs);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
-.navigation .nav-link-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+/* link interaction states — ordered by ascending specificity */
+.navigation .nav-drawer-contact-link:hover,
+.navigation .nav-drawer-contact-link:focus-visible,
+.navigation .nav-drawer-contact-link:active {
+  background-color: rgb(255 255 255 / 8%);
+}
+
+.navigation .nav-drawer-contact-link:hover::before,
+.navigation .nav-drawer-contact-link:focus-visible::before,
+.navigation .nav-drawer-contact-link:active::before {
+  opacity: 1;
+}
+
+.navigation .nav-tools a:hover,
+.navigation .nav-tools a:focus-visible {
+  color: rgb(255 255 255 / 80%);
+}
+
+.navigation .nav-drawer-submenu a:hover,
+.navigation .nav-drawer-submenu a:focus-visible,
+.navigation .nav-drawer-submenu a:active {
+  color: #fff;
+  background-color: rgb(255 255 255 / 6%);
+}
+
+.navigation .nav-drawer-submenu a:hover::after,
+.navigation .nav-drawer-submenu a:focus-visible::after,
+.navigation .nav-drawer-submenu a:active::after {
+  opacity: 1;
+}
+
+.navigation .nav-drawer-item > a:hover,
+.navigation .nav-drawer-item > a:focus-visible,
+.navigation .nav-drawer-item > a:active,
+.navigation .nav-drawer-toggle:hover,
+.navigation .nav-drawer-toggle:focus-visible,
+.navigation .nav-drawer-toggle:active {
+  background-color: rgb(255 255 255 / 8%);
+}
+
+.navigation .nav-drawer-item > a:hover::before,
+.navigation .nav-drawer-item > a:focus-visible::before,
+.navigation .nav-drawer-item > a:active::before,
+.navigation .nav-drawer-toggle:hover::before,
+.navigation .nav-drawer-toggle:focus-visible::before,
+.navigation .nav-drawer-toggle:active::before {
+  opacity: 1;
+}
+
+.navigation .nav-sections > ul > li > a:hover,
+.navigation .nav-sections > ul > li > a:focus-visible,
+.navigation .nav-sections > ul > li > a:active {
+  color: inherit;
 }
 
 .navigation a.nav-external::after {
