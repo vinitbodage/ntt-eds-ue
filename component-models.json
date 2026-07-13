@@ -796,7 +796,7 @@
       },
       {
         "component": "select",
-        "name": "linkTarget",
+        "name": "linkType",
         "label": "Link Target",
         "valueType": "string",
         "value": "_self",
