@@ -1,3 +1,8 @@
+.feature-card-container .feature-card-wrapper {
+  margin: 0;
+  padding: 0;
+}
+
 .feature-card .feature-card-content {
   display: flex;
   flex-direction: column;
@@ -12,7 +17,7 @@
 }
 
 .feature-card .feature-card-heading {
-  margin: 0 0 32px;
+  margin: 0;
   color: #2e404d;
   font-family: noto-serif, "Noto Serif", "Noto Sans", "Noto Sans JP", noto-serif-fallback, serif, sans-serif;
   font-size: 2.5rem;
@@ -25,7 +30,7 @@
 }
 
 .feature-card .feature-card-description {
-  margin: 0;
+  margin: 64px 0 0;
   max-width: 800px;
   color: #2e404d;
   font-family: noto-sans, "Noto Sans", "Noto Sans JP", noto-sans-fallback, sans-serif;
@@ -84,14 +89,12 @@
 
 @media (width >= 600px) {
   .feature-card .feature-card-heading {
-    margin-bottom: 48px;
     font-size: 3rem;
   }
 }
 
 @media (width >= 900px) {
   .feature-card .feature-card-heading {
-    margin-bottom: 64px;
     font-size: 4rem;
   }
 }
