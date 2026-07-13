@@ -164,7 +164,7 @@
         "description": "Maximum 120 characters"
       },
       {
-        "component": "textarea",
+        "component": "text",
         "name": "linkText",
         "label": "CTA Text",
         "valueType": "string"

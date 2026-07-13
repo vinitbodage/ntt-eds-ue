@@ -1,27 +1,30 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { moveInstrumentation } from '../../scripts/scripts.js';
 
-function getTitleElement(row) {
-  return row.querySelector('h1, h2, h3, h4, h5, h6');
+function getRowCells(row) {
+  return [...row.children].filter((child) => child.tagName === 'DIV');
 }
 
-function getCtaLink(row) {
-  return row.querySelector('a[href]');
+function getTitleFromCell(titleCell) {
+  if (!titleCell?.textContent?.trim()) return null;
+
+  const heading = titleCell.querySelector('h1, h2, h3, h4, h5, h6');
+  if (heading) return heading;
+
+  const source = titleCell.querySelector(':scope > div') || titleCell;
+  const title = document.createElement('h3');
+  title.textContent = source.textContent.trim();
+  moveInstrumentation(source, title);
+  return title;
 }
 
-function getCtaText(row, title, link) {
-  const paragraph = [...row.querySelectorAll('p')].find(
-    (p) => !p.querySelector('a') && !p.closest('picture'),
-  );
+function getTextFromCell(cell) {
+  if (!cell) return '';
+
+  const paragraph = cell.querySelector('p');
   if (paragraph?.textContent?.trim()) return paragraph.textContent.trim();
 
-  const textRow = [...row.children].find((cell) => {
-    if (cell.tagName !== 'DIV') return false;
-    if (cell.contains(title) || cell.contains(link) || cell.querySelector('picture')) return false;
-    return Boolean(cell.textContent?.trim());
-  });
-
-  return textRow?.textContent?.trim() || link?.textContent?.trim() || 'Read more';
+  return cell.textContent?.trim() || '';
 }
 
 function isSameOriginImage(src) {
@@ -70,10 +73,17 @@ function setCtaText(link, ctaText) {
 }
 
 function buildCard(row) {
+  const cells = getRowCells(row);
+  const imageCell = cells.find((cell) => cell.querySelector('picture'));
+  const linkCell = cells.find((cell) => cell.querySelector('a[href]'));
+  const contentCells = cells.filter((cell) => cell !== imageCell && cell !== linkCell);
+
   const picture = row.querySelector('picture');
-  const title = getTitleElement(row);
-  const link = getCtaLink(row);
-  const ctaText = getCtaText(row, title, link);
+  const link = linkCell?.querySelector('a[href]');
+  const title = getTitleFromCell(contentCells[0]);
+  const ctaText = getTextFromCell(contentCells[1])
+    || link?.textContent?.trim()
+    || 'Read more';
 
   const article = document.createElement('article');
   article.className = 'card-grid-with-image-card';
