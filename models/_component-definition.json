@@ -11,9 +11,6 @@
           "...": "./_title.json#/definitions"
         },
         {
-          "...": "./_title-with-margin.json#/definitions"
-        },
-        {
           "...": "./_image.json#/definitions"
         },
         {
@@ -27,9 +24,6 @@
       "components": [
         {
           "...": "./_section.json#/definitions"
-        },
-        {
-          "...": "./_header-section.json#/definitions"
         }
       ]
     },

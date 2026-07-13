@@ -9,9 +9,6 @@
     "...": "./_title.json#/models"
   },
   {
-    "...": "./_title-with-margin.json#/models"
-  },
-  {
     "...": "./_text.json#/models"
   },
   {
@@ -19,9 +16,6 @@
   },
   {
     "...": "./_section.json#/models"
-  },
-  {
-    "...": "./_header-section.json#/models"
   },
   {
     "...": "../blocks/*/_*.json#/models"
