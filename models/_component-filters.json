@@ -2,11 +2,15 @@
   {
     "id": "main",
     "components": [
-      "section"
+      "section",
+      "header-section"
     ]
   },
   {
     "...": "./_section.json#/filters"
+  },
+  {
+    "...": "./_header-section.json#/filters"
   },
   {
     "...": "../blocks/*/_*.json#/filters"

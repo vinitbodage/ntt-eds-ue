@@ -20,6 +20,20 @@
         "name": "keywords",
         "multi": true,
         "label": "Keywords"
+      },
+      {
+        "component": "aem-content",
+        "name": "nav",
+        "label": "Navigation",
+        "valueType": "string",
+        "description": "Page used as the site header navigation fragment. Defaults to /nav when empty."
+      },
+      {
+        "component": "aem-content",
+        "name": "footer",
+        "label": "Footer",
+        "valueType": "string",
+        "description": "Page used as the site footer fragment. Defaults to /footer when empty."
       }
     ]
   },
@@ -142,6 +156,17 @@
             "value": "navy"
           }
         ]
+      }
+    ]
+  },
+  {
+    "id": "header-section",
+    "fields": [
+      {
+        "component": "text",
+        "name": "name",
+        "label": "Section Name",
+        "description": "The label shown for this section in the Content Tree"
       }
     ]
   },
@@ -432,6 +457,199 @@
     ]
   },
   {
+    "id": "navigation",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "logo",
+        "label": "Logo",
+        "multi": false
+      },
+      {
+        "component": "aem-content",
+        "name": "logoLink",
+        "label": "Logo Link",
+        "valueType": "string"
+      },
+      {
+        "component": "container",
+        "name": "navItems",
+        "label": "Navigation Items",
+        "collapsible": false,
+        "multi": true,
+        "fields": [
+          {
+            "component": "text",
+            "name": "navLabel",
+            "label": "Label",
+            "valueType": "string"
+          },
+          {
+            "component": "aem-content",
+            "name": "navLink",
+            "label": "Link",
+            "valueType": "string"
+          },
+          {
+            "component": "reference",
+            "name": "navIcon",
+            "label": "Icon",
+            "valueType": "string",
+            "multi": false
+          },
+          {
+            "component": "select",
+            "name": "navTarget",
+            "label": "Link Target",
+            "valueType": "string",
+            "value": "_self",
+            "options": [
+              {
+                "name": "Same tab",
+                "value": "_self"
+              },
+              {
+                "name": "New tab (external)",
+                "value": "_blank"
+              }
+            ]
+          },
+          {
+            "component": "container",
+            "name": "megaMenu",
+            "label": "Mega Menu Columns",
+            "collapsible": false,
+            "multi": true,
+            "fields": [
+              {
+                "component": "text",
+                "name": "megaColumnLabel",
+                "label": "Column Title",
+                "valueType": "string"
+              },
+              {
+                "component": "container",
+                "name": "megaLinks",
+                "label": "Links",
+                "collapsible": false,
+                "multi": true,
+                "fields": [
+                  {
+                    "component": "text",
+                    "name": "megaLinkLabel",
+                    "label": "Label",
+                    "valueType": "string"
+                  },
+                  {
+                    "component": "aem-content",
+                    "name": "megaLinkUrl",
+                    "label": "Link",
+                    "valueType": "string"
+                  },
+                  {
+                    "component": "reference",
+                    "name": "megaLinkIcon",
+                    "label": "Icon",
+                    "valueType": "string",
+                    "multi": false
+                  },
+                  {
+                    "component": "select",
+                    "name": "megaLinkTarget",
+                    "label": "Link Target",
+                    "valueType": "string",
+                    "value": "_self",
+                    "options": [
+                      {
+                        "name": "Same tab",
+                        "value": "_self"
+                      },
+                      {
+                        "name": "New tab (external)",
+                        "value": "_blank"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "component": "container",
+        "name": "tools",
+        "label": "Utility Links",
+        "collapsible": false,
+        "multi": true,
+        "fields": [
+          {
+            "component": "text",
+            "name": "toolLabel",
+            "label": "Label",
+            "valueType": "string"
+          },
+          {
+            "component": "aem-content",
+            "name": "toolLink",
+            "label": "Link",
+            "valueType": "string"
+          },
+          {
+            "component": "reference",
+            "name": "toolIcon",
+            "label": "Icon",
+            "valueType": "string",
+            "multi": false
+          },
+          {
+            "component": "select",
+            "name": "toolTarget",
+            "label": "Link Target",
+            "valueType": "string",
+            "value": "_self",
+            "options": [
+              {
+                "name": "Same tab",
+                "value": "_self"
+              },
+              {
+                "name": "New tab (external)",
+                "value": "_blank"
+              }
+            ]
+          },
+          {
+            "component": "select",
+            "name": "toolStyle",
+            "label": "Style",
+            "valueType": "string",
+            "value": "",
+            "options": [
+              {
+                "name": "Default",
+                "value": ""
+              },
+              {
+                "name": "Primary button",
+                "value": "primary"
+              },
+              {
+                "name": "Globe (region selector)",
+                "value": "globe"
+              },
+              {
+                "name": "Search",
+                "value": "search"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "spotlight-card",
     "fields": [
       {
@@ -453,8 +671,8 @@
         "label": "Title",
         "valueType": "string",
         "validation": {
-          "maxLength": 15,
-          "customErrorMsg": "Title must be 15 characters or less."
+          "maxLength": 40,
+          "customErrorMsg": "Title must be 40 characters or less."
         }
       },
       {
@@ -463,8 +681,8 @@
         "label": "Description",
         "valueType": "string",
         "validation": {
-          "maxLength": 40,
-          "customErrorMsg": "Description must be 40 characters or less."
+          "maxLength": 100,
+          "customErrorMsg": "Description must be 100 characters or less."
         }
       },
       {

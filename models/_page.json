@@ -21,6 +21,20 @@
           "name": "keywords",
           "multi": true,
           "label": "Keywords"
+        },
+        {
+          "component": "aem-content",
+          "name": "nav",
+          "label": "Navigation",
+          "valueType": "string",
+          "description": "Page used as the site header navigation fragment. Defaults to /nav when empty."
+        },
+        {
+          "component": "aem-content",
+          "name": "footer",
+          "label": "Footer",
+          "valueType": "string",
+          "description": "Page used as the site footer fragment. Defaults to /footer when empty."
         }
       ]
     }

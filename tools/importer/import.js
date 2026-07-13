@@ -243,8 +243,8 @@ function buildColumnsBlock(layout, document, baseUrl) {
 function createMetadataBlock(main, document) {
   const meta = {
     ...WebImporter.Blocks.getMetadata(document),
-    nav: '/drafts/nav',
-    footer: '/drafts/footer',
+    nav: '/global/en/nav',
+    footer: '/global/en/footer',
   };
   main.prepend(WebImporter.Blocks.getMetadataBlock(document, meta));
 }

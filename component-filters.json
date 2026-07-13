@@ -2,7 +2,8 @@
   {
     "id": "main",
     "components": [
-      "section"
+      "section",
+      "header-section"
     ]
   },
   {
@@ -24,6 +25,12 @@
       "stats",
       "columns",
       "fragment"
+    ]
+  },
+  {
+    "id": "header-section",
+    "components": [
+      "navigation"
     ]
   },
   {
