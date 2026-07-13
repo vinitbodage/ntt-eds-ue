@@ -12,6 +12,7 @@ header nav.navigation {
   width: 100%;
   font-family: var(--body-font-family);
   color: #fff;
+
   --nav-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --ntt-nav-underline: #ffc400;
 }
