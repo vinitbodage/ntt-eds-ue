@@ -24,9 +24,6 @@
       "components": [
         {
           "...": "./_section.json#/definitions"
-        },
-        {
-          "...": "./_header-section.json#/definitions"
         }
       ]
     },

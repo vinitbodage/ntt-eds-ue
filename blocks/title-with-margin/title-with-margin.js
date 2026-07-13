@@ -18,29 +18,6 @@ function isMarginValueCell(element) {
   return text !== '' && /^\d+$/.test(text);
 }
 
-function readMarginProp(container, prop, removeCell) {
-  const field = container.querySelector(`[data-aue-prop="${prop}"]`);
-  if (!field) return null;
-  const value = parseMargin(field.textContent);
-  if (removeCell) {
-    field.remove();
-  } else {
-    field.classList.add('title-with-margin-config');
-  }
-  return value;
-}
-
-function readDeliveryMargins(cells) {
-  if (cells.length < MARGIN_PROPS.length) return null;
-
-  const margins = {};
-  MARGIN_PROPS.forEach((prop, index) => {
-    margins[prop] = parseMargin(cells[index].textContent);
-    cells[index].remove();
-  });
-  return margins;
-}
-
 function applyMargins(heading, margins) {
   MARGIN_PROPS.forEach((prop) => {
     const value = margins[prop];
@@ -50,51 +27,63 @@ function applyMargins(heading, margins) {
   });
 }
 
-function getMarginCells(row, heading) {
-  const propCells = MARGIN_PROPS
-    .map((prop) => row.querySelector(`[data-aue-prop="${prop}"]`))
-    .filter(Boolean);
-  if (propCells.length) return { type: 'props', cells: propCells };
-
-  const numericCells = [...row.children].filter(
-    (child) => child !== heading && !child.contains(heading) && isMarginValueCell(child),
-  );
-  if (numericCells.length >= MARGIN_PROPS.length) {
-    return { type: 'delivery', cells: numericCells.slice(0, MARGIN_PROPS.length) };
-  }
-
-  return null;
-}
-
-function readMargins(row, heading, removeCells) {
+function readInstrumentedMargins(block, removeCells) {
   const margins = {};
   let found = false;
 
   MARGIN_PROPS.forEach((prop) => {
-    const value = readMarginProp(row, prop, removeCells);
-    if (value !== null) {
-      margins[prop] = value;
-      found = true;
-    }
-  });
-  if (found) return margins;
-
-  const marginCells = getMarginCells(row, heading);
-  if (!marginCells) return null;
-
-  if (marginCells.type === 'delivery') {
-    return readDeliveryMargins(marginCells.cells);
-  }
-
-  marginCells.cells.forEach((cell, index) => {
-    margins[MARGIN_PROPS[index]] = parseMargin(cell.textContent);
+    const field = block.querySelector(`[data-aue-prop="${prop}"]`);
+    if (!field) return;
+    margins[prop] = parseMargin(field.textContent);
+    found = true;
     if (removeCells) {
-      cell.remove();
+      field.closest('.title-with-margin > div')?.remove();
     } else {
-      cell.classList.add('title-with-margin-config');
+      field.classList.add('title-with-margin-config');
     }
   });
+
+  return found ? margins : null;
+}
+
+function readDeliveryMargins(block, heading, removeCells) {
+  const marginCells = [];
+
+  [...block.children].forEach((row) => {
+    if (row.tagName !== 'DIV') return;
+    [...row.children].forEach((cell) => {
+      if (cell.contains(heading)) return;
+      if (isMarginValueCell(cell)) marginCells.push({ row, cell });
+    });
+  });
+
+  if (marginCells.length < MARGIN_PROPS.length) return null;
+
+  const margins = {};
+  MARGIN_PROPS.forEach((prop, index) => {
+    margins[prop] = parseMargin(marginCells[index].cell.textContent);
+    if (removeCells) {
+      marginCells[index].row.remove();
+    } else {
+      marginCells[index].cell.classList.add('title-with-margin-config');
+    }
+  });
+
   return margins;
+}
+
+function readMargins(block, heading, removeCells) {
+  return readInstrumentedMargins(block, removeCells)
+    || readDeliveryMargins(block, heading, removeCells);
+}
+
+function removeTitleTypeRows(block, titleRow, removeCells) {
+  if (!removeCells) return;
+  [...block.children].forEach((row) => {
+    if (row === titleRow) return;
+    const text = row.textContent?.trim();
+    if (/^h[1-6]$/i.test(text)) row.remove();
+  });
 }
 
 /**
@@ -102,19 +91,21 @@ function readMargins(row, heading, removeCells) {
  * @param {Element} block The block element
  */
 export default function decorate(block) {
-  const row = block.querySelector(':scope > div');
-  if (!row) return;
+  if (block.querySelector('.title-with-margin-inner')) return;
 
-  const heading = row.querySelector('h1, h2, h3, h4, h5, h6');
+  const heading = block.querySelector('h1, h2, h3, h4, h5, h6');
   if (!heading) return;
 
+  const titleRow = heading.closest('.title-with-margin > div');
   const removeCells = !isAuthoring();
-  const margins = readMargins(row, heading, removeCells);
+  const margins = readMargins(block, heading, removeCells);
   if (margins) applyMargins(heading, margins);
+
+  removeTitleTypeRows(block, titleRow, removeCells);
 
   const inner = document.createElement('div');
   inner.className = 'title-with-margin-inner';
-  moveInstrumentation(row, inner);
+  if (titleRow) moveInstrumentation(titleRow, inner);
   inner.append(heading);
   block.replaceChildren(inner);
 }
