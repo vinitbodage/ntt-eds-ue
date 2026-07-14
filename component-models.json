@@ -230,6 +230,31 @@
     ]
   },
   {
+    "id": "connect-cta",
+    "fields": [
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Heading",
+        "valueType": "string",
+        "value": "Connect with us"
+      },
+      {
+        "component": "aem-content",
+        "name": "link",
+        "label": "CTA Link",
+        "valueType": "string"
+      },
+      {
+        "component": "text",
+        "name": "linkText",
+        "label": "CTA Label",
+        "valueType": "string",
+        "value": "Contact Us"
+      }
+    ]
+  },
+  {
     "id": "feature-card",
     "fields": [
       {
@@ -277,6 +302,23 @@
         "label": "CTA Link",
         "valueType": "string",
         "description": "Destination URL for the call-to-action"
+      }
+    ]
+  },
+  {
+    "id": "footer-nav-column",
+    "fields": [
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Column Title",
+        "valueType": "string"
+      },
+      {
+        "component": "aem-content",
+        "name": "link",
+        "label": "Column Link",
+        "valueType": "string"
       }
     ]
   },
@@ -688,7 +730,7 @@
       },
       {
         "component": "select",
-        "name": "linkTarget",
+        "name": "linkType",
         "label": "Link Target",
         "valueType": "string",
         "value": "_self",
