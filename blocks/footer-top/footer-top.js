@@ -19,11 +19,11 @@ export default function decorate(block) {
   const textCell = getCellByProp(block, 'text') || cells[0];
   const ctaTextCell = getCellByProp(block, 'ctaText')
     || cells.find((cell) => cell !== textCell && !cell.querySelector('a[href]'));
-  const ctaLinkCell = getCellByProp(block, 'ctaLink')
+  const ctaCell = getCellByProp(block, 'cta')
     || cells.find((cell) => cell.querySelector('a[href]'));
 
   const headingText = textCell?.textContent.trim() || 'Connect with us';
-  const anchor = ctaLinkCell?.querySelector('a[href]');
+  const anchor = ctaCell?.querySelector('a[href]');
   const href = anchor?.getAttribute('href') || '';
   const ctaText = ctaTextCell?.textContent.trim()
     || anchor?.textContent.trim()
