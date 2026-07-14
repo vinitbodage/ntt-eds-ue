@@ -29,7 +29,8 @@ footer .footer > .section > div {
   padding: 0;
 }
 
-footer .footer .connect-cta {
+footer .footer .connect-cta,
+footer .footer .footer-top {
   width: 100%;
 }
 
