@@ -10,6 +10,7 @@ import {
   loadSections,
   loadCSS,
 } from './aem.js';
+import decorateTitlesWithMargin from './title-with-margin.js';
 
 /**
  * Moves all the attributes from a given elmenet to another given element.
@@ -118,6 +119,7 @@ export function decorateMain(main) {
   decorateIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
+  decorateTitlesWithMargin(main);
   decorateBlocks(main);
   decorateButtons(main);
 }

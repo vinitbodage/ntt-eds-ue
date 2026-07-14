@@ -55,7 +55,7 @@
           "valueType": "string"
         },
         {
-          "component": "textarea",
+          "component": "text",
           "name": "linkText",
           "label": "CTA Text",
           "valueType": "string"

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 425.2 425.2" aria-hidden="true">
+  <g>
+    <polygon points="284.41 1.42 284.41 142.2 282.99 142.2 282.99 1.42 284.41 1.42" fill="#fff" stroke-width="0"/>
+    <polygon points="284.41 142.2 284.41 282.99 282.99 282.99 282.99 142.2 284.41 142.2" fill="#fff" stroke-width="0"/>
+    <polygon points="284.41 282.99 284.41 423.78 282.99 423.78 282.99 282.99 284.41 282.99" fill="#fff" stroke-width="0"/>
+    <line x1="423.78" y1="142.2" x2="1.42" y2="142.2" fill="none" stroke="#fff" stroke-miterlimit="10" stroke-width="1.42"/>
+    <polygon points="282.99 282.99 142.2 282.99 142.2 281.57 282.99 281.57 282.99 282.99" fill="#fff" stroke-width="0"/>
+    <polygon points="423.78 282.99 282.99 282.99 282.99 281.57 423.78 281.57 423.78 282.99" fill="#fff" stroke-width="0"/>
+    <path d="m142.2,282.99v140.79H1.42v-140.79h140.79m1.42-1.42H0v143.62h143.62v-143.62h0Z" fill="#fff" stroke-width="0"/>
+    <path d="m423.78,1.42v422.36H142.22V1.42h281.56m1.42-1.42H140.8v425.2h284.4V0h0Z" fill="#fff" stroke-width="0"/>
+    <path d="m423.78,423.78l-70.39-140.79-70.39-140.79C260.8,96,224.05,1.42,142.2,1.42h-8.47c-1.19.02-2.39.07-3.54.07C76.09,1.48,12.49,23.48,1.96,135.69c-.38,4.03-.54,8.07-.54,12.12v275.97" fill="none" stroke="#fff" stroke-miterlimit="10" stroke-width="2.83"/>
+    <polyline points="282.99 423.78 212.61 282.99 142.22 142.2 142.2 423.78" fill="none" stroke="#fff" stroke-linejoin="bevel" stroke-width="2.83"/>
+  </g>
+</svg>

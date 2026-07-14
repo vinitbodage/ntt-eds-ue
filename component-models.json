@@ -160,17 +160,6 @@
     ]
   },
   {
-    "id": "header-section",
-    "fields": [
-      {
-        "component": "text",
-        "name": "name",
-        "label": "Section Name",
-        "description": "The label shown for this section in the Content Tree"
-      }
-    ]
-  },
-  {
     "id": "card-grid-with-image-item",
     "fields": [
       {
@@ -189,7 +178,7 @@
         "description": "Maximum 120 characters"
       },
       {
-        "component": "textarea",
+        "component": "text",
         "name": "linkText",
         "label": "CTA Text",
         "valueType": "string"
@@ -241,6 +230,31 @@
     ]
   },
   {
+    "id": "connect-cta",
+    "fields": [
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Heading",
+        "valueType": "string",
+        "value": "Connect with us"
+      },
+      {
+        "component": "aem-content",
+        "name": "link",
+        "label": "CTA Link",
+        "valueType": "string"
+      },
+      {
+        "component": "text",
+        "name": "linkText",
+        "label": "CTA Label",
+        "valueType": "string",
+        "value": "Contact Us"
+      }
+    ]
+  },
+  {
     "id": "feature-card",
     "fields": [
       {
@@ -277,7 +291,7 @@
         "valueType": "string"
       },
       {
-        "component": "textarea",
+        "component": "text",
         "name": "linkText",
         "label": "CTA Text",
         "valueType": "string"
@@ -288,6 +302,23 @@
         "label": "CTA Link",
         "valueType": "string",
         "description": "Destination URL for the call-to-action"
+      }
+    ]
+  },
+  {
+    "id": "footer-nav-column",
+    "fields": [
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Column Title",
+        "valueType": "string"
+      },
+      {
+        "component": "aem-content",
+        "name": "link",
+        "label": "Column Link",
+        "valueType": "string"
       }
     ]
   },
@@ -671,8 +702,8 @@
         "label": "Title",
         "valueType": "string",
         "validation": {
-          "maxLength": 15,
-          "customErrorMsg": "Title must be 15 characters or less."
+          "maxLength": 40,
+          "customErrorMsg": "Title must be 40 characters or less."
         }
       },
       {
@@ -681,8 +712,8 @@
         "label": "Description",
         "valueType": "string",
         "validation": {
-          "maxLength": 40,
-          "customErrorMsg": "Description must be 40 characters or less."
+          "maxLength": 100,
+          "customErrorMsg": "Description must be 100 characters or less."
         }
       },
       {
@@ -699,7 +730,7 @@
       },
       {
         "component": "select",
-        "name": "linkTarget",
+        "name": "linkType",
         "label": "Link Target",
         "valueType": "string",
         "value": "_self",
@@ -767,6 +798,62 @@
             "value": "dark"
           }
         ]
+      }
+    ]
+  },
+  {
+    "id": "title-with-margin",
+    "fields": [
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Title"
+      },
+      {
+        "component": "select",
+        "name": "titleType",
+        "label": "Title Type",
+        "value": "h2",
+        "options": [
+          {
+            "name": "h1",
+            "value": "h1"
+          },
+          {
+            "name": "h2",
+            "value": "h2"
+          },
+          {
+            "name": "h3",
+            "value": "h3"
+          },
+          {
+            "name": "h4",
+            "value": "h4"
+          },
+          {
+            "name": "h5",
+            "value": "h5"
+          },
+          {
+            "name": "h6",
+            "value": "h6"
+          }
+        ]
+      },
+      {
+        "component": "number",
+        "name": "marginTop",
+        "label": "Margin Top (px)",
+        "valueType": "number",
+        "value": 0
+      },
+      {
+        "component": "number",
+        "name": "marginBottom",
+        "label": "Margin Bottom (px)",
+        "valueType": "number",
+        "value": 0
       }
     ]
   }

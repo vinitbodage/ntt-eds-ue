@@ -51,6 +51,7 @@
         "image",
         "button",
         "title",
+        "title-with-margin",
         "hero",
         "hero-banner",
         "hero-video-carousel",
@@ -61,7 +62,9 @@
         "spotlight",
         "stats",
         "columns",
-        "fragment"
+        "fragment",
+        "connect-cta",
+        "footer-site"
       ]
     }
   ]

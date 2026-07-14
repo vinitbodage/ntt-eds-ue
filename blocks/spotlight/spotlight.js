@@ -1,8 +1,8 @@
-import { createOptimizedPicture } from '../../scripts/aem.js';
+import { createOptimizedPicture, decorateIcons } from '../../scripts/aem.js';
 import { moveInstrumentation } from '../../scripts/scripts.js';
 
-const TITLE_MAX = 15;
-const DESC_MAX = 40;
+const TITLE_MAX = 40;
+const DESC_MAX = 100;
 const LINK_TARGETS = ['_self', '_blank'];
 const TITLE_TYPES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 const DEFAULT_TITLE_TAG = 'h3';
@@ -166,12 +166,11 @@ function buildCtaLink({ linkArea, linkTextCell, linkTarget }) {
   return anchor;
 }
 
-function addCtaArrow(link) {
+function addCtaExternalLinkIcon(link) {
   if (link.querySelector('.spotlight-card-cta-icon')) return;
   const icon = document.createElement('span');
-  icon.className = 'spotlight-card-cta-icon';
+  icon.className = 'icon icon-external_link spotlight-card-cta-icon';
   icon.setAttribute('aria-hidden', 'true');
-  icon.innerHTML = '<svg viewBox="0 0 16 16" width="16" height="16" focusable="false" aria-hidden="true"><path fill="currentColor" d="M8.7 3.3a1 1 0 0 0 0 1.4L10.59 6.5H3.5a1 1 0 0 0 0 2h7.09l-1.89 1.8a1 1 0 1 0 1.38 1.44l3.5-3.33a1 1 0 0 0 .04-1.38l-3.5-3.33a1 1 0 0 0-1.42.04Z"/></svg>';
   link.append(icon);
 }
 
@@ -202,7 +201,7 @@ export default function decorate(block) {
     if (description) description.textContent = truncate(description.textContent, DESC_MAX);
 
     const link = buildCtaLink({ linkArea, linkTextCell, linkTarget });
-    if (link) addCtaArrow(link);
+    if (link) addCtaExternalLinkIcon(link);
 
     const inner = document.createElement('div');
     inner.className = 'spotlight-card-inner';
@@ -233,4 +232,5 @@ export default function decorate(block) {
   });
 
   block.replaceChildren(ul);
+  decorateIcons(block);
 }

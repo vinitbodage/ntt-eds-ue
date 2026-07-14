@@ -8,6 +8,7 @@ import {
   loadSections,
 } from './aem.js';
 import { decorateRichtext } from './editor-support-rte.js';
+import decorateTitlesWithMargin from './title-with-margin.js';
 import { decorateButtons, decorateMain } from './scripts.js';
 
 let promiseChanges$ = Promise.resolve();
@@ -87,6 +88,7 @@ async function applyChanges(event) {
           element.replaceWith(...newElements);
           decorateButtons(parentElement);
           decorateIcons(parentElement);
+          decorateTitlesWithMargin(parentElement);
           decorateRichtext(parentElement);
         }
         return true;
