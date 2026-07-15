@@ -1,0 +1,89 @@
+.footer-top {
+  background: url('https://www.nttdata.com/jp/ja/-/media/assets/images/bg_nttdata_logo.svg') right top no-repeat #2e404d;
+  background-size: auto 100%;
+  color: #fff;
+}
+
+.footer-top .footer-top-inner {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  max-width: 1200px;
+  min-height: 320px;
+  margin: auto;
+  padding: 80px 24px;
+}
+
+.footer-top .footer-top-content {
+  position: relative;
+  z-index: 1;
+  max-width: 550px;
+}
+
+.footer-top .footer-top-heading {
+  margin: 0 0 40px;
+  color: #fff;
+  font-family: noto-serif, "Noto Serif", "Noto Sans JP", noto-serif-fallback, serif, sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.footer-top .footer-top-link {
+  display: inline-flex;
+  align-items: center;
+  color: #fff;
+  font-family: noto-sans, "Noto Sans", "Noto Sans JP", noto-sans-fallback, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.footer-top .footer-top-link:hover,
+.footer-top .footer-top-link:focus-visible {
+  color: #fff;
+  text-decoration: none;
+}
+
+.footer-top .footer-top-link-text {
+  text-decoration: none;
+}
+
+.footer-top .footer-top-link:hover .footer-top-link-text,
+.footer-top .footer-top-link:focus-visible .footer-top-link-text {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footer-top .footer-top-link-arrow {
+  margin-left: 6px;
+  transition: transform 0.2s ease;
+}
+
+.footer-top .footer-top-link:hover .footer-top-link-arrow,
+.footer-top .footer-top-link:focus-visible .footer-top-link-arrow {
+  transform: translateX(4px);
+}
+
+@media (width >= 600px) {
+  .footer-top .footer-top-inner {
+    min-height: 420px;
+    padding: 120px 40px;
+  }
+
+  .footer-top .footer-top-heading {
+    margin-bottom: 64px;
+    font-size: 2.5rem;
+  }
+}
+
+@media (width >= 1200px) {
+  .footer-top .footer-top-inner {
+    padding: 120px calc((100% - 1200px) / 2);
+  }
+
+  .footer-top .footer-top-heading {
+    font-size: 4rem;
+  }
+}

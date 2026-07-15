@@ -62,7 +62,10 @@
         "spotlight",
         "stats",
         "columns",
-        "fragment"
+        "fragment",
+        "connect-cta",
+        "footer-top",
+        "footer-site"
       ]
     }
   ]

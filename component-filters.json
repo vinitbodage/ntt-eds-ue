@@ -24,7 +24,10 @@
       "spotlight",
       "stats",
       "columns",
-      "fragment"
+      "fragment",
+      "connect-cta",
+      "footer-top",
+      "footer-site"
     ]
   },
   {
@@ -58,6 +61,12 @@
       "image",
       "button",
       "title"
+    ]
+  },
+  {
+    "id": "footer-site",
+    "components": [
+      "footer-nav-column"
     ]
   },
   {
