@@ -122,9 +122,120 @@
   color: var(--link-hover-color);
 }
 
+.tiles.tile-bg-blue {
+  background-color: var(--ntt-navy);
+}
+
+.tiles.tile-bg-white {
+  background-color: var(--background-color);
+}
+
+.tiles h2 {
+  padding-bottom: 64px;
+}
+
+/* Spotlight layout variant */
+.tiles.layout-spotlight > ul > li {
+  border: 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tiles.layout-spotlight .tiles-tile-media {
+  overflow: hidden;
+}
+
+.tiles.layout-spotlight .tiles-tile-inner::after {
+  background: linear-gradient(180deg, rgb(11 31 58 / 5%) 20%, rgb(11 31 58 / 88%) 100%);
+}
+
+.tiles.layout-spotlight .tiles-tile-content :is(h1, h2, h3, h4, h5, h6),
+.tiles.layout-spotlight .tiles-tile-content p {
+  color: var(--background-color);
+}
+
+.tiles.layout-spotlight .tiles-tile-content :is(h1, h2, h3, h4, h5, h6) {
+  text-transform: capitalize;
+}
+
+.tiles.layout-spotlight .tiles-tile-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--background-color);
+  text-transform: capitalize;
+}
+
+.tiles.layout-spotlight .tiles-tile-cta-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  align-self: center;
+  position: relative;
+  top: -1px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.tiles.layout-spotlight .tiles-tile-cta-icon img {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.tiles.layout-spotlight .image-hover-zoom {
+  transition: transform 0.9s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.tiles.layout-spotlight > ul > li:hover .image-hover-zoom {
+  transform: scale(1.08);
+}
+
+.tiles.layout-spotlight > ul > li:hover .tiles-tile-cta {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tiles.layout-spotlight > ul > li:hover .tiles-tile-cta-icon {
+  transform: translateX(2px);
+}
+
+/* Compact layout variant (Investors / Media) */
+.tiles.layout-compact > ul {
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.tiles.layout-compact .tiles-tile-inner {
+  min-height: auto;
+  aspect-ratio: 322 / 467;
+}
+
+.tiles.layout-compact .tiles-tile-content :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 24px;
+  font-family: noto-serif, "Noto Serif", "Noto Sans", "Noto Sans JP", noto-serif-fallback, serif, sans-serif;
+  font-size: clamp(2rem, 2.5vw, 3.2rem);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.tiles.layout-compact .tiles-tile-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 0;
+  font-size: 100%;
+  font-weight: 400;
+  line-height: 1.8;
+}
+
 @media (width >= 600px) {
   .tiles .tiles-tile-inner {
     min-height: 320px;
+  }
+
+  .tiles.layout-spotlight > ul {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -135,5 +246,13 @@
 
   .tiles .tiles-tile-inner {
     min-height: 360px;
+  }
+
+  .tiles.layout-spotlight > ul {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .tiles.layout-compact > ul {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
