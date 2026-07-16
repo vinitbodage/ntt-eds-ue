@@ -3,7 +3,8 @@
     "id": "main",
     "components": [
       "section",
-      "header-section"
+      "header-section",
+      "content-stack-section"
     ]
   },
   {
@@ -11,6 +12,9 @@
   },
   {
     "...": "./_header-section.json#/filters"
+  },
+  {
+    "...": "./_content-stack-section.json#/filters"
   },
   {
     "...": "../blocks/*/_*.json#/filters"

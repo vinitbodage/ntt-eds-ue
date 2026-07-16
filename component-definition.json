@@ -75,6 +75,22 @@
               }
             }
           }
+        },
+        {
+          "title": "Content Stack Section",
+          "id": "content-stack-section",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/section/v1/section",
+                "template": {
+                  "name": "Content Stack Section",
+                  "model": "content-stack-section",
+                  "filter": "content-stack-section"
+                }
+              }
+            }
+          }
         }
       ]
     },
