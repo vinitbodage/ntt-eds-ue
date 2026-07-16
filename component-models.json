@@ -846,6 +846,32 @@
     ]
   },
   {
+    "id": "tiles",
+    "fields": [
+      {
+        "component": "multiselect",
+        "name": "classes",
+        "label": "Layout variant",
+        "valueType": "string[]",
+        "maxSize": 1,
+        "options": [
+          {
+            "name": "Layout Spotlight",
+            "value": "layout-spotlight"
+          },
+          {
+            "name": "Layout Standard",
+            "value": "layout-standard"
+          },
+          {
+            "name": "Layout Compact",
+            "value": "layout-compact"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "tile",
     "fields": [
       {
@@ -856,12 +882,92 @@
         "multi": false
       },
       {
-        "component": "richtext",
-        "name": "text",
-        "value": "",
-        "label": "Text",
+        "component": "text",
+        "name": "imageAlt",
+        "label": "Image Alt Text",
+        "valueType": "string"
+      },
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Title",
         "valueType": "string",
-        "description": "Use a heading for the title, a paragraph for the description, and a link for the CTA."
+        "validation": {
+          "maxLength": 40,
+          "customErrorMsg": "Title must be 40 characters or less."
+        }
+      },
+      {
+        "component": "select",
+        "name": "titleType",
+        "label": "Title Type",
+        "valueType": "string",
+        "value": "h3",
+        "options": [
+          {
+            "name": "H1",
+            "value": "h1"
+          },
+          {
+            "name": "H2",
+            "value": "h2"
+          },
+          {
+            "name": "H3",
+            "value": "h3"
+          },
+          {
+            "name": "H4",
+            "value": "h4"
+          },
+          {
+            "name": "H5",
+            "value": "h5"
+          },
+          {
+            "name": "H6",
+            "value": "h6"
+          }
+        ]
+      },
+      {
+        "component": "textarea",
+        "name": "description",
+        "label": "Description",
+        "valueType": "string",
+        "validation": {
+          "maxLength": 100,
+          "customErrorMsg": "Description must be 100 characters or less."
+        }
+      },
+      {
+        "component": "aem-content",
+        "name": "link",
+        "label": "Link URL",
+        "valueType": "string"
+      },
+      {
+        "component": "text",
+        "name": "linkText",
+        "label": "Link Label",
+        "valueType": "string"
+      },
+      {
+        "component": "select",
+        "name": "linkType",
+        "label": "Link Target",
+        "valueType": "string",
+        "value": "_self",
+        "options": [
+          {
+            "name": "Same window",
+            "value": "_self"
+          },
+          {
+            "name": "New tab",
+            "value": "_blank"
+          }
+        ]
       },
       {
         "component": "multiselect",
