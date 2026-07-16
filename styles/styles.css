@@ -362,9 +362,3 @@ main .section.navy a:any-link {
 main .section.navy a:any-link:hover {
   color: #b8d9f5;
 }
-
-main .section.section.navy.tiles-container {
-  h2 {
-    padding-bottom: 64px;
-  }
-}
