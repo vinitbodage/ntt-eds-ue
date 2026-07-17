@@ -7,11 +7,17 @@ const DESC_MAX = 100;
 const LINK_TARGETS = ['_self', '_blank'];
 const TITLE_TYPES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 const DEFAULT_TITLE_TAG = 'h3';
+const PLACEHOLDER_TEXT = /^(title|description|link label|image alt text|learn more|read more|tile|#)$/i;
 
 function truncate(text, max) {
   const trimmed = (text || '').trim();
   if (trimmed.length <= max) return trimmed;
   return trimmed.slice(0, max).trim();
+}
+
+function isEmptyOrPlaceholder(text) {
+  const trimmed = (text || '').trim();
+  return !trimmed || PLACEHOLDER_TEXT.test(trimmed);
 }
 
 function isLinkTargetCell(cell) {
@@ -35,10 +41,21 @@ function isTitleTypeCell(cell) {
   return TITLE_TYPES.includes(text) && !cell?.querySelector('picture, a, h1, h2, h3, h4, h5, h6');
 }
 
-function getTitleType(cells) {
+function getTitleTypeFromCells(cells) {
   const titleTypeCell = cells.find(isTitleTypeCell);
   const titleType = titleTypeCell?.textContent.trim().toLowerCase();
   return TITLE_TYPES.includes(titleType) ? titleType : DEFAULT_TITLE_TAG;
+}
+
+function readRowProp(row, prop) {
+  const field = row.querySelector(`[data-aue-prop="${prop}"]`);
+  return field?.textContent?.trim() || '';
+}
+
+function getTitleTypeFromRow(row, cells) {
+  const titleType = readRowProp(row, 'titleType').toLowerCase();
+  if (TITLE_TYPES.includes(titleType)) return titleType;
+  return getTitleTypeFromCells(cells);
 }
 
 function getContentCells(cells, pictureCell, linkCell, linkTargetCell) {
@@ -47,8 +64,11 @@ function getContentCells(cells, pictureCell, linkCell, linkTargetCell) {
   return cells.filter((cell) => {
     if (cell === pictureCell || cell === linkCell || cell === linkTargetCell) return false;
     if (cell.querySelector('picture') || isLinkTargetCell(cell) || isTitleTypeCell(cell)) return false;
+    if (cell.querySelector('[data-aue-prop="titleType"], [data-aue-prop="linkType"], [data-aue-prop="linkText"], [data-aue-prop="imageAlt"]')) {
+      return false;
+    }
     const text = cell.textContent.trim();
-    if (!text) return false;
+    if (!text || isEmptyOrPlaceholder(text)) return false;
     if (imgAlt && text === imgAlt && !cell.querySelector('h1, h2, h3, h4, h5, h6')) return false;
     return true;
   });
@@ -56,7 +76,7 @@ function getContentCells(cells, pictureCell, linkCell, linkTargetCell) {
 
 function ensureHeading(titleCell, existingHeading, titleTag = DEFAULT_TITLE_TAG) {
   if (existingHeading) return existingHeading;
-  if (!titleCell) return null;
+  if (!titleCell || isEmptyOrPlaceholder(titleCell.textContent)) return null;
 
   const heading = document.createElement(titleTag);
   heading.textContent = titleCell.textContent.trim();
@@ -64,7 +84,73 @@ function ensureHeading(titleCell, existingHeading, titleTag = DEFAULT_TITLE_TAG)
   return heading;
 }
 
+function readLinkFromField(linkField) {
+  if (!linkField) return { href: '', source: null };
+
+  const anchor = linkField.querySelector('a[href]');
+  if (anchor) {
+    return {
+      href: anchor.getAttribute('href') || '',
+      source: linkField,
+      existingAnchor: anchor,
+    };
+  }
+
+  const text = linkField.textContent.trim();
+  if (looksLikeUrl(text)) {
+    return { href: text, source: linkField, existingAnchor: null };
+  }
+
+  return { href: '', source: linkField, existingAnchor: null };
+}
+
+function parseInstrumentedTileRow(row) {
+  if (!row.querySelector('[data-aue-prop]')) return null;
+
+  const picture = row.querySelector('picture');
+  const title = readRowProp(row, 'title');
+  const description = readRowProp(row, 'description');
+  const linkText = readRowProp(row, 'linkText');
+  const linkType = readRowProp(row, 'linkType');
+  const linkTarget = LINK_TARGETS.includes(linkType) ? linkType : '_self';
+  const titleTag = getTitleTypeFromRow(row, [...row.children]);
+  const titleField = row.querySelector('[data-aue-prop="title"]');
+  const descriptionField = row.querySelector('[data-aue-prop="description"]');
+  const linkTextField = row.querySelector('[data-aue-prop="linkText"]');
+  const linkField = row.querySelector('[data-aue-prop="link"]');
+
+  const existingHeading = row.querySelector('h1, h2, h3, h4, h5, h6');
+  let heading = existingHeading;
+  if (!heading && !isEmptyOrPlaceholder(title)) {
+    heading = document.createElement(titleTag);
+    heading.textContent = title;
+    if (titleField) moveInstrumentation(titleField, heading);
+  }
+
+  let descriptionCell = null;
+  if (!isEmptyOrPlaceholder(description)) {
+    descriptionCell = descriptionField || null;
+  }
+
+  const { href, source: linkArea, existingAnchor } = readLinkFromField(linkField);
+
+  return {
+    picture,
+    heading,
+    descriptionCell,
+    linkArea,
+    linkTextCell: linkTextField,
+    linkTarget,
+    linkHref: href,
+    linkText,
+    existingAnchor,
+  };
+}
+
 function parseTileRow(row) {
+  const instrumented = parseInstrumentedTileRow(row);
+  if (instrumented) return instrumented;
+
   const cells = [...row.children];
   const pictureCell = cells.find((cell) => cell.querySelector('picture'));
   const picture = pictureCell?.querySelector('picture');
@@ -79,7 +165,7 @@ function parseTileRow(row) {
   });
 
   const existingHeading = row.querySelector('h1, h2, h3, h4, h5, h6');
-  const titleTag = getTitleType(cells);
+  const titleTag = getTitleTypeFromCells(cells);
   const contentCells = getContentCells(cells, pictureCell, linkCell, linkTargetCell);
 
   let titleCell = null;
@@ -105,8 +191,12 @@ function parseTileRow(row) {
     if (isLinkTargetCell(cell) || isImageAltCell(cell, pictureCell) || isTitleTypeCell(cell)) {
       return false;
     }
-    return Boolean(cell.textContent.trim());
+    return Boolean(cell.textContent.trim()) && !isEmptyOrPlaceholder(cell.textContent);
   });
+
+  if (descriptionCell && isEmptyOrPlaceholder(descriptionCell.textContent)) {
+    descriptionCell = null;
+  }
 
   return {
     picture,
@@ -115,38 +205,51 @@ function parseTileRow(row) {
     linkArea,
     linkTextCell,
     linkTarget,
+    linkHref: '',
+    linkText: '',
+    existingAnchor: null,
   };
 }
 
 function getDescriptionElement(descriptionCell) {
   if (!descriptionCell) return null;
 
+  const text = descriptionCell.textContent.trim();
+  if (isEmptyOrPlaceholder(text)) return null;
+
   const paragraph = descriptionCell.querySelector('p');
   if (paragraph && !paragraph.querySelector('a')) {
+    if (isEmptyOrPlaceholder(paragraph.textContent)) return null;
     moveInstrumentation(descriptionCell, paragraph);
     return paragraph;
   }
 
   const description = document.createElement('p');
-  description.textContent = descriptionCell.textContent.trim();
+  description.textContent = text;
   moveInstrumentation(descriptionCell, description);
   return description;
 }
 
-function buildCtaLink({ linkArea, linkTextCell, linkTarget }) {
-  const existingAnchor = linkArea?.querySelector('a[href]');
-  let href = existingAnchor?.getAttribute('href') || '';
-  const authoredLabel = linkTextCell?.textContent.trim() || '';
-  const label = authoredLabel || existingAnchor?.textContent.trim() || '';
+function buildCtaLink({
+  linkArea, linkTextCell, linkTarget, linkHref, linkText, existingAnchor,
+}) {
+  let href = linkHref || existingAnchor?.getAttribute('href') || '';
+  const authoredLabel = linkText || linkTextCell?.textContent.trim() || '';
+  const anchorLabel = existingAnchor?.textContent.trim() || '';
+  const label = authoredLabel || (anchorLabel && !looksLikeUrl(anchorLabel) ? anchorLabel : '');
 
   if (!href && linkArea) {
-    const text = linkArea.textContent.trim();
-    if (looksLikeUrl(text)) href = text;
+    const areaAnchor = linkArea.querySelector('a[href]');
+    href = areaAnchor?.getAttribute('href') || '';
+    if (!href) {
+      const text = linkArea.textContent.trim();
+      if (looksLikeUrl(text)) href = text;
+    }
   }
 
   if (!href) return null;
 
-  let anchor = existingAnchor;
+  let anchor = existingAnchor || linkArea?.querySelector('a[href]');
   if (!anchor) {
     anchor = document.createElement('a');
     anchor.href = href;
@@ -156,6 +259,7 @@ function buildCtaLink({ linkArea, linkTextCell, linkTarget }) {
     moveInstrumentation(linkArea, anchor);
   }
 
+  anchor.href = href;
   if (label) anchor.textContent = label;
   anchor.classList.add('tiles-tile-cta');
   anchor.target = linkTarget;
@@ -232,6 +336,7 @@ function buildTileInner({
 }
 
 function buildTile(row, { includeDescription, isSpotlight }) {
+  const parsed = parseTileRow(row);
   const {
     picture,
     heading,
@@ -239,7 +344,10 @@ function buildTile(row, { includeDescription, isSpotlight }) {
     linkArea,
     linkTextCell,
     linkTarget,
-  } = parseTileRow(row);
+    linkHref,
+    linkText,
+    existingAnchor,
+  } = parsed;
 
   const li = document.createElement('li');
   moveInstrumentation(row, li);
@@ -254,7 +362,9 @@ function buildTile(row, { includeDescription, isSpotlight }) {
     description.textContent = truncate(description.textContent, DESC_MAX);
   }
 
-  const link = buildCtaLink({ linkArea, linkTextCell, linkTarget });
+  const link = buildCtaLink({
+    linkArea, linkTextCell, linkTarget, linkHref, linkText, existingAnchor,
+  });
   if (link && isSpotlight) addCtaExternalLinkIcon(link);
 
   li.append(buildTileInner({
