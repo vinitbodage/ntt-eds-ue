@@ -1,5 +1,5 @@
 import { getMetadata } from '../../scripts/aem.js';
-import { loadFragment } from '../fragment/fragment.js';
+import { loadFragment, resolveFragmentPath } from '../fragment/fragment.js';
 
 /**
  * Resolve footer fragment path from page metadata or URL hierarchy.
@@ -44,7 +44,7 @@ async function resolveFooterPath(footerMeta) {
  */
 export default async function decorate(block) {
   const footerMeta = getMetadata('footer');
-  const footerPath = await resolveFooterPath(footerMeta);
+  const footerPath = await resolveFragmentPath(footerMeta, 'footer');
   const fragment = await loadFragment(footerPath);
 
   block.textContent = '';
@@ -56,6 +56,5 @@ export default async function decorate(block) {
   const footer = document.createElement('div');
   footer.className = 'footer';
   while (fragment.firstElementChild) footer.append(fragment.firstElementChild);
-
   block.append(footer);
 }
