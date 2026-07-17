@@ -3,7 +3,8 @@
     "id": "main",
     "components": [
       "section",
-      "header-section"
+      "header-section",
+      "content-stack-section"
     ]
   },
   {
@@ -34,6 +35,13 @@
     "id": "header-section",
     "components": [
       "navigation"
+    ]
+  },
+  {
+    "id": "content-stack-section",
+    "components": [
+      "title-with-margin",
+      "tiles"
     ]
   },
   {
