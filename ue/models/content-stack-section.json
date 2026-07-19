@@ -1,0 +1,67 @@
+{
+  "definitions": [
+    {
+      "title": "Content Stack Section",
+      "id": "content-stack-section",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div></div>"
+        }
+      },
+      "filter": "content-stack-section",
+      "model": "content-stack-section"
+    }
+  ],
+  "models": [
+    {
+      "id": "content-stack-section",
+      "fields": [
+        {
+          "component": "text",
+          "name": "name",
+          "label": "Section Name",
+          "description": "The label shown for this section in the Content Tree"
+        },
+        {
+          "component": "multiselect",
+          "name": "style",
+          "label": "Style",
+          "valueType": "string[]",
+          "maxSize": 1,
+          "options": [
+            { "name": "Highlight", "value": "highlight" },
+            { "name": "Navy", "value": "navy" }
+          ]
+        },
+        {
+          "component": "multiselect",
+          "name": "layout",
+          "label": "Layout",
+          "valueType": "string[]",
+          "maxSize": 1,
+          "options": [
+            { "name": "Layout Center", "value": "layout-center" },
+            { "name": "Layout Left", "value": "layout-left" },
+            { "name": "Layout Right", "value": "layout-right" }
+          ]
+        },
+        {
+          "component": "number",
+          "name": "titleMarginBottom",
+          "label": "Title Margin Bottom (px)",
+          "valueType": "number",
+          "value": 0
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "content-stack-section",
+      "components": [
+        "title-with-margin",
+        "tiles"
+      ]
+    }
+  ]
+}

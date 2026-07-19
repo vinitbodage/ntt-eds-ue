@@ -1,0 +1,56 @@
+{
+  "definitions": [
+    {
+      "title": "Footer Site",
+      "id": "footer-site",
+      "model": "footer-site",
+      "filter": "footer-site",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 1
+        }
+      }
+    },
+    {
+      "title": "Footer Nav Column",
+      "id": "footer-nav-column",
+      "model": "footer-nav-column",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 1,
+          "fields": [
+            { "name": "title", "selector": "div>h3" },
+            { "name": "link", "selector": "div>h3>a[href]" }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "footer-nav-column",
+      "fields": [
+        {
+          "component": "text",
+          "name": "title",
+          "label": "Column Title",
+          "valueType": "string"
+        },
+        {
+          "component": "aem-content",
+          "name": "link",
+          "label": "Column Link",
+          "valueType": "string"
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "footer-site",
+      "components": ["footer-nav-column"]
+    }
+  ]
+}

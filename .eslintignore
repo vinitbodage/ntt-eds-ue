@@ -1,3 +1,8 @@
 helix-importer-ui
 dompurify.min.js
 *.min.js
+ue/models/**
+models/**
+blocks/*/_*.json
+component-*.json
+xwalk.json

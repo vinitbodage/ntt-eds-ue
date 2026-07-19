@@ -1,0 +1,47 @@
+{
+  "definitions": [
+    {
+      "title": "Connect CTA",
+      "id": "connect-cta",
+      "model": "connect-cta",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div class=\"connect-cta\"><div><div><h2></h2></div><div><p><a href=\"\"></a></p></div></div></div>",
+          "fields": [
+            { "name": "title", "selector": "div>div:nth-child(1)>h2" },
+            { "name": "link", "selector": "div>div:nth-child(2)>p>a[href]" },
+            { "name": "linkText", "selector": "div>div:nth-child(2)>p>a" }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "connect-cta",
+      "fields": [
+        {
+          "component": "text",
+          "name": "title",
+          "label": "Heading",
+          "valueType": "string",
+          "value": "Connect with us"
+        },
+        {
+          "component": "aem-content",
+          "name": "link",
+          "label": "CTA Link",
+          "valueType": "string"
+        },
+        {
+          "component": "text",
+          "name": "linkText",
+          "label": "CTA Label",
+          "valueType": "string",
+          "value": "Contact Us"
+        }
+      ]
+    }
+  ],
+  "filters": []
+}

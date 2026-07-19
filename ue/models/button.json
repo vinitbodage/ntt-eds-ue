@@ -1,0 +1,51 @@
+{
+  "definitions": [
+    {
+      "title": "Button",
+      "id": "button",
+      "model": "button",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<p class=\"button-container\"><a href=\"\" title=\"\"></a></p>",
+          "fields": [
+            { "name": "link", "selector": "a[href]" },
+            { "name": "linkText", "selector": "a" },
+            { "name": "linkTitle", "selector": "a[title]" }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "button",
+      "fields": [
+        {
+          "component": "aem-content",
+          "name": "link",
+          "label": "Link"
+        },
+        {
+          "component": "text",
+          "name": "linkText",
+          "label": "Text"
+        },
+        {
+          "component": "text",
+          "name": "linkTitle",
+          "label": "Title"
+        },
+        {
+          "component": "select",
+          "name": "linkType",
+          "label": "Type",
+          "options": [
+            { "name": "default", "value": "" },
+            { "name": "primary", "value": "primary" },
+            { "name": "secondary", "value": "secondary" }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -2,18 +2,16 @@
   {
     "id": "main",
     "components": [
-      "section",
-      "header-section",
-      "content-stack-section"
+      "section"
     ]
   },
   {
     "id": "section",
     "components": [
       "text",
+      "title",
       "image",
       "button",
-      "title",
       "title-with-margin",
       "hero",
       "hero-banner",
@@ -28,12 +26,7 @@
       "fragment",
       "connect-cta",
       "footer-top",
-      "footer-site"
-    ]
-  },
-  {
-    "id": "header-section",
-    "components": [
+      "footer-site",
       "navigation"
     ]
   },
@@ -59,11 +52,15 @@
   {
     "id": "columns",
     "components": [
-      "column"
+      "columns-row"
     ]
   },
   {
-    "id": "column",
+    "id": "columns-row",
+    "components": []
+  },
+  {
+    "id": "columns-cell",
     "components": [
       "text",
       "image",
@@ -81,6 +78,12 @@
     "id": "hero-banner",
     "components": [
       "hero-banner-slide"
+    ]
+  },
+  {
+    "id": "hero-video-carousel",
+    "components": [
+      "hero-video-carousel-slide"
     ]
   },
   {

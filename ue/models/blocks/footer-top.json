@@ -1,0 +1,47 @@
+{
+  "definitions": [
+    {
+      "title": "Footer Top",
+      "id": "footer-top",
+      "model": "footer-top",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div class=\"footer-top\"><div><div><p></p></div><div><p><a href=\"\"></a></p></div></div></div>",
+          "fields": [
+            { "name": "text", "selector": "div>div:nth-child(1)>p" },
+            { "name": "ctaText", "selector": "div>div:nth-child(2)>p>a" },
+            { "name": "cta", "selector": "div>div:nth-child(2)>p>a[href]" }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "footer-top",
+      "fields": [
+        {
+          "component": "text",
+          "name": "text",
+          "label": "Text",
+          "valueType": "string",
+          "value": "Connect with us"
+        },
+        {
+          "component": "text",
+          "name": "ctaText",
+          "label": "CTA Text",
+          "valueType": "string",
+          "value": "Contact Us"
+        },
+        {
+          "component": "aem-content",
+          "name": "cta",
+          "label": "CTA Link",
+          "valueType": "string"
+        }
+      ]
+    }
+  ],
+  "filters": []
+}

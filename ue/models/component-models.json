@@ -1,0 +1,26 @@
+[
+  {
+    "...": "./page.json#/models"
+  },
+  {
+    "...": "./text.json#/models"
+  },
+  {
+    "...": "./title.json#/models"
+  },
+  {
+    "...": "./image.json#/models"
+  },
+  {
+    "...": "./button.json#/models"
+  },
+  {
+    "...": "./section.json#/models"
+  },
+  {
+    "...": "./content-stack-section.json#/models"
+  },
+  {
+    "...": "./blocks/*.json#/models"
+  }
+]

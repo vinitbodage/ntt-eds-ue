@@ -1,0 +1,73 @@
+{
+  "definitions": [
+    {
+      "title": "Card Grid with Image",
+      "id": "card-grid-with-image",
+      "model": "card-grid-with-image",
+      "filter": "card-grid-with-image",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 1
+        }
+      }
+    },
+    {
+      "title": "Card Grid Item",
+      "id": "card-grid-with-image-item",
+      "model": "card-grid-with-image-item",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 2,
+          "fields": [
+            { "name": "image", "selector": "div:nth-child(1)>picture>img[src]" },
+            { "name": "title", "selector": "div:nth-child(2)>h3" },
+            { "name": "linkText", "selector": "div:nth-child(2)>p>a" },
+            { "name": "link", "selector": "div:nth-child(2)>p>a[href]" }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "card-grid-with-image-item",
+      "fields": [
+        {
+          "component": "reference",
+          "valueType": "string",
+          "name": "image",
+          "label": "Image",
+          "multi": false
+        },
+        {
+          "component": "text",
+          "name": "title",
+          "label": "Title",
+          "valueType": "string",
+          "maxLength": 120,
+          "description": "Maximum 120 characters"
+        },
+        {
+          "component": "text",
+          "name": "linkText",
+          "label": "CTA Text",
+          "valueType": "string"
+        },
+        {
+          "component": "aem-content",
+          "name": "link",
+          "label": "CTA Link",
+          "valueType": "string"
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "card-grid-with-image",
+      "components": ["card-grid-with-image-item"]
+    }
+  ]
+}

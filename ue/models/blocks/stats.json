@@ -1,0 +1,56 @@
+{
+  "definitions": [
+    {
+      "title": "Stats",
+      "id": "stats",
+      "model": "stats",
+      "filter": "stats",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 2
+        }
+      }
+    },
+    {
+      "title": "Stat",
+      "id": "stat",
+      "model": "stat",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 2,
+          "fields": [
+            { "name": "value", "selector": "div:nth-child(1)" },
+            { "name": "label", "selector": "div:nth-child(2)" }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "stat",
+      "fields": [
+        {
+          "component": "text",
+          "name": "value",
+          "label": "Value",
+          "valueType": "string"
+        },
+        {
+          "component": "text",
+          "name": "label",
+          "label": "Label",
+          "valueType": "string"
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "stats",
+      "components": ["stat"]
+    }
+  ]
+}
