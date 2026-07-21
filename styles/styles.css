@@ -363,60 +363,85 @@ main .section.navy a:any-link:hover {
   color: #b8d9f5;
 }
 
-/* content stack section — layout variants and title spacing */
+/* content stack section — flexbox layout variants */
 main .section.content-stack-section {
-  --content-stack-title-margin-bottom: 0px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
-main .section.content-stack-section > .default-content-wrapper:first-child :is(h1, h2, h3, h4, h5, h6) {
-  margin-bottom: var(--content-stack-title-margin-bottom);
-}
-
-main .section.content-stack-section.layout-center {
-  text-align: center;
-}
-
-main .section.content-stack-section.layout-center > div {
-  margin-inline: auto;
-}
-
-main .section.content-stack-section.layout-center .tiles > ul {
-  grid-template-columns: repeat(auto-fill, minmax(260px, 280px));
-  justify-content: center;
+/* Reset global section wrapper centering so flex align-items controls layout */
+main .section.content-stack-section > div {
+  margin: 0;
+  width: fit-content;
+  max-width: 1200px;
 }
 
 main .section.content-stack-section.layout-left {
-  text-align: left;
+  align-items: flex-start;
 }
 
-main .section.content-stack-section.layout-left > div {
-  margin-inline: 0;
-  margin-right: auto;
-}
-
-main .section.content-stack-section.layout-left .tiles > ul {
-  grid-template-columns: repeat(auto-fill, minmax(260px, 280px));
-  justify-content: start;
+main .section.content-stack-section.layout-center {
+  align-items: center;
 }
 
 main .section.content-stack-section.layout-right {
-  text-align: right;
+  align-items: flex-end;
 }
 
-main .section.content-stack-section.layout-right > div {
-  margin-inline: 0;
-  margin-left: auto;
+main .section.content-stack-section .title-with-margin,
+main .section.content-stack-section > .default-content-wrapper,
+main .section.content-stack-section > h1,
+main .section.content-stack-section > h2,
+main .section.content-stack-section > h3,
+main .section.content-stack-section > h4,
+main .section.content-stack-section > h5,
+main .section.content-stack-section > h6 {
+  width: fit-content;
+  max-width: 100%;
+  text-align: left;
 }
 
-main .section.content-stack-section.layout-right .tiles > ul {
-  grid-template-columns: repeat(auto-fill, minmax(260px, 280px));
-  justify-content: end;
+main .section.content-stack-section .tiles {
+  width: fit-content;
+  max-width: 100%;
+  text-align: left;
+}
+
+main .section.content-stack-section .tiles > ul {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 24px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+}
+
+main .section.content-stack-section .tiles.layout-spotlight > ul,
+main .section.content-stack-section .tiles.layout-compact > ul,
+main .section.content-stack-section .tiles.layout-standard > ul {
+  display: flex;
+  grid-template-columns: unset;
+}
+
+main .section.content-stack-section .tiles > ul > li {
+  flex: 0 0 auto;
+  width: 260px;
+  max-width: 100%;
+}
+
+main .section.content-stack-section .tiles .tiles-tile-content,
+main .section.content-stack-section .tiles .tiles-tile-content :is(h1, h2, h3, h4, h5, h6),
+main .section.content-stack-section .tiles .tiles-tile-content p,
+main .section.content-stack-section .tiles .tiles-tile-cta {
+  text-align: left;
 }
 
 @media (width >= 900px) {
-  main .section.content-stack-section.layout-center .tiles > ul,
-  main .section.content-stack-section.layout-left .tiles > ul,
-  main .section.content-stack-section.layout-right .tiles > ul {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 300px));
+  main .section.content-stack-section .tiles > ul > li {
+    width: 280px;
   }
 }

@@ -41,6 +41,16 @@ function isTitleTypeCell(cell) {
   return TITLE_TYPES.includes(text) && !cell?.querySelector('picture, a, h1, h2, h3, h4, h5, h6');
 }
 
+function isClassesCell(cell) {
+  if (!cell) return false;
+  if (cell.querySelector('[data-aue-prop="classes"]')) return true;
+  return /^tile,\s*(light|dark)$/i.test(cell.textContent.trim());
+}
+
+function isConfigCell(cell) {
+  return cell?.querySelector('[data-aue-prop="titleType"], [data-aue-prop="linkType"], [data-aue-prop="linkText"], [data-aue-prop="imageAlt"], [data-aue-prop="classes"]');
+}
+
 function getTitleTypeFromCells(cells) {
   const titleTypeCell = cells.find(isTitleTypeCell);
   const titleType = titleTypeCell?.textContent.trim().toLowerCase();
@@ -64,7 +74,8 @@ function getContentCells(cells, pictureCell, linkCell, linkTargetCell) {
   return cells.filter((cell) => {
     if (cell === pictureCell || cell === linkCell || cell === linkTargetCell) return false;
     if (cell.querySelector('picture') || isLinkTargetCell(cell) || isTitleTypeCell(cell)) return false;
-    if (cell.querySelector('[data-aue-prop="titleType"], [data-aue-prop="linkType"], [data-aue-prop="linkText"], [data-aue-prop="imageAlt"]')) {
+    if (isClassesCell(cell) || isConfigCell(cell)) return false;
+    if (cell.querySelector('[data-aue-prop="description"]') && isEmptyOrPlaceholder(cell.textContent)) {
       return false;
     }
     const text = cell.textContent.trim();
@@ -104,20 +115,56 @@ function readLinkFromField(linkField) {
   return { href: '', source: linkField, existingAnchor: null };
 }
 
+function resolveDescriptionCell(row, cells, {
+  pictureCell, linkCell, linkTargetCell, titleCell, existingHeading,
+}) {
+  const descriptionField = row.querySelector('[data-aue-prop="description"]');
+  const descriptionText = readRowProp(row, 'description') || descriptionField?.textContent?.trim() || '';
+
+  if (descriptionField && !isEmptyOrPlaceholder(descriptionText)) {
+    return descriptionField;
+  }
+
+  const contentCells = getContentCells(cells, pictureCell, linkCell, linkTargetCell);
+  let descriptionCell = null;
+
+  if (existingHeading) {
+    descriptionCell = contentCells.find((cell) => cell !== titleCell && !cell.querySelector('a[href]')) || null;
+  } else if (contentCells.length > 1) {
+    descriptionCell = contentCells[1] && !contentCells[1].querySelector('a[href]')
+      ? contentCells[1]
+      : null;
+  }
+
+  const titleContainer = titleCell || existingHeading?.closest(':scope > div');
+  const inlineParagraph = titleContainer?.querySelector(':scope p:not(:has(a))');
+  if (inlineParagraph && !isEmptyOrPlaceholder(inlineParagraph.textContent)) {
+    return inlineParagraph;
+  }
+
+  if (descriptionCell && isEmptyOrPlaceholder(descriptionCell.textContent)) {
+    return null;
+  }
+
+  return descriptionCell;
+}
+
 function parseInstrumentedTileRow(row) {
   if (!row.querySelector('[data-aue-prop]')) return null;
 
-  const picture = row.querySelector('picture');
+  const cells = [...row.children];
+  const pictureCell = cells.find((cell) => cell.querySelector('picture'));
+  const picture = pictureCell?.querySelector('picture');
   const title = readRowProp(row, 'title');
-  const description = readRowProp(row, 'description');
   const linkText = readRowProp(row, 'linkText');
   const linkType = readRowProp(row, 'linkType');
   const linkTarget = LINK_TARGETS.includes(linkType) ? linkType : '_self';
-  const titleTag = getTitleTypeFromRow(row, [...row.children]);
+  const titleTag = getTitleTypeFromRow(row, cells);
   const titleField = row.querySelector('[data-aue-prop="title"]');
-  const descriptionField = row.querySelector('[data-aue-prop="description"]');
   const linkTextField = row.querySelector('[data-aue-prop="linkText"]');
   const linkField = row.querySelector('[data-aue-prop="link"]');
+  const linkTargetCell = cells.find(isLinkTargetCell);
+  const linkCell = cells.find((cell) => cell.querySelector('a[href]'));
 
   const existingHeading = row.querySelector('h1, h2, h3, h4, h5, h6');
   let heading = existingHeading;
@@ -127,10 +174,15 @@ function parseInstrumentedTileRow(row) {
     if (titleField) moveInstrumentation(titleField, heading);
   }
 
-  let descriptionCell = null;
-  if (!isEmptyOrPlaceholder(description)) {
-    descriptionCell = descriptionField || null;
-  }
+  const titleCell = titleField?.closest(':scope > div')
+    || (existingHeading ? cells.find((cell) => cell.contains(existingHeading)) : null);
+  const descriptionCell = resolveDescriptionCell(row, cells, {
+    pictureCell,
+    linkCell,
+    linkTargetCell,
+    titleCell,
+    existingHeading,
+  });
 
   const { href, source: linkArea, existingAnchor } = readLinkFromField(linkField);
 
@@ -169,34 +221,33 @@ function parseTileRow(row) {
   const contentCells = getContentCells(cells, pictureCell, linkCell, linkTargetCell);
 
   let titleCell = null;
-  let descriptionCell = null;
 
   if (existingHeading) {
     titleCell = contentCells.find((cell) => cell.contains(existingHeading)) || null;
-    descriptionCell = contentCells.find((cell) => cell !== titleCell && !cell.querySelector('a[href]')) || null;
   } else if (contentCells.length) {
     [titleCell] = contentCells;
-    descriptionCell = contentCells[1] && !contentCells[1].querySelector('a[href]')
-      ? contentCells[1]
-      : null;
   }
 
   const heading = ensureHeading(titleCell, existingHeading, titleTag);
+  const descriptionCell = resolveDescriptionCell(row, cells, {
+    pictureCell,
+    linkCell,
+    linkTargetCell,
+    titleCell,
+    existingHeading,
+  });
 
   const linkTextCell = cells.find((cell) => {
     if (cell === pictureCell || cell === linkTargetCell || cell === linkArea) return false;
     if (titleCell && cell === titleCell) return false;
     if (descriptionCell && cell === descriptionCell) return false;
     if (cell.querySelector('picture, a[href]')) return false;
-    if (isLinkTargetCell(cell) || isImageAltCell(cell, pictureCell) || isTitleTypeCell(cell)) {
+    if (isLinkTargetCell(cell) || isImageAltCell(cell, pictureCell) || isTitleTypeCell(cell)
+      || isClassesCell(cell)) {
       return false;
     }
     return Boolean(cell.textContent.trim()) && !isEmptyOrPlaceholder(cell.textContent);
   });
-
-  if (descriptionCell && isEmptyOrPlaceholder(descriptionCell.textContent)) {
-    descriptionCell = null;
-  }
 
   return {
     picture,

@@ -27,6 +27,12 @@
           "label": "Title"
         },
         {
+          "component": "textarea",
+          "name": "description",
+          "label": "Description",
+          "valueType": "string"
+        },
+        {
           "component": "select",
           "name": "titleType",
           "label": "Title Type",
