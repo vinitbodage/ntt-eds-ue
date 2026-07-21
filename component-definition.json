@@ -13,6 +13,10 @@
                 "resourceType": "core/franklin/components/text/v1/text",
                 "template": {}
               }
+            },
+	          "da": {
+              "name": "text",
+              "type": "text"
             }
           }
         },
@@ -39,6 +43,20 @@
                 "resourceType": "core/franklin/components/image/v1/image",
                 "template": {}
               }
+            },
+            "da": {
+              "name": "image",
+              "type": "image",
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "img[alt]"
+                }
+              ]
             }
           }
         },
@@ -73,8 +91,13 @@
                   "model": "section"
                 }
               }
+            },
+            "da": {
+              "unsafeHTML": "<div></div>"
             }
-          }
+          },
+          "filter": "section",
+          "model": "section"
         },
         {
           "title": "Content Stack Section",
@@ -141,6 +164,12 @@
                   "filter": "cards"
                 }
               }
+            },
+          "model": "cards",
+          "filter": "cards",
+            "da": {
+              "rows": 1,
+              "columns": 2
             }
           }
         },
@@ -157,7 +186,26 @@
                 }
               }
             }
-          }
+          },
+          "model": "card",
+          "da": {
+              "rows": 1,
+              "columns": 2,
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "div:nth-child(1)>picture>img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "div:nth-child(1)>picture>img[alt]"
+                },
+                {
+                  "name": "text",
+                  "selector": "div:nth-child(2)"
+                }
+              ]
+            }
         },
         {
           "title": "Columns",
@@ -171,6 +219,38 @@
                   "rows": "1"
                 }
               }
+            },
+          "model": "columns",
+          "filter": "columns",
+            "da": {
+              "name": "columns",
+              "rows": 1,
+              "columns": 2,
+              "behaviour": "columns"
+            }
+          }
+        },
+        {
+          "title": "Columns Row",
+          "id": "columns-row",
+          "model": "columns-row",
+          "filter": "columns-row",
+          "plugins": {
+            "da": {
+              "name": "columns-row",
+              "behaviour": "columns-row"
+            }
+          }
+        },
+        {
+          "title": "Columns Cell",
+          "id": "columns-cell",
+          "model": "columns-cell",
+          "filter": "columns-cell",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div></div>",
+              "behaviour": "columns-cell"
             }
           }
         },
@@ -263,6 +343,20 @@
                   "model": "fragment"
                 }
               }
+            },
+            "model": "fragment",
+            "da": {
+              "unsafeHTML": "<div class=\"fragment\"><div><div><p><a href=\"\">Fragment URL</a></p></div></div></div>",
+              "fields": [
+                {
+                  "name": "url",
+                  "selector": "div>div>p>a[href]"
+                },
+                {
+                  "name": "urlText",
+                  "selector": "div>div>p>a"
+                }
+              ]
             }
           }
         },

@@ -59,7 +59,8 @@
   {
     "id": "columns",
     "components": [
-      "column"
+      "column",
+      "columns-row"
     ]
   },
   {
@@ -69,6 +70,17 @@
       "image",
       "button",
       "title"
+    ]
+  },
+  {
+    "id": "columns-row",
+    "components": []
+  },
+  {
+    "id": "columns-cell",
+    "components": [
+      "text",
+      "image"
     ]
   },
   {
