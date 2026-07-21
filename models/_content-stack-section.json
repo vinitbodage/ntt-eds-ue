@@ -64,13 +64,6 @@
               "value": "layout-right"
             }
           ]
-        },
-        {
-          "component": "number",
-          "name": "titleMarginBottom",
-          "label": "Title Margin Bottom (px)",
-          "valueType": "number",
-          "value": 0
         }
       ]
     }

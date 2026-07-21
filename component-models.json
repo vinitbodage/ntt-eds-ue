@@ -205,13 +205,6 @@
             "value": "layout-right"
           }
         ]
-      },
-      {
-        "component": "number",
-        "name": "titleMarginBottom",
-        "label": "Title Margin Bottom (px)",
-        "valueType": "number",
-        "value": 0
       }
     ]
   },
@@ -995,6 +988,12 @@
         "component": "text",
         "name": "title",
         "label": "Title"
+      },
+      {
+        "component": "textarea",
+        "name": "description",
+        "label": "Description",
+        "valueType": "string"
       },
       {
         "component": "select",

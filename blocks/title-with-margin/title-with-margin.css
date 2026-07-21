@@ -1,3 +1,7 @@
 .title-with-margin .title-with-margin-config {
   display: none;
 }
+
+.title-with-margin .title-with-margin-description {
+  margin: 0;
+}
