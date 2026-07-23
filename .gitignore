@@ -1,4 +1,5 @@
 .hlx/*
+.tmp/*
 coverage/*
 logs/*
 node_modules/*
