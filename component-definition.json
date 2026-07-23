@@ -73,8 +73,13 @@
                   "model": "section"
                 }
               }
+            },
+            "da": {
+              "unsafeHTML": "<div></div>"
             }
-          }
+          },
+          "model": "section",
+          "filter": "section"
         },
         {
           "title": "Content Stack Section",
@@ -202,8 +207,30 @@
                   "titleType": "h1"
                 }
               }
+            },
+            "da": {
+              "unsafeHTML": "<div class=\"feature-card\"><div><h1></h1></div><div><p></p></div><div><p></p></div><div><a href=\"\"></a></div></div>",
+              "fields": [
+                {
+                  "name": "title",
+                  "selector": "div:nth-child(1)>h1"
+                },
+                {
+                  "name": "description",
+                  "selector": "div:nth-child(2)>p"
+                },
+                {
+                  "name": "linkText",
+                  "selector": "div:nth-child(3)>p"
+                },
+                {
+                  "name": "link",
+                  "selector": "div:nth-child(4)>a[href]"
+                }
+              ]
             }
-          }
+          },
+          "model": "feature-card"
         },
         {
           "title": "Footer Site",

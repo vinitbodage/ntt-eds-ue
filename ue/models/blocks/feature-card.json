@@ -1,0 +1,65 @@
+{
+  "definitions": [
+    {
+      "title": "Feature Card",
+      "id": "feature-card",
+      "model": "feature-card",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div class=\"feature-card\"><div><h1></h1></div><div><p></p></div><div><p></p></div><div><a href=\"\"></a></div></div>",
+          "fields": [
+            { "name": "title", "selector": "div:nth-child(1)>h1" },
+            { "name": "description", "selector": "div:nth-child(2)>p" },
+            { "name": "linkText", "selector": "div:nth-child(3)>p" },
+            { "name": "link", "selector": "div:nth-child(4)>a[href]" }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "feature-card",
+      "fields": [
+        {
+          "component": "text",
+          "name": "title",
+          "label": "Heading",
+          "valueType": "string"
+        },
+        {
+          "component": "select",
+          "name": "titleType",
+          "label": "Heading Level",
+          "valueType": "string",
+          "value": "h1",
+          "options": [
+            { "name": "H1", "value": "h1" },
+            { "name": "H2", "value": "h2" },
+            { "name": "H3", "value": "h3" }
+          ]
+        },
+        {
+          "component": "textarea",
+          "name": "description",
+          "label": "Description",
+          "valueType": "string"
+        },
+        {
+          "component": "text",
+          "name": "linkText",
+          "label": "CTA Text",
+          "valueType": "string"
+        },
+        {
+          "component": "aem-content",
+          "name": "link",
+          "label": "CTA Link",
+          "valueType": "string",
+          "description": "Destination URL for the call-to-action"
+        }
+      ]
+    }
+  ],
+  "filters": []
+}

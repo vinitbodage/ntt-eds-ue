@@ -1,0 +1,11 @@
+[
+  {
+    "...": "./page.json#/models"
+  },
+  {
+    "...": "./section.json#/models"
+  },
+  {
+    "...": "./blocks/feature-card.json#/models"
+  }
+]
