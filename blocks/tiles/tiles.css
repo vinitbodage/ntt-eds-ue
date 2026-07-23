@@ -145,12 +145,12 @@
   overflow: hidden;
 }
 
-.tiles.layout-spotlight .tiles-tile-inner::after {
+.tiles.layout-spotlight > ul > li .tiles-tile-inner::after {
   background: linear-gradient(180deg, rgb(11 31 58 / 5%) 20%, rgb(11 31 58 / 88%) 100%);
 }
 
 .tiles.layout-spotlight .tiles-tile-content :is(h1, h2, h3, h4, h5, h6),
-.tiles.layout-spotlight .tiles-tile-content p {
+.tiles.layout-spotlight > ul > li .tiles-tile-content p {
   color: var(--background-color);
 }
 
@@ -158,7 +158,7 @@
   text-transform: capitalize;
 }
 
-.tiles.layout-spotlight .tiles-tile-cta {
+.tiles.layout-spotlight > ul > li .tiles-tile-content .tiles-tile-cta {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -187,19 +187,6 @@
   transition: transform 0.9s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
-.tiles.layout-spotlight > ul > li:hover .image-hover-zoom {
-  transform: scale(1.08);
-}
-
-.tiles.layout-spotlight > ul > li:hover .tiles-tile-cta {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.tiles.layout-spotlight > ul > li:hover .tiles-tile-cta-icon {
-  transform: translateX(2px);
-}
-
 /* Compact layout variant (Investors / Media) */
 .tiles.layout-compact > ul {
   grid-template-columns: 1fr;
@@ -219,7 +206,7 @@
   line-height: 1.3;
 }
 
-.tiles.layout-compact .tiles-tile-cta {
+.tiles.layout-compact > ul > li .tiles-tile-content .tiles-tile-cta {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -227,6 +214,19 @@
   font-size: 100%;
   font-weight: 400;
   line-height: 1.8;
+}
+
+.tiles.layout-spotlight > ul > li:hover .image-hover-zoom {
+  transform: scale(1.08);
+}
+
+.tiles.layout-spotlight > ul > li:hover .tiles-tile-content .tiles-tile-cta {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tiles.layout-spotlight > ul > li:hover .tiles-tile-cta-icon {
+  transform: translateX(2px);
 }
 
 @media (width >= 600px) {
