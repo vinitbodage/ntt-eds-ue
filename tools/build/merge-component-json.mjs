@@ -54,7 +54,9 @@ function mergeDefinitions(xwalk, da) {
 
   if (daComponents.size > 0) {
     da.groups.forEach((group) => {
-      const extraComponents = group.components.filter((component) => daComponents.has(component.id));
+      const extraComponents = group.components.filter(
+        (component) => daComponents.has(component.id),
+      );
       if (!extraComponents.length) return;
 
       let targetGroup = mergedGroups.find((entry) => entry.id === group.id);
