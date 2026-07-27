@@ -977,7 +977,7 @@
       },
       {
         "component": "text",
-        "name": "title",
+        "name": "content_title",
         "label": "Title",
         "valueType": "string",
         "validation": {
@@ -987,7 +987,7 @@
       },
       {
         "component": "select",
-        "name": "titleType",
+        "name": "content_titleType",
         "label": "Title Type",
         "valueType": "string",
         "value": "h3",
@@ -1020,7 +1020,7 @@
       },
       {
         "component": "textarea",
-        "name": "description",
+        "name": "content_description",
         "label": "Description",
         "valueType": "string",
         "validation": {

@@ -446,7 +446,7 @@
                   "classes": [
                     "light"
                   ],
-                  "titleType": "h3",
+                  "content_titleType": "h3",
                   "linkType": "_self"
                 }
               }

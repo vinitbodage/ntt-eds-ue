@@ -30,6 +30,15 @@
   text-decoration: none;
 }
 
+.footer-bottom .footer-bottom-social-list a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  text-decoration: none;
+}
+
 .footer-bottom .footer-bottom-legal-list a:hover,
 .footer-bottom .footer-bottom-legal-list a:focus-visible,
 .footer-bottom .footer-bottom-social-list a:hover,
@@ -46,15 +55,6 @@
 
 .footer-bottom .footer-bottom-social-list {
   gap: 16px;
-}
-
-.footer-bottom .footer-bottom-social-list a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  text-decoration: none;
 }
 
 .footer-bottom .footer-bottom-social-list a:hover,

@@ -48,7 +48,7 @@ function isClassesCell(cell) {
 }
 
 function isConfigCell(cell) {
-  return cell?.querySelector('[data-aue-prop="titleType"], [data-aue-prop="linkType"], [data-aue-prop="linkText"], [data-aue-prop="imageAlt"], [data-aue-prop="classes"]');
+  return cell?.querySelector('[data-aue-prop="content_titleType"], [data-aue-prop="titleType"], [data-aue-prop="linkType"], [data-aue-prop="linkText"], [data-aue-prop="imageAlt"], [data-aue-prop="classes"]');
 }
 
 function getTitleTypeFromCells(cells) {
@@ -57,13 +57,14 @@ function getTitleTypeFromCells(cells) {
   return TITLE_TYPES.includes(titleType) ? titleType : DEFAULT_TITLE_TAG;
 }
 
-function readRowProp(row, prop) {
-  const field = row.querySelector(`[data-aue-prop="${prop}"]`);
+function readRowProp(row, prop, altProp) {
+  const field = row.querySelector(`[data-aue-prop="${prop}"]`)
+    || (altProp && row.querySelector(`[data-aue-prop="${altProp}"]`));
   return field?.textContent?.trim() || '';
 }
 
 function getTitleTypeFromRow(row, cells) {
-  const titleType = readRowProp(row, 'titleType').toLowerCase();
+  const titleType = readRowProp(row, 'content_titleType', 'titleType').toLowerCase();
   if (TITLE_TYPES.includes(titleType)) return titleType;
   return getTitleTypeFromCells(cells);
 }
@@ -75,7 +76,8 @@ function getContentCells(cells, pictureCell, linkCell, linkTargetCell) {
     if (cell === pictureCell || cell === linkCell || cell === linkTargetCell) return false;
     if (cell.querySelector('picture') || isLinkTargetCell(cell) || isTitleTypeCell(cell)) return false;
     if (isClassesCell(cell) || isConfigCell(cell)) return false;
-    if (cell.querySelector('[data-aue-prop="description"]') && isEmptyOrPlaceholder(cell.textContent)) {
+    if ((cell.querySelector('[data-aue-prop="content_description"], [data-aue-prop="description"]'))
+      && isEmptyOrPlaceholder(cell.textContent)) {
       return false;
     }
     const text = cell.textContent.trim();
@@ -118,8 +120,9 @@ function readLinkFromField(linkField) {
 function resolveDescriptionCell(row, cells, {
   pictureCell, linkCell, linkTargetCell, titleCell, existingHeading,
 }) {
-  const descriptionField = row.querySelector('[data-aue-prop="description"]');
-  const descriptionText = readRowProp(row, 'description') || descriptionField?.textContent?.trim() || '';
+  const descriptionField = row.querySelector('[data-aue-prop="content_description"], [data-aue-prop="description"]');
+  const descriptionText = readRowProp(row, 'content_description', 'description')
+    || descriptionField?.textContent?.trim() || '';
 
   if (descriptionField && !isEmptyOrPlaceholder(descriptionText)) {
     return descriptionField;
@@ -155,12 +158,12 @@ function parseInstrumentedTileRow(row) {
   const cells = [...row.children];
   const pictureCell = cells.find((cell) => cell.querySelector('picture'));
   const picture = pictureCell?.querySelector('picture');
-  const title = readRowProp(row, 'title');
+  const title = readRowProp(row, 'content_title', 'title');
   const linkText = readRowProp(row, 'linkText');
   const linkType = readRowProp(row, 'linkType');
   const linkTarget = LINK_TARGETS.includes(linkType) ? linkType : '_self';
   const titleTag = getTitleTypeFromRow(row, cells);
-  const titleField = row.querySelector('[data-aue-prop="title"]');
+  const titleField = row.querySelector('[data-aue-prop="content_title"], [data-aue-prop="title"]');
   const linkTextField = row.querySelector('[data-aue-prop="linkText"]');
   const linkField = row.querySelector('[data-aue-prop="link"]');
   const linkTargetCell = cells.find(isLinkTargetCell);
