@@ -252,13 +252,24 @@ function parseSocialItems(cell) {
   return item ? [item] : [];
 }
 
-function dedupeByHref(items) {
+function dedupeItems(items, getKey) {
   const seen = new Set();
   return items.filter((item) => {
-    if (!item?.href || seen.has(item.href)) return false;
-    seen.add(item.href);
+    const key = getKey(item);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
+}
+
+function dedupeLegalItems(items) {
+  return dedupeItems(items, (item) => (
+    item?.href ? `${item.label || ''}|${item.href}` : ''
+  ));
+}
+
+function dedupeSocialItems(items) {
+  return dedupeItems(items, (item) => item?.platform || '');
 }
 
 function isCopyrightRow(row) {
@@ -299,7 +310,7 @@ function collectLegalLinks(rows) {
     if (!isLegalCell(cell)) return;
     items.push(...parseLegalItems(cell));
   });
-  return dedupeByHref(items);
+  return dedupeLegalItems(items);
 }
 
 function collectSocialLinks(rows) {
@@ -310,7 +321,7 @@ function collectSocialLinks(rows) {
     if (!isSocialCell(cell)) return;
     items.push(...parseSocialItems(cell));
   });
-  return dedupeByHref(items);
+  return dedupeSocialItems(items);
 }
 
 function findCopyright(block, rows) {
