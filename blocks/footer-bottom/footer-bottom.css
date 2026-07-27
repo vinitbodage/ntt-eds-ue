@@ -1,0 +1,99 @@
+.footer-bottom {
+  background-color: var(--ntt-navy-dark);
+  color: rgb(255 255 255 / 85%);
+  font-size: var(--body-font-size-xs);
+}
+
+.footer-bottom .footer-bottom-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+  max-width: 1200px;
+  margin: auto;
+  padding: 24px 24px 40px;
+}
+
+.footer-bottom .footer-bottom-legal-list,
+.footer-bottom .footer-bottom-social-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-bottom .footer-bottom-legal-list a,
+.footer-bottom .footer-bottom-social-list a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.footer-bottom .footer-bottom-legal-list a:hover,
+.footer-bottom .footer-bottom-legal-list a:focus-visible,
+.footer-bottom .footer-bottom-social-list a:hover,
+.footer-bottom .footer-bottom-social-list a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.footer-bottom .footer-bottom-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footer-bottom .footer-bottom-social-list {
+  gap: 16px;
+}
+
+.footer-bottom .footer-bottom-social-list a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  text-decoration: none;
+}
+
+.footer-bottom .footer-bottom-social-list a:hover,
+.footer-bottom .footer-bottom-social-list a:focus-visible {
+  text-decoration: none;
+  opacity: 0.85;
+}
+
+.footer-bottom .footer-bottom-social-list img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.footer-bottom .footer-bottom-copyright {
+  margin: 0;
+  color: rgb(255 255 255 / 65%);
+}
+
+@media (width >= 600px) {
+  .footer-bottom .footer-bottom-legal-list {
+    justify-content: space-between;
+  }
+}
+
+@media (width >= 900px) {
+  .footer-bottom .footer-bottom-inner {
+    padding: 24px 32px 40px;
+  }
+
+  .footer-bottom .footer-bottom-meta {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (width >= 1200px) {
+  .footer-bottom .footer-bottom-inner {
+    padding: 24px calc((100% - 1200px) / 2) 40px;
+  }
+}

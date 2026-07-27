@@ -4,15 +4,6 @@ function isLogoRow(row) {
   return Boolean(row.querySelector('img, picture'));
 }
 
-function isCopyrightRow(row) {
-  return /copyright/i.test(row.textContent);
-}
-
-function isLegalRow(row) {
-  const links = row.querySelectorAll('a[href]');
-  return links.length >= 3 && !row.querySelector('h2, h3, h4, h5, h6, ul');
-}
-
 function buildNavColumn(row) {
   const li = document.createElement('li');
   li.className = 'footer-site-nav-item';
@@ -69,16 +60,6 @@ export default function decorate(block) {
   const navList = document.createElement('ul');
   navList.className = 'footer-site-nav-list';
 
-  const lower = document.createElement('div');
-  lower.className = 'footer-site-lower';
-
-  const legal = document.createElement('nav');
-  legal.className = 'footer-site-legal';
-  legal.setAttribute('aria-label', 'Legal');
-
-  const copyright = document.createElement('p');
-  copyright.className = 'footer-site-copyright';
-
   rows.forEach((row) => {
     if (isLogoRow(row)) {
       const logoContent = row.querySelector('picture, img')?.closest('p, div') || row.firstElementChild;
@@ -90,34 +71,11 @@ export default function decorate(block) {
       return;
     }
 
-    if (isCopyrightRow(row)) {
-      copyright.textContent = row.textContent.trim();
-      moveInstrumentation(row, copyright);
-      return;
-    }
-
-    if (isLegalRow(row)) {
-      const legalList = document.createElement('ul');
-      legalList.className = 'footer-site-legal-list';
-      row.querySelectorAll('a[href]').forEach((anchor) => {
-        const item = document.createElement('li');
-        const link = document.createElement('a');
-        link.href = anchor.getAttribute('href');
-        link.textContent = anchor.textContent.trim();
-        moveInstrumentation(anchor, link);
-        item.append(link);
-        legalList.append(item);
-      });
-      legal.append(legalList);
-      return;
-    }
-
     navList.append(buildNavColumn(row));
   });
 
   if (navList.children.length) nav.append(navList);
   upper.append(logo, nav);
-  lower.append(legal, copyright);
-  inner.append(upper, lower);
+  inner.append(upper);
   block.replaceChildren(inner);
 }
