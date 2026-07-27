@@ -17,6 +17,15 @@ function getText(element) {
   return element?.textContent?.trim() || '';
 }
 
+function readRowProp(row, prop) {
+  const field = row.querySelector(`[data-aue-prop="${prop}"]`);
+  return getText(field);
+}
+
+function looksLikeUrl(text) {
+  return /^(https?:\/\/|\/|#)/.test(text) || /\.html(\?|$)/i.test(text);
+}
+
 function splitByHr(root) {
   const chunks = [];
   let buffer = [];
@@ -44,12 +53,39 @@ function wrapElements(elements) {
   return wrapper;
 }
 
+function getHrefFromLink(link) {
+  if (!link) return '';
+  if (link.isPlainUrl) return link.href;
+  return link.getAttribute('href') || link.href || '';
+}
+
+function getLinkSource(link, chunk) {
+  if (!link) return wrapElements(chunk);
+  if (link.isPlainUrl) return link.source;
+  return link;
+}
+
+function readLinkFromElement(element) {
+  if (!element) return null;
+
+  const anchor = element.querySelector('a[href]') || (element.matches?.('a[href]') ? element : null);
+  if (anchor) return anchor;
+
+  const text = getText(element);
+  if (looksLikeUrl(text)) {
+    return { href: text, source: element, isPlainUrl: true };
+  }
+
+  return null;
+}
+
 function getLabelFromChunk(chunk) {
   const wrapper = wrapElements(chunk);
   const labelParagraph = [...wrapper.querySelectorAll('p')].find((paragraph) => {
     const text = paragraph.textContent.trim();
     return text
       && !paragraph.querySelector('a[href]')
+      && !looksLikeUrl(text)
       && !SOCIAL_PLATFORMS.includes(text.toLowerCase())
       && !LINK_TARGETS.includes(text);
   });
@@ -63,10 +99,24 @@ function getLinkFromChunk(chunk) {
     const text = anchor.textContent.trim();
     return text && !text.startsWith('http') && !text.startsWith('/');
   });
-  return contentLink
-    || anchors.find((anchor) => !LINK_TARGETS.includes(anchor.textContent.trim()))
+  const anchor = contentLink
+    || anchors.find((a) => !LINK_TARGETS.includes(a.textContent.trim()))
     || anchors[0]
     || null;
+  if (anchor) return anchor;
+
+  const urlParagraph = [...wrapper.querySelectorAll('p')].find((paragraph) => (
+    !paragraph.querySelector('a[href]') && looksLikeUrl(paragraph.textContent.trim())
+  ));
+  if (urlParagraph) {
+    return {
+      href: urlParagraph.textContent.trim(),
+      source: urlParagraph,
+      isPlainUrl: true,
+    };
+  }
+
+  return null;
 }
 
 function getTargetFromChunk(chunk, link) {
@@ -91,19 +141,84 @@ function getRowCell(row) {
   return row.querySelector(':scope > div') || row;
 }
 
+function getElementChildren(cell) {
+  return [...cell.childNodes].filter((node) => node.nodeType === Node.ELEMENT_NODE);
+}
+
+function parseInstrumentedLegalRow(row) {
+  const linkField = row.querySelector('[data-aue-prop="link"]');
+  if (!linkField || row.querySelector('[data-aue-prop="platform"], [data-aue-prop="profileUrl"]')) {
+    return null;
+  }
+
+  const link = readLinkFromElement(linkField);
+  const href = getHrefFromLink(link);
+  if (!href) return null;
+
+  const target = readRowProp(row, 'target');
+  return {
+    label: readRowProp(row, 'label'),
+    href,
+    target: LINK_TARGETS.includes(target) ? target : '_self',
+    source: getLinkSource(link, [linkField]),
+  };
+}
+
+function parseInstrumentedSocialRow(row) {
+  const profileField = row.querySelector('[data-aue-prop="profileUrl"]');
+  if (!profileField) return null;
+
+  const platform = readRowProp(row, 'platform').toLowerCase();
+  if (!SOCIAL_PLATFORMS.includes(platform)) return null;
+
+  const link = readLinkFromElement(profileField);
+  const href = getHrefFromLink(link);
+  if (!href) return null;
+
+  return {
+    platform,
+    href,
+    ariaLabel: readRowProp(row, 'ariaLabel') || platform,
+    source: getLinkSource(link, [profileField]),
+  };
+}
+
+function parseLegalChunk(chunk) {
+  const link = getLinkFromChunk(chunk);
+  const href = getHrefFromLink(link);
+  if (!href) return null;
+
+  return {
+    label: getLabelFromChunk(chunk) || getText(link),
+    href,
+    target: getTargetFromChunk(chunk, link),
+    source: getLinkSource(link, chunk),
+  };
+}
+
+function parseSocialChunk(chunk) {
+  const link = getLinkFromChunk(chunk);
+  const platform = getPlatformFromChunk(chunk);
+  const href = getHrefFromLink(link);
+  if (!href || !platform) return null;
+
+  return {
+    platform,
+    href,
+    ariaLabel: getLabelFromChunk(chunk) || platform,
+    source: getLinkSource(link, chunk),
+  };
+}
+
 function parseLegalItems(cell) {
   if (!cell) return [];
 
+  const row = cell.closest('.footer-bottom > div');
+  const instrumented = parseInstrumentedLegalRow(row || cell);
+  if (instrumented) return [instrumented];
+
   if (cell.querySelector('hr')) {
-    return splitByHr(cell).map((chunk) => {
-      const link = getLinkFromChunk(chunk);
-      return {
-        label: getLabelFromChunk(chunk) || getText(link),
-        href: link?.getAttribute('href') || link?.href || '',
-        target: getTargetFromChunk(chunk, link),
-        source: link || wrapElements(chunk),
-      };
-    }).filter((item) => item.href);
+    return splitByHr(cell).map(parseLegalChunk).filter(Boolean);
   }
 
   const paragraph = cell.querySelector('p');
@@ -116,43 +231,86 @@ function parseLegalItems(cell) {
     }));
   }
 
-  return [];
+  const chunk = getElementChildren(cell);
+  const item = parseLegalChunk(chunk);
+  return item ? [item] : [];
 }
 
 function parseSocialItems(cell) {
-  if (!cell?.querySelector('hr')) return [];
+  if (!cell) return [];
 
-  return splitByHr(cell).map((chunk) => {
-    const link = getLinkFromChunk(chunk);
-    const platform = getPlatformFromChunk(chunk);
-    return {
-      platform,
-      href: link?.getAttribute('href') || link?.href || '',
-      ariaLabel: getLabelFromChunk(chunk) || platform,
-      source: link || wrapElements(chunk),
-    };
-  }).filter((item) => item.href && item.platform);
+  const row = cell.closest('.footer-bottom > div');
+  const instrumented = parseInstrumentedSocialRow(row || cell);
+  if (instrumented) return [instrumented];
+
+  if (cell.querySelector('hr')) {
+    return splitByHr(cell).map(parseSocialChunk).filter(Boolean);
+  }
+
+  const chunk = getElementChildren(cell);
+  const item = parseSocialChunk(chunk);
+  return item ? [item] : [];
+}
+
+function dedupeByHref(items) {
+  const seen = new Set();
+  return items.filter((item) => {
+    if (!item?.href || seen.has(item.href)) return false;
+    seen.add(item.href);
+    return true;
+  });
 }
 
 function isCopyrightRow(row) {
   const cell = getRowCell(row);
   const text = cell.textContent.trim();
-  return /copyright/i.test(text) && cell.querySelectorAll('a[href]').length === 0;
+  return /copyright/i.test(text) && cell.querySelectorAll('a[href]').length === 0
+    && !cell.querySelector('[data-aue-prop="link"], [data-aue-prop="profileUrl"]');
 }
 
-function isLegalRow(row) {
-  const cell = getRowCell(row);
+function isSocialCell(cell) {
+  if (!cell) return false;
+  if (cell.querySelector('[data-aue-prop="platform"], [data-aue-prop="profileUrl"]')) return true;
+
   if (cell.querySelector('hr')) {
-    const chunks = splitByHr(cell);
-    return chunks.some((chunk) => getLinkFromChunk(chunk) && !getPlatformFromChunk(chunk));
+    return splitByHr(cell).some((chunk) => getPlatformFromChunk(chunk));
   }
-  return cell.querySelectorAll('a[href]').length >= 3 && !getPlatformFromChunk([cell]);
+
+  return Boolean(getPlatformFromChunk(getElementChildren(cell)));
 }
 
-function isSocialRow(row) {
-  const cell = getRowCell(row);
-  if (!cell.querySelector('hr')) return false;
-  return splitByHr(cell).some((chunk) => SOCIAL_PLATFORMS.includes(getPlatformFromChunk(chunk)));
+function isLegalCell(cell) {
+  if (!cell || isSocialCell(cell)) return false;
+  if (cell.querySelector('[data-aue-prop="label"], [data-aue-prop="link"]')) return true;
+
+  if (cell.querySelector('hr')) {
+    return splitByHr(cell).some((chunk) => getLinkFromChunk(chunk) && !getPlatformFromChunk(chunk));
+  }
+
+  return cell.querySelectorAll('a[href]').length >= 1
+    || Boolean(readLinkFromElement(cell));
+}
+
+function collectLegalLinks(rows) {
+  const items = [];
+  rows.forEach((row) => {
+    if (isCopyrightRow(row)) return;
+    const cell = getRowCell(row);
+    if (!isLegalCell(cell)) return;
+    items.push(...parseLegalItems(cell));
+  });
+  return dedupeByHref(items);
+}
+
+function collectSocialLinks(rows) {
+  const items = [];
+  rows.forEach((row) => {
+    if (isCopyrightRow(row)) return;
+    const cell = getRowCell(row);
+    if (!isSocialCell(cell)) return;
+    items.push(...parseSocialItems(cell));
+  });
+  return dedupeByHref(items);
 }
 
 function findCopyright(block, rows) {
@@ -174,26 +332,6 @@ function findCopyright(block, rows) {
   }
 
   return { text: DEFAULT_COPYRIGHT, source: null };
-}
-
-function findLegalCell(block, rows) {
-  const legalField = getField(block, 'legalLinks');
-  if (legalField) {
-    return legalField.closest('.footer-bottom > div > div') || legalField.parentElement;
-  }
-
-  const legalRow = rows.find(isLegalRow);
-  return legalRow ? getRowCell(legalRow) : null;
-}
-
-function findSocialCell(block, rows) {
-  const socialField = getField(block, 'socialLinks');
-  if (socialField) {
-    return socialField.closest('.footer-bottom > div > div') || socialField.parentElement;
-  }
-
-  const socialRow = rows.find(isSocialRow);
-  return socialRow ? getRowCell(socialRow) : null;
 }
 
 function applyLinkAttributes(anchor, target) {
@@ -244,8 +382,8 @@ export default function decorate(block) {
   if (!rows.length) return;
 
   const copyright = findCopyright(block, rows);
-  const legalLinks = parseLegalItems(findLegalCell(block, rows));
-  const socialLinks = parseSocialItems(findSocialCell(block, rows));
+  const legalLinks = collectLegalLinks(rows);
+  const socialLinks = collectSocialLinks(rows);
 
   const inner = document.createElement('div');
   inner.className = 'footer-bottom-inner';
