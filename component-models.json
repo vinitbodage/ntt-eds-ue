@@ -355,6 +355,101 @@
     ]
   },
   {
+    "id": "footer-bottom",
+    "fields": [
+      {
+        "component": "text",
+        "name": "copyright",
+        "label": "Copyright Text",
+        "valueType": "string",
+        "value": "Copyright © NTT DATA Group Corporation"
+      },
+      {
+        "component": "container",
+        "name": "legalLinks",
+        "label": "Legal Links",
+        "collapsible": false,
+        "multi": true,
+        "fields": [
+          {
+            "component": "text",
+            "name": "label",
+            "label": "Label",
+            "valueType": "string"
+          },
+          {
+            "component": "aem-content",
+            "name": "link",
+            "label": "Link",
+            "valueType": "string"
+          },
+          {
+            "component": "select",
+            "name": "target",
+            "label": "Link Target",
+            "valueType": "string",
+            "value": "_self",
+            "options": [
+              {
+                "name": "Same tab",
+                "value": "_self"
+              },
+              {
+                "name": "New tab",
+                "value": "_blank"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "component": "container",
+        "name": "socialLinks",
+        "label": "Social Links",
+        "collapsible": false,
+        "multi": true,
+        "fields": [
+          {
+            "component": "select",
+            "name": "platform",
+            "label": "Platform",
+            "valueType": "string",
+            "options": [
+              {
+                "name": "X",
+                "value": "x"
+              },
+              {
+                "name": "Instagram",
+                "value": "instagram"
+              },
+              {
+                "name": "LinkedIn",
+                "value": "linkedin"
+              },
+              {
+                "name": "YouTube",
+                "value": "youtube"
+              }
+            ]
+          },
+          {
+            "component": "aem-content",
+            "name": "profileUrl",
+            "label": "Profile URL",
+            "valueType": "string"
+          },
+          {
+            "component": "text",
+            "name": "ariaLabel",
+            "label": "Accessible Label",
+            "valueType": "string"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "footer-nav-column",
     "fields": [
       {
@@ -882,7 +977,7 @@
       },
       {
         "component": "text",
-        "name": "title",
+        "name": "content_title",
         "label": "Title",
         "valueType": "string",
         "validation": {
@@ -892,7 +987,7 @@
       },
       {
         "component": "select",
-        "name": "titleType",
+        "name": "content_titleType",
         "label": "Title Type",
         "valueType": "string",
         "value": "h3",
@@ -925,7 +1020,7 @@
       },
       {
         "component": "textarea",
-        "name": "description",
+        "name": "content_description",
         "label": "Description",
         "valueType": "string",
         "validation": {

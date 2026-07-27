@@ -34,7 +34,8 @@ footer .footer .footer-top {
   width: 100%;
 }
 
-footer .footer .footer-site {
+footer .footer .footer-site,
+footer .footer .footer-bottom {
   width: 100%;
 }
 
