@@ -45,7 +45,13 @@
   object-fit: cover;
 }
 
-.custom-tiles .custom-tiles-tile-body a:focus-visible {
+.custom-tiles .custom-tiles-tile-body a.custom-tiles-tile-cta {
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.custom-tiles .custom-tiles-tile-body a:focus-visible,
+.custom-tiles .custom-tiles-tile-body a.custom-tiles-tile-cta:focus-visible {
   outline: 2px solid currentcolor;
   outline-offset: 2px;
 }
