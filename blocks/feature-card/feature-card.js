@@ -22,6 +22,7 @@ function getDescriptionElement(block, heading, link) {
 }
 
 function getCtaText(block, heading, link, description) {
+  const linkTextEl = block.querySelector('[data-aue-prop="linkText"]');
   const textRow = [...block.children].find((row) => {
     if (row.tagName !== 'DIV') return false;
     if (row.contains(heading) || row.contains(link) || row.contains(description)) return false;
@@ -29,7 +30,13 @@ function getCtaText(block, heading, link, description) {
     return Boolean(row.textContent?.trim());
   });
 
-  return textRow?.textContent?.trim() || link?.textContent?.trim() || 'Learn more';
+  return {
+    text: linkTextEl?.textContent?.trim()
+      || textRow?.textContent?.trim()
+      || link?.textContent?.trim()
+      || 'Learn more',
+    source: linkTextEl || textRow,
+  };
 }
 
 function wrapElement(element, wrapperClass) {
@@ -69,7 +76,7 @@ export default function decorate(block) {
   const heading = block.querySelector('h1, h2, h3, h4, h5, h6');
   const link = block.querySelector('a[href]');
   const description = getDescriptionElement(block, heading, link);
-  const ctaText = getCtaText(block, heading, link, description);
+  const { text: ctaText, source: ctaTextSource } = getCtaText(block, heading, link, description);
 
   const content = document.createElement('div');
   content.className = 'feature-card-content';
@@ -88,6 +95,8 @@ export default function decorate(block) {
     link.classList.add('feature-card-cta');
     link.textContent = '';
     setCtaText(link, ctaText);
+    const textSpan = link.querySelector('.feature-card-cta-text');
+    if (ctaTextSource && textSpan) moveInstrumentation(ctaTextSource, textSpan);
     link.setAttribute(
       'aria-label',
       `${ctaText} — ${heading?.textContent?.trim() || ''}`.trim(),
@@ -96,5 +105,6 @@ export default function decorate(block) {
     content.append(wrapElement(link, 'feature-card-cta-wrapper'));
   }
 
+  moveInstrumentation(block, content);
   block.replaceChildren(content);
 }

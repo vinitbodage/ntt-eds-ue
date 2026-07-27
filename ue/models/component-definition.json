@@ -1,0 +1,22 @@
+{
+  "groups": [
+    {
+      "title": "Sections",
+      "id": "sections",
+      "components": [
+        {
+          "...": "./section.json#/definitions"
+        }
+      ]
+    },
+    {
+      "title": "Blocks",
+      "id": "blocks",
+      "components": [
+        {
+          "...": "./blocks/feature-card.json#/definitions"
+        }
+      ]
+    }
+  ]
+}
