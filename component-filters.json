@@ -21,6 +21,7 @@
       "feature-card",
       "card-grid-with-image",
       "cards",
+      "custom-tiles",
       "tiles",
       "spotlight",
       "stats",
@@ -70,6 +71,12 @@
       "image",
       "button",
       "title"
+    ]
+  },
+  {
+    "id": "custom-tiles",
+    "components": [
+      "custom-tile"
     ]
   },
   {
