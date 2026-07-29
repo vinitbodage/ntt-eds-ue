@@ -47,10 +47,13 @@ function splitByHr(root) {
   return chunks;
 }
 
-function wrapElements(elements) {
-  const wrapper = document.createElement('div');
-  elements.forEach((element) => wrapper.append(element));
-  return wrapper;
+// Chunks hold live DOM nodes that are later used as instrumentation sources,
+// so they must never be re-parented while being inspected.
+function queryChunk(chunk, selector) {
+  return chunk.flatMap((element) => [
+    ...(element.matches?.(selector) ? [element] : []),
+    ...element.querySelectorAll(selector),
+  ]);
 }
 
 function getHrefFromLink(link) {
@@ -60,7 +63,7 @@ function getHrefFromLink(link) {
 }
 
 function getLinkSource(link, chunk) {
-  if (!link) return wrapElements(chunk);
+  if (!link) return chunk[0] || null;
   if (link.isPlainUrl) return link.source;
   return link;
 }
@@ -80,8 +83,7 @@ function readLinkFromElement(element) {
 }
 
 function getLabelFromChunk(chunk) {
-  const wrapper = wrapElements(chunk);
-  const labelParagraph = [...wrapper.querySelectorAll('p')].find((paragraph) => {
+  const labelParagraph = queryChunk(chunk, 'p').find((paragraph) => {
     const text = paragraph.textContent.trim();
     return text
       && !paragraph.querySelector('a[href]')
@@ -93,8 +95,7 @@ function getLabelFromChunk(chunk) {
 }
 
 function getLinkFromChunk(chunk) {
-  const wrapper = wrapElements(chunk);
-  const anchors = [...wrapper.querySelectorAll('a[href]')];
+  const anchors = queryChunk(chunk, 'a[href]');
   const contentLink = anchors.find((anchor) => {
     const text = anchor.textContent.trim();
     return text && !text.startsWith('http') && !text.startsWith('/');
@@ -105,7 +106,7 @@ function getLinkFromChunk(chunk) {
     || null;
   if (anchor) return anchor;
 
-  const urlParagraph = [...wrapper.querySelectorAll('p')].find((paragraph) => (
+  const urlParagraph = queryChunk(chunk, 'p').find((paragraph) => (
     !paragraph.querySelector('a[href]') && looksLikeUrl(paragraph.textContent.trim())
   ));
   if (urlParagraph) {
@@ -120,8 +121,7 @@ function getLinkFromChunk(chunk) {
 }
 
 function getTargetFromChunk(chunk, link) {
-  const wrapper = wrapElements(chunk);
-  const targetParagraph = [...wrapper.querySelectorAll('p')].find((paragraph) => (
+  const targetParagraph = queryChunk(chunk, 'p').find((paragraph) => (
     LINK_TARGETS.includes(paragraph.textContent.trim())
   ));
   if (targetParagraph) return targetParagraph.textContent.trim();
@@ -130,8 +130,7 @@ function getTargetFromChunk(chunk, link) {
 }
 
 function getPlatformFromChunk(chunk) {
-  const wrapper = wrapElements(chunk);
-  const platformParagraph = [...wrapper.querySelectorAll('p')].find((paragraph) => (
+  const platformParagraph = queryChunk(chunk, 'p').find((paragraph) => (
     SOCIAL_PLATFORMS.includes(paragraph.textContent.trim().toLowerCase())
   ));
   return platformParagraph?.textContent.trim().toLowerCase() || '';
