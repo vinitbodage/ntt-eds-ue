@@ -1,5 +1,24 @@
 {
-  "project": "AEM XWalk Boilerplate",
-  "editUrlLabel": "AEM Editor",
-  "editUrlPattern": "{{contentSourceUrl}}{{pathname}}?cmd=open"
+  "project": "NTT EDS UE",
+  "editUrlLabel": "Document Authoring",
+  "editUrlPattern": "https://da.live/edit#/{{org}}/{{site}}{{pathname}}",
+  "plugins": [
+    {
+      "id": "universal-editor",
+      "titleI18n": {
+        "en": "Universal Editor",
+        "de": "Universal Editor",
+        "es": "Editor Universal",
+        "fr": "Éditeur universel",
+        "it": "Editor universale",
+        "ja": "Universal Editor",
+        "ko": "Universal Editor",
+        "pt_BR": "Editor Universal",
+        "zh_CN": "通用编辑器",
+        "zh_TW": "通用編輯器"
+      },
+      "environments": ["edit", "dev", "preview", "live"],
+      "url": "https://experience.adobe.com/#/@nttdataamerptrsd/aem/editor/canvas/main--ntt-eds-ue--vinitbodage.ue.da.live{{pathname}}"
+    }
+  ]
 }
