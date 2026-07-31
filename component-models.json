@@ -932,6 +932,39 @@
     ]
   },
   {
+    "id": "package-tracking",
+    "fields": [
+      {
+        "component": "text",
+        "name": "heading",
+        "label": "Heading",
+        "valueType": "string",
+        "value": "Track your package"
+      },
+      {
+        "component": "text",
+        "name": "trackingApiEndpoint",
+        "label": "Tracking API Endpoint",
+        "valueType": "string",
+        "description": "Optional same-origin tracking API. Falls back to /drafts/mock-package-tracking.json when empty or unavailable."
+      },
+      {
+        "component": "text",
+        "name": "inputPlaceholder",
+        "label": "Input Placeholder",
+        "valueType": "string",
+        "value": "Enter 12-digit number or waybill (e.g. ABC12345678)"
+      },
+      {
+        "component": "text",
+        "name": "buttonLabel",
+        "label": "Button Label",
+        "valueType": "string",
+        "value": "Track"
+      }
+    ]
+  },
+  {
     "id": "search",
     "fields": [
       {

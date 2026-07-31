@@ -1,0 +1,168 @@
+.package-tracking .package-tracking-inner {
+  max-width: 720px;
+}
+
+.package-tracking .package-tracking-heading {
+  margin: 0 0 1rem;
+}
+
+.package-tracking .package-tracking-form {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (width >= 600px) {
+  .package-tracking .package-tracking-form {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+}
+
+.package-tracking .package-tracking-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.package-tracking .package-tracking-input {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0.65em 0.75em;
+  border: 1px solid var(--dark-color);
+  border-radius: 4px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font: inherit;
+}
+
+.package-tracking .package-tracking-input:hover {
+  border-color: var(--text-color);
+}
+
+.package-tracking .package-tracking-input[aria-invalid="true"] {
+  border-color: #b42318;
+}
+
+.package-tracking .package-tracking-error {
+  margin: 0;
+  font-size: var(--body-font-size-xs);
+  color: #b42318;
+}
+
+.package-tracking .package-tracking-submit {
+  align-self: start;
+  white-space: nowrap;
+}
+
+.package-tracking .package-tracking-results {
+  margin-top: 1.5rem;
+}
+
+.package-tracking .package-tracking-status {
+  margin: 0;
+  color: var(--dark-color);
+}
+
+.package-tracking .package-tracking-status-error {
+  color: #b42318;
+}
+
+.package-tracking .package-tracking-summary {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #dadada;
+  border-radius: 4px;
+  background-color: var(--background-color);
+}
+
+.package-tracking .package-tracking-summary-list {
+  display: grid;
+  grid-template-columns: minmax(8rem, auto) 1fr;
+  gap: 0.75rem 1rem;
+  margin: 0;
+}
+
+.package-tracking .package-tracking-summary-list dt {
+  margin: 0;
+  font-size: var(--body-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dark-color);
+}
+
+.package-tracking .package-tracking-summary-list dd {
+  margin: 0;
+  font-size: var(--body-font-size-s);
+}
+
+.package-tracking .package-tracking-events-title {
+  margin: 0 0 1rem;
+  font-size: var(--heading-font-size-s);
+}
+
+.package-tracking .package-tracking-events-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.package-tracking .package-tracking-event {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  gap: 0.75rem 1rem;
+  position: relative;
+  padding-bottom: 1.25rem;
+}
+
+.package-tracking .package-tracking-event:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 1rem;
+  left: 0.4375rem;
+  width: 2px;
+  height: calc(100% - 0.5rem);
+  background-color: #dadada;
+}
+
+.package-tracking .package-tracking-event-marker {
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-top: 0.2rem;
+  border: 2px solid var(--dark-color);
+  border-radius: 50%;
+  background-color: var(--background-color);
+}
+
+.package-tracking .package-tracking-event-marker.is-current {
+  border-color: var(--link-color);
+  background-color: var(--link-color);
+}
+
+.package-tracking .package-tracking-event-content p {
+  margin: 0;
+}
+
+.package-tracking .package-tracking-event-time {
+  font-size: var(--body-font-size-xs);
+  color: var(--dark-color);
+}
+
+.package-tracking .package-tracking-event-status {
+  font-size: var(--body-font-size-s);
+  font-weight: 600;
+}
+
+.package-tracking .package-tracking-event-location,
+.package-tracking .package-tracking-event-meta {
+  font-size: var(--body-font-size-xs);
+  color: var(--dark-color);
+}
+
+.package-tracking .package-tracking-event-location {
+  margin-top: 0.15rem;
+}
+
+.package-tracking .package-tracking-event-meta {
+  margin-top: 0.25rem;
+}
