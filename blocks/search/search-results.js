@@ -1,7 +1,10 @@
 import {
   createOptimizedPicture,
 } from '../../scripts/aem.js';
-import { fetchQueryIndex } from '../../scripts/api/search-api.js';
+import {
+  fetchQueryIndex,
+  toSafeSameOriginPath,
+} from '../../scripts/api/search-api.js';
 
 function findNextHeading(el) {
   let preceedingEl = el.parentElement.previousElement || el.parentElement.parentElement;
@@ -61,9 +64,10 @@ function highlightTextElements(terms, elements) {
 }
 
 function renderResult(result, searchTerms, titleTag) {
+  const resultPath = toSafeSameOriginPath(result.path, window.location.pathname);
   const li = document.createElement('li');
   const a = document.createElement('a');
-  a.href = result.path;
+  a.href = resultPath;
   if (result.image) {
     const wrapper = document.createElement('div');
     wrapper.className = 'search-result-image';
@@ -75,7 +79,7 @@ function renderResult(result, searchTerms, titleTag) {
     const title = document.createElement(titleTag);
     title.className = 'search-result-title';
     const link = document.createElement('a');
-    link.href = result.path;
+    link.href = resultPath;
     link.textContent = result.title;
     highlightTextElements(searchTerms, [link]);
     title.append(link);
