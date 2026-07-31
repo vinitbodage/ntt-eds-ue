@@ -1,0 +1,7 @@
+{
+  "data": [
+    { "label": "Cloud Services", "value": "cloud services", "path": "/search-results" },
+    { "label": "Cloud Migration", "value": "cloud migration", "path": "/search-results" },
+    { "label": "Consulting", "value": "consulting", "path": "/search-results" }
+  ]
+}
