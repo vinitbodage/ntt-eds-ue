@@ -29,7 +29,10 @@ function createAutosuggestPopup(input) {
   return popup;
 }
 
-function createSearchInput(block, config, placeholders, labels) {
+function createSearchInput(config, placeholders, labels) {
+  const field = document.createElement('div');
+  field.className = 'search-field';
+
   const input = document.createElement('input');
   input.setAttribute('type', 'search');
   input.className = 'search-input';
@@ -40,20 +43,17 @@ function createSearchInput(block, config, placeholders, labels) {
   input.maxLength = 200;
 
   const popup = createAutosuggestPopup(input);
-  initAutosuggest(block, input, popup, config, labels);
+  field.append(input, popup);
+  initAutosuggest(input, popup, field, config, labels);
 
-  return { input, popup };
+  return { input, popup, field };
 }
 
-function createSearchBox(block, config, placeholders, labels) {
+function createSearchBox(config, placeholders, labels) {
   const box = document.createElement('div');
   box.classList.add('search-box');
 
-  const field = document.createElement('div');
-  field.className = 'search-field';
-
-  const { input, popup } = createSearchInput(block, config, placeholders, labels);
-  field.append(input, popup);
+  const { field } = createSearchInput(config, placeholders, labels);
   box.append(searchIcon(), field);
 
   return box;
@@ -96,12 +96,15 @@ export default async function decorate(block) {
     recentSearches: placeholders.searchRecent || 'Recent searches',
     trendingSearches: placeholders.searchTrending || 'Trending searches',
     suggestions: placeholders.searchSuggestions || 'Suggestions',
+    loading: placeholders.searchLoading || 'Loading...',
+    empty: placeholders.searchEmpty || 'Start typing to search.',
+    noSuggestions: placeholders.searchNoSuggestions || 'No suggestions found.',
   };
 
   const fullConfig = { ...config, placeholders };
   block.innerHTML = '';
 
-  block.append(createSearchBox(block, fullConfig, placeholders, labels));
+  block.append(createSearchBox(fullConfig, placeholders, labels));
 
   const showResults = isResultsPage(fullConfig);
   if (showResults) {

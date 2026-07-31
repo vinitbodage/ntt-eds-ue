@@ -55,6 +55,17 @@ function createSection(title, items, onSelect) {
   return section;
 }
 
+function createEmptyState(message) {
+  const status = document.createElement('p');
+  status.className = 'search-autosuggest-status';
+  status.textContent = message;
+  return status;
+}
+
+function isPopupTarget(field, target) {
+  return field.contains(target);
+}
+
 function getRecentItems(config) {
   return getRecentSearches()
     .slice(0, config.recentSearchLimit)
@@ -76,13 +87,13 @@ async function getTrendingItems(config) {
 
 /**
  * Initializes autosuggest behavior for a search input.
- * @param {Element} block search block element
  * @param {HTMLInputElement} input search input
  * @param {Element} popup autosuggest popup container
+ * @param {Element} field search field wrapper containing input and popup
  * @param {object} config search configuration
  * @param {object} labels section labels from placeholders
  */
-export default function initAutosuggest(block, input, popup, config, labels) {
+export default function initAutosuggest(input, popup, field, config, labels) {
   let debounceTimer;
   let suggestRequestId = 0;
 
@@ -101,7 +112,9 @@ export default function initAutosuggest(block, input, popup, config, labels) {
 
     popup.innerHTML = '';
     popup.hidden = false;
+    popup.dataset.loading = 'true';
     input.setAttribute('aria-expanded', 'true');
+    popup.append(createEmptyState(labels.loading || 'Loading...'));
 
     const sections = [];
     const trimmedQuery = sanitizeSearchTerm(query);
@@ -138,11 +151,17 @@ export default function initAutosuggest(block, input, popup, config, labels) {
       ));
     }
 
+    if (renderId !== suggestRequestId) return;
+
+    popup.innerHTML = '';
+    delete popup.dataset.loading;
     sections.filter(Boolean).forEach((section) => popup.append(section));
 
     if (!popup.children.length) {
-      popup.hidden = true;
-      input.setAttribute('aria-expanded', 'false');
+      const emptyMessage = trimmedQuery.length >= MIN_QUERY_LENGTH
+        ? (labels.noSuggestions || 'No suggestions found.')
+        : (labels.empty || 'Start typing to search.');
+      popup.append(createEmptyState(emptyMessage));
     }
   };
 
@@ -154,6 +173,10 @@ export default function initAutosuggest(block, input, popup, config, labels) {
   const showPopup = () => {
     renderPopup(input.value);
   };
+
+  field.addEventListener('mousedown', (event) => {
+    event.stopPropagation();
+  });
 
   input.addEventListener('focus', showPopup);
   input.addEventListener('click', showPopup);
@@ -178,8 +201,8 @@ export default function initAutosuggest(block, input, popup, config, labels) {
     }
   });
 
-  document.addEventListener('click', (event) => {
-    if (!block.contains(event.target)) {
+  document.addEventListener('mousedown', (event) => {
+    if (!isPopupTarget(field, event.target)) {
       hidePopup();
     }
   });
