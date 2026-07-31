@@ -13,6 +13,23 @@ const DEFAULTS = {
 
 const MAX_LIST_LIMIT = 50;
 
+const CONFIG_KEY_ALIASES = {
+  resultpageurl: 'resultPageUrl',
+  searchresultspage: 'resultPageUrl',
+  queryindexsource: 'queryIndexSource',
+  queryindex: 'queryIndexSource',
+  trendingapiendpoint: 'trendingApiEndpoint',
+  trendinglimit: 'trendingLimit',
+  recentsearchlimit: 'recentSearchLimit',
+  suggestapiendpoint: 'suggestApiEndpoint',
+  autosuggestapiendpoint: 'suggestApiEndpoint',
+  searchqueryparam: 'searchQueryParam',
+};
+
+function normalizeConfigKey(key) {
+  return key.trim().toLowerCase().replace(/[\s_-]+/g, '');
+}
+
 function readFieldText(field) {
   if (!field) return '';
   const link = field.querySelector('a[href]');
@@ -35,33 +52,13 @@ function readKeyValueConfig(block) {
     const value = readFieldText(cells[1]);
     if (!key || !value) return;
 
-    switch (key.toLowerCase()) {
-      case 'result page url':
-      case 'search results page':
-        config.resultPageUrl = value;
-        break;
-      case 'query index source':
-      case 'query index':
-        config.queryIndexSource = value;
-        break;
-      case 'trending api endpoint':
-        config.trendingApiEndpoint = value;
-        break;
-      case 'trending limit':
-        config.trendingLimit = Number.parseInt(value, 10);
-        break;
-      case 'recent search limit':
-        config.recentSearchLimit = Number.parseInt(value, 10);
-        break;
-      case 'suggest api endpoint':
-      case 'autosuggest api endpoint':
-        config.suggestApiEndpoint = value;
-        break;
-      case 'search query param':
-        config.searchQueryParam = value;
-        break;
-      default:
-        break;
+    const configKey = CONFIG_KEY_ALIASES[normalizeConfigKey(key)];
+    if (!configKey) return;
+
+    if (configKey === 'trendingLimit' || configKey === 'recentSearchLimit') {
+      config[configKey] = Number.parseInt(value, 10);
+    } else {
+      config[configKey] = value;
     }
   });
   return config;
@@ -74,7 +71,6 @@ function readKeyValueConfig(block) {
  */
 export default function readSearchConfig(block) {
   const keyValueConfig = readKeyValueConfig(block);
-  const legacySourceLink = block.querySelector('a[href]');
 
   const config = {
     resultPageUrl: readFieldText(block.querySelector('[data-aue-prop="resultPageUrl"]'))
@@ -82,7 +78,6 @@ export default function readSearchConfig(block) {
       || readFieldText(block.querySelector('[data-aue-prop="searchUrl"]')),
     queryIndexSource: readFieldText(block.querySelector('[data-aue-prop="queryIndexSource"]'))
       || keyValueConfig.queryIndexSource
-      || legacySourceLink?.href
       || DEFAULTS.queryIndexSource,
     trendingApiEndpoint: readFieldText(block.querySelector('[data-aue-prop="trendingApiEndpoint"]'))
       || keyValueConfig.trendingApiEndpoint,
