@@ -66,7 +66,10 @@
 }
 
 .search .search-autosuggest-item {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
   width: 100%;
   margin: 0;
   padding: 0.5rem 1rem;
@@ -76,6 +79,16 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+.search .search-autosuggest-item-label {
+  font-size: var(--body-font-size-s);
+}
+
+.search .search-autosuggest-item-meta {
+  font-size: var(--body-font-size-xs);
+  color: var(--dark-color);
+  text-transform: capitalize;
 }
 
 .search .search-autosuggest-item:hover,

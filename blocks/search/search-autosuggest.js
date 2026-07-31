@@ -22,6 +22,27 @@ function buildResultPageUrl(config, term, item) {
   return url.toString();
 }
 
+function createSuggestButton(item, onSelect) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'search-autosuggest-item';
+
+  const label = document.createElement('span');
+  label.className = 'search-autosuggest-item-label';
+  label.textContent = item.label || item.value || item;
+  button.append(label);
+
+  if (item.meta) {
+    const meta = document.createElement('span');
+    meta.className = 'search-autosuggest-item-meta';
+    meta.textContent = item.meta;
+    button.append(meta);
+  }
+
+  button.addEventListener('click', () => onSelect(item));
+  return button;
+}
+
 function createSection(title, items, onSelect) {
   if (!items.length) return null;
 
@@ -42,12 +63,7 @@ function createSection(title, items, onSelect) {
   items.forEach((item) => {
     const li = document.createElement('li');
     li.setAttribute('role', 'option');
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'search-autosuggest-item';
-    button.textContent = item.label || item.value || item;
-    button.addEventListener('click', () => onSelect(item));
-    li.append(button);
+    li.append(createSuggestButton(item, onSelect));
     list.append(li);
   });
 

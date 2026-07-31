@@ -3,6 +3,8 @@ import fetchJson from './fetch-json.js';
 const MAX_SEARCH_TERM_LENGTH = 200;
 const MAX_LABEL_LENGTH = 500;
 const SAFE_QUERY_PARAM_PATTERN = /^[a-z][a-z0-9_-]*$/i;
+const DEFAULT_SUGGEST_API = 'https://dummyjson.com/products/search';
+const ALLOWED_EXTERNAL_ORIGINS = new Set(['https://dummyjson.com']);
 
 /**
  * Validates and normalizes a URL search parameter name.
@@ -55,13 +57,44 @@ export function toSafeSameOriginFetchUrl(value, fallback = '') {
 }
 
 /**
- * Builds a URL with query parameters.
+ * Allows same-origin or allowlisted external suggest API URLs.
+ * @param {string} value URL or path from configuration
+ * @param {string} fallback fallback when value is unsafe
+ * @returns {string}
+ */
+export function toSafeSuggestFetchUrl(value, fallback = '') {
+  const candidate = String(value || '').trim();
+  if (!candidate) return fallback;
+
+  const sameOrigin = toSafeSameOriginFetchUrl(candidate);
+  if (sameOrigin) return sameOrigin;
+
+  try {
+    const url = new URL(candidate);
+    if (!['http:', 'https:'].includes(url.protocol)) return fallback;
+    if (!ALLOWED_EXTERNAL_ORIGINS.has(url.origin)) return fallback;
+    return url.toString();
+  } catch {
+    return fallback;
+  }
+}
+
+function isExternalUrl(url) {
+  try {
+    return new URL(url).origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Builds a suggest API URL with query parameters.
  * @param {string} endpoint base API URL
  * @param {Record<string, string|number>} params query parameters
  * @returns {string}
  */
-function buildApiUrl(endpoint, params = {}) {
-  const safeEndpoint = toSafeSameOriginFetchUrl(endpoint);
+function buildSuggestApiUrl(endpoint, params = {}) {
+  const safeEndpoint = toSafeSuggestFetchUrl(endpoint, DEFAULT_SUGGEST_API);
   if (!safeEndpoint) return '';
 
   const url = new URL(safeEndpoint);
@@ -121,8 +154,11 @@ export function normalizeSearchItem(item) {
   );
   const value = sanitizeLabel(item.value || item.query || label);
   const path = toSafeSameOriginPath(item.path || item.url || item.href || item.link || '');
+  const meta = sanitizeLabel(item.category || item.brand || '');
 
-  return { label, value, path };
+  return {
+    label, value, path, meta,
+  };
 }
 
 /**
@@ -133,6 +169,7 @@ export function normalizeSearchItem(item) {
 export function extractItems(json) {
   if (!json) return [];
   if (Array.isArray(json)) return json;
+  if (Array.isArray(json.products)) return json.products;
   if (Array.isArray(json.data)) return json.data;
   if (Array.isArray(json.results)) return json.results;
   if (Array.isArray(json.items)) return json.items;
@@ -144,34 +181,38 @@ export function extractItems(json) {
  * Fetches trending search items.
  * @param {string} endpoint trending API URL
  * @param {number} limit max items to request
- * @returns {Promise<Array<{ label: string, value: string, path: string }>>}
+ * @returns {Promise<Array<{ label: string, value: string, path: string, meta?: string }>>}
  */
 export async function fetchTrendingItems(endpoint, limit = 5) {
-  const url = buildApiUrl(endpoint, { limit });
-  if (!url) return [];
+  const safeEndpoint = toSafeSameOriginFetchUrl(endpoint);
+  if (!safeEndpoint) return [];
 
-  const json = await fetchJson(url);
+  const url = new URL(safeEndpoint);
+  url.searchParams.set('limit', String(limit));
+
+  const json = await fetchJson(url.toString());
   return extractItems(json).map(normalizeSearchItem).filter((item) => item.label);
 }
 
 /**
- * Fetches autosuggest items for a query.
+ * Fetches autosuggest items for a query (supports DummyJSON product titles).
  * @param {string} endpoint suggest API URL
  * @param {string} query user search query
  * @param {number} [limit] optional max items
- * @returns {Promise<Array<{ label: string, value: string, path: string }>>}
+ * @returns {Promise<Array<{ label: string, value: string, path: string, meta?: string }>>}
  */
-export async function fetchSuggestions(endpoint, query, limit) {
+export async function fetchSuggestions(endpoint, query, limit = 10) {
   const safeQuery = sanitizeSearchTerm(query);
   if (!safeQuery) return [];
 
-  const params = { q: safeQuery, query: safeQuery };
+  const params = { q: safeQuery };
   if (limit) params.limit = limit;
 
-  const url = buildApiUrl(endpoint, params);
+  const url = buildSuggestApiUrl(endpoint, params);
   if (!url) return [];
 
-  const json = await fetchJson(url);
+  const fetchOptions = isExternalUrl(url) ? { credentials: 'omit', mode: 'cors' } : undefined;
+  const json = await fetchJson(url, fetchOptions);
   return extractItems(json).map(normalizeSearchItem).filter((item) => item.label);
 }
 

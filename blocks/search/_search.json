@@ -62,7 +62,8 @@
           "name": "suggestApiEndpoint",
           "label": "Autosuggest API Endpoint",
           "valueType": "string",
-          "description": "API endpoint for query autosuggestions after 3 characters"
+          "value": "https://dummyjson.com/products/search",
+          "description": "Product search API. DummyJSON returns product titles from the products array."
         },
         {
           "component": "text",

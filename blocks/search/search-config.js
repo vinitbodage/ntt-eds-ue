@@ -2,6 +2,7 @@ import {
   sanitizeSearchQueryParam,
   toSafeSameOriginFetchUrl,
   toSafeSameOriginPath,
+  toSafeSuggestFetchUrl,
 } from '../../scripts/api/search-api.js';
 
 const DEFAULTS = {
@@ -9,6 +10,7 @@ const DEFAULTS = {
   trendingLimit: 5,
   searchQueryParam: 'q',
   queryIndexSource: '/query-index.json',
+  suggestApiEndpoint: 'https://dummyjson.com/products/search',
 };
 
 const MAX_LIST_LIMIT = 50;
@@ -90,7 +92,8 @@ export default function readSearchConfig(block) {
       keyValueConfig.recentSearchLimit || DEFAULTS.recentSearchLimit,
     ),
     suggestApiEndpoint: readFieldText(block.querySelector('[data-aue-prop="suggestApiEndpoint"]'))
-      || keyValueConfig.suggestApiEndpoint,
+      || keyValueConfig.suggestApiEndpoint
+      || DEFAULTS.suggestApiEndpoint,
     searchQueryParam: readFieldText(block.querySelector('[data-aue-prop="searchQueryParam"]'))
       || keyValueConfig.searchQueryParam
       || DEFAULTS.searchQueryParam,
@@ -101,7 +104,10 @@ export default function readSearchConfig(block) {
     resultPageUrl: toSafeSameOriginPath(config.resultPageUrl, ''),
     queryIndexSource: toSafeSameOriginFetchUrl(config.queryIndexSource, DEFAULTS.queryIndexSource),
     trendingApiEndpoint: toSafeSameOriginFetchUrl(config.trendingApiEndpoint, ''),
-    suggestApiEndpoint: toSafeSameOriginFetchUrl(config.suggestApiEndpoint, ''),
+    suggestApiEndpoint: toSafeSuggestFetchUrl(
+      config.suggestApiEndpoint,
+      DEFAULTS.suggestApiEndpoint,
+    ),
     searchQueryParam: sanitizeSearchQueryParam(config.searchQueryParam, DEFAULTS.searchQueryParam),
     trendingLimit: Math.min(config.trendingLimit || DEFAULTS.trendingLimit, MAX_LIST_LIMIT),
     recentSearchLimit: Math.min(
