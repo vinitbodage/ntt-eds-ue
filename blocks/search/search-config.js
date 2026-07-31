@@ -1,9 +1,17 @@
+import {
+  sanitizeSearchQueryParam,
+  toSafeSameOriginFetchUrl,
+  toSafeSameOriginPath,
+} from '../../scripts/api/search-api.js';
+
 const DEFAULTS = {
   recentSearchLimit: 3,
   trendingLimit: 5,
   searchQueryParam: 'q',
   queryIndexSource: '/query-index.json',
 };
+
+const MAX_LIST_LIMIT = 50;
 
 function readFieldText(field) {
   if (!field) return '';
@@ -12,9 +20,10 @@ function readFieldText(field) {
   return field.textContent.trim();
 }
 
-function readFieldNumber(field, fallback) {
+function readFieldNumber(field, fallback, max = MAX_LIST_LIMIT) {
   const value = Number.parseInt(readFieldText(field), 10);
-  return Number.isFinite(value) && value > 0 ? value : fallback;
+  if (!Number.isFinite(value) || value <= 0) return fallback;
+  return Math.min(value, max);
 }
 
 function readKeyValueConfig(block) {
@@ -92,5 +101,17 @@ export default function readSearchConfig(block) {
       || DEFAULTS.searchQueryParam,
   };
 
-  return config;
+  return {
+    ...config,
+    resultPageUrl: toSafeSameOriginPath(config.resultPageUrl, ''),
+    queryIndexSource: toSafeSameOriginFetchUrl(config.queryIndexSource, DEFAULTS.queryIndexSource),
+    trendingApiEndpoint: toSafeSameOriginFetchUrl(config.trendingApiEndpoint, ''),
+    suggestApiEndpoint: toSafeSameOriginFetchUrl(config.suggestApiEndpoint, ''),
+    searchQueryParam: sanitizeSearchQueryParam(config.searchQueryParam, DEFAULTS.searchQueryParam),
+    trendingLimit: Math.min(config.trendingLimit || DEFAULTS.trendingLimit, MAX_LIST_LIMIT),
+    recentSearchLimit: Math.min(
+      config.recentSearchLimit || DEFAULTS.recentSearchLimit,
+      MAX_LIST_LIMIT,
+    ),
+  };
 }

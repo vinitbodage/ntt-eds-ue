@@ -1,5 +1,59 @@
 import fetchJson from './fetch-json.js';
 
+const MAX_SEARCH_TERM_LENGTH = 200;
+const MAX_LABEL_LENGTH = 500;
+const SAFE_QUERY_PARAM_PATTERN = /^[a-z][a-z0-9_-]*$/i;
+
+/**
+ * Validates and normalizes a URL search parameter name.
+ * @param {string} param candidate parameter name
+ * @param {string} fallback fallback when invalid
+ * @returns {string}
+ */
+export function sanitizeSearchQueryParam(param, fallback = 'q') {
+  const candidate = String(param || '').trim();
+  return SAFE_QUERY_PARAM_PATTERN.test(candidate) ? candidate : fallback;
+}
+
+/**
+ * Strips control characters and enforces a max length on search terms.
+ * @param {string} term user or API-provided search term
+ * @param {number} [maxLength] max allowed length
+ * @returns {string}
+ */
+export function sanitizeSearchTerm(term, maxLength = MAX_SEARCH_TERM_LENGTH) {
+  if (term == null || term === '') return '';
+  const cleaned = String(term)
+    .split('')
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      return code >= 32 && code !== 127;
+    })
+    .join('')
+    .trim();
+  return cleaned.slice(0, maxLength);
+}
+
+/**
+ * Restricts fetch targets to the current origin.
+ * @param {string} value URL or path from configuration
+ * @param {string} fallback fallback when value is unsafe
+ * @returns {string}
+ */
+export function toSafeSameOriginFetchUrl(value, fallback = '') {
+  const candidate = String(value || '').trim();
+  if (!candidate) return fallback;
+
+  try {
+    const url = new URL(candidate, window.location.origin);
+    if (!['http:', 'https:'].includes(url.protocol)) return fallback;
+    if (url.origin !== window.location.origin) return fallback;
+    return url.toString();
+  } catch {
+    return fallback;
+  }
+}
+
 /**
  * Builds a URL with query parameters.
  * @param {string} endpoint base API URL
@@ -7,13 +61,20 @@ import fetchJson from './fetch-json.js';
  * @returns {string}
  */
 function buildApiUrl(endpoint, params = {}) {
-  const url = new URL(endpoint, window.location.origin);
+  const safeEndpoint = toSafeSameOriginFetchUrl(endpoint);
+  if (!safeEndpoint) return '';
+
+  const url = new URL(safeEndpoint);
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       url.searchParams.set(key, String(value));
     }
   });
   return url.toString();
+}
+
+function sanitizeLabel(value) {
+  return sanitizeSearchTerm(value, MAX_LABEL_LENGTH);
 }
 
 /**
@@ -47,11 +108,18 @@ export function toSafeSameOriginPath(value, fallback = '') {
  */
 export function normalizeSearchItem(item) {
   if (typeof item === 'string') {
-    return { label: item, value: item, path: '' };
+    const label = sanitizeLabel(item);
+    return { label, value: label, path: '' };
   }
 
-  const label = item.label || item.title || item.text || item.name || item.query || '';
-  const value = item.value || item.query || label;
+  if (!item || typeof item !== 'object') {
+    return { label: '', value: '', path: '' };
+  }
+
+  const label = sanitizeLabel(
+    item.label || item.title || item.text || item.name || item.query || '',
+  );
+  const value = sanitizeLabel(item.value || item.query || label);
   const path = toSafeSameOriginPath(item.path || item.url || item.href || item.link || '');
 
   return { label, value, path };
@@ -79,7 +147,10 @@ export function extractItems(json) {
  * @returns {Promise<Array<{ label: string, value: string, path: string }>>}
  */
 export async function fetchTrendingItems(endpoint, limit = 5) {
-  const json = await fetchJson(buildApiUrl(endpoint, { limit }));
+  const url = buildApiUrl(endpoint, { limit });
+  if (!url) return [];
+
+  const json = await fetchJson(url);
   return extractItems(json).map(normalizeSearchItem).filter((item) => item.label);
 }
 
@@ -91,10 +162,16 @@ export async function fetchTrendingItems(endpoint, limit = 5) {
  * @returns {Promise<Array<{ label: string, value: string, path: string }>>}
  */
 export async function fetchSuggestions(endpoint, query, limit) {
-  const params = { q: query, query };
+  const safeQuery = sanitizeSearchTerm(query);
+  if (!safeQuery) return [];
+
+  const params = { q: safeQuery, query: safeQuery };
   if (limit) params.limit = limit;
 
-  const json = await fetchJson(buildApiUrl(endpoint, params));
+  const url = buildApiUrl(endpoint, params);
+  if (!url) return [];
+
+  const json = await fetchJson(url);
   return extractItems(json).map(normalizeSearchItem).filter((item) => item.label);
 }
 
@@ -104,10 +181,16 @@ export async function fetchSuggestions(endpoint, query, limit) {
  * @returns {Promise<object[]|null>}
  */
 export async function fetchQueryIndex(source) {
-  const json = await fetchJson(source);
+  const safeSource = toSafeSameOriginFetchUrl(source);
+  if (!safeSource) return null;
+
+  const json = await fetchJson(safeSource);
   if (!json) return null;
   return extractItems(json).map((item) => ({
     ...item,
+    title: sanitizeLabel(item.title || item.header || ''),
+    description: sanitizeLabel(item.description || ''),
     path: toSafeSameOriginPath(item.path || item.url || item.href || item.link || ''),
+    image: toSafeSameOriginPath(item.image || '', ''),
   }));
 }

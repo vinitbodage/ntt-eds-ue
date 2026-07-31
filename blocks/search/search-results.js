@@ -3,6 +3,7 @@ import {
 } from '../../scripts/aem.js';
 import {
   fetchQueryIndex,
+  sanitizeSearchTerm,
   toSafeSameOriginPath,
 } from '../../scripts/api/search-api.js';
 
@@ -153,12 +154,13 @@ export async function renderSearchResults(block, config, searchValue) {
 
   clearSearchResults(block);
 
-  if (!searchValue || searchValue.length < 3) {
+  const sanitizedValue = sanitizeSearchTerm(searchValue);
+  if (!sanitizedValue || sanitizedValue.length < 3) {
     searchResults.classList.remove('no-results');
     return;
   }
 
-  const searchTerms = searchValue.toLowerCase().split(/\s+/).filter((term) => !!term);
+  const searchTerms = sanitizedValue.toLowerCase().split(/\s+/).filter((term) => !!term);
   const data = await fetchQueryIndex(config.queryIndexSource);
   const filteredData = filterData(searchTerms, data || []);
   const headingTag = searchResults.dataset.h;

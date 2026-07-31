@@ -8,7 +8,7 @@ export default async function fetchJson(source, options) {
   if (!source) return null;
 
   try {
-    const response = await fetch(source, options);
+    const response = await fetch(source, { credentials: 'same-origin', ...options });
     if (!response.ok) {
       // eslint-disable-next-line no-console
       console.error('error loading API response', response.status, source);

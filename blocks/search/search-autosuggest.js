@@ -1,6 +1,7 @@
 import {
   fetchSuggestions,
   fetchTrendingItems,
+  sanitizeSearchTerm,
   toSafeSameOriginPath,
 } from '../../scripts/api/search-api.js';
 import {
@@ -86,7 +87,8 @@ export default function initAutosuggest(block, input, popup, config, labels) {
   let suggestRequestId = 0;
 
   const navigateToResult = (item) => {
-    const term = (typeof item === 'string' ? item : item.value || item.label || '').trim();
+    const rawTerm = typeof item === 'string' ? item : item.value || item.label || '';
+    const term = sanitizeSearchTerm(rawTerm);
     if (!term) return;
 
     addRecentSearch(term, config.recentSearchLimit);
@@ -102,7 +104,7 @@ export default function initAutosuggest(block, input, popup, config, labels) {
     input.setAttribute('aria-expanded', 'true');
 
     const sections = [];
-    const trimmedQuery = query.trim();
+    const trimmedQuery = sanitizeSearchTerm(query);
     const recentItems = getRecentItems(config);
 
     if (recentItems.length) {
@@ -168,7 +170,7 @@ export default function initAutosuggest(block, input, popup, config, labels) {
       hidePopup();
     }
     if (event.key === 'Enter') {
-      const term = input.value.trim();
+      const term = sanitizeSearchTerm(input.value);
       if (term.length >= MIN_QUERY_LENGTH) {
         event.preventDefault();
         navigateToResult({ label: term, value: term, path: '' });

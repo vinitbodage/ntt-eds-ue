@@ -1,5 +1,8 @@
+import { sanitizeSearchTerm } from '../api/search-api.js';
+
 const RECENT_SEARCHES_KEY = 'search-recent-searches';
 const TRENDING_CACHE_KEY = 'search-trending-cache';
+const MAX_STORED_RECENT = 20;
 
 function readStorage(storage, key) {
   try {
@@ -23,7 +26,14 @@ function writeStorage(storage, key, value) {
  * @returns {string[]}
  */
 export function getRecentSearches() {
-  return readStorage(localStorage, RECENT_SEARCHES_KEY) || [];
+  const stored = readStorage(localStorage, RECENT_SEARCHES_KEY);
+  if (!Array.isArray(stored)) return [];
+
+  return stored
+    .filter((item) => typeof item === 'string')
+    .map((item) => sanitizeSearchTerm(item))
+    .filter(Boolean)
+    .slice(0, MAX_STORED_RECENT);
 }
 
 /**
@@ -32,7 +42,7 @@ export function getRecentSearches() {
  * @param {number} limit max stored items
  */
 export function addRecentSearch(term, limit = 3) {
-  const trimmed = term?.trim();
+  const trimmed = sanitizeSearchTerm(term);
   if (!trimmed) return;
 
   const recent = getRecentSearches().filter((item) => item.toLowerCase() !== trimmed.toLowerCase());

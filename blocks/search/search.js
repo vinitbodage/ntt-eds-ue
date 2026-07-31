@@ -2,6 +2,7 @@ import {
   decorateIcons,
 } from '../../scripts/aem.js';
 import fetchPlaceholders from '../../scripts/placeholders.js';
+import { sanitizeSearchTerm } from '../../scripts/api/search-api.js';
 import readSearchConfig from './search-config.js';
 import initAutosuggest from './search-autosuggest.js';
 import {
@@ -36,6 +37,7 @@ function createSearchInput(block, config, placeholders, labels) {
   const searchPlaceholder = placeholders.searchPlaceholder || 'Search...';
   input.placeholder = searchPlaceholder;
   input.setAttribute('aria-label', searchPlaceholder);
+  input.maxLength = 200;
 
   const popup = createAutosuggestPopup(input);
   initAutosuggest(block, input, popup, config, labels);
@@ -58,7 +60,8 @@ function createSearchBox(block, config, placeholders, labels) {
 }
 
 function getSearchParam(config) {
-  return new URLSearchParams(window.location.search).get(config.searchQueryParam) || '';
+  const raw = new URLSearchParams(window.location.search).get(config.searchQueryParam) || '';
+  return sanitizeSearchTerm(raw);
 }
 
 function isResultsPage(config) {
@@ -115,7 +118,7 @@ export default async function decorate(block) {
 
   if (showResults) {
     input.addEventListener('input', async (event) => {
-      const searchValue = event.target.value;
+      const searchValue = sanitizeSearchTerm(event.target.value);
       updateUrlQuery(fullConfig, searchValue);
 
       if (searchValue.length < 3) {
