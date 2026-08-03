@@ -2,15 +2,15 @@
   "data": {
     "teaserCfModelByPath": {
       "item": {
-        "title": "Discover the future of digital experience",
-        "description": {
+        "teaserTitle": "Discover the future of digital experience",
+        "teaserDescription": {
           "html": "<p>Explore how NTT DATA helps organizations transform with cloud, AI, and modern engineering.</p>"
         },
-        "image": {
+        "teaserImage": {
           "_path": "/images/spotlight/cloud.jpg"
         },
-        "cta_title": "Learn more",
-        "cta_link": "/"
+        "ctaText": "Learn more",
+        "ctaLink": "https://www.nttdata.com/"
       }
     }
   }

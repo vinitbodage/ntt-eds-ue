@@ -23,15 +23,38 @@ function buildGraphQlUrl(baseUrl, config, cfPath, cfVariation) {
   return `${baseUrl}${config.persistedGraphQlQuery};path=${cfPath};variation=${variation};ts=${cacheBuster}`;
 }
 
-function resolveAssetUrl(baseUrl, assetPath) {
+function resolveAssetUrl(baseUrl, assetPath, config) {
   if (!assetPath) return '';
   if (/^https?:\/\//i.test(assetPath)) return assetPath;
+
+  if (assetPath.startsWith('/content/dam/')) {
+    return `${config.aemAuthorUrl}${assetPath}`;
+  }
+
   if (assetPath.startsWith('/')) return `${baseUrl}${assetPath}`;
   return assetPath;
 }
 
 function extractTeaser(data, config) {
   return data?.data?.[config.graphQlResultKey]?.item || null;
+}
+
+function normalizeTeaserItem(item) {
+  if (!item) return null;
+
+  return {
+    title: item.teaserTitle || item.title || '',
+    descriptionHtml: item.teaserDescription?.html || item.description?.html || '',
+    imagePath: item.teaserImage?._path || item.image?._path || '',
+    ctaText: item.ctaText || item.cta_title || '',
+    ctaLink: item.ctaLink || item.cta_link || '',
+  };
+}
+
+function buildCtaHref(link) {
+  if (!link) return '#';
+  if (/^https?:\/\//i.test(link)) return link;
+  return link.endsWith('.html') ? link : `${link}.html`;
 }
 
 async function fetchJson(url, options = {}) {
@@ -77,30 +100,34 @@ async function fetchTeaserFromMock(config) {
   };
 }
 
-function buildTeaserMarkup(cfPath, cfVariation, teaser, assetBaseUrl) {
+function buildTeaserMarkup(cfPath, cfVariation, teaser, assetBaseUrl, config) {
+  const normalized = normalizeTeaserItem(teaser);
+  if (!normalized) return '';
+
   const variation = cfVariation || 'master';
-  const imagePath = resolveAssetUrl(assetBaseUrl, teaser?.image?._path || '');
-  const imageAlt = teaser?.title || '';
-  let ctaLink = '#';
-  if (teaser?.cta_link) {
-    ctaLink = teaser.cta_link.endsWith('.html') ? teaser.cta_link : `${teaser.cta_link}.html`;
-  }
+  const imagePath = resolveAssetUrl(assetBaseUrl, normalized.imagePath, config);
+  const imageAlt = normalized.title || '';
+  const ctaLink = buildCtaHref(normalized.ctaLink);
+  const imageMarkup = imagePath
+    ? `<img src="${imagePath}" alt="${imageAlt}" data-aue-prop="teaserImage" data-aue-label="Image" data-aue-type="media" loading="lazy">`
+    : '';
+  const ctaMarkup = normalized.ctaText
+    ? `<a href="${ctaLink}" data-aue-prop="ctaText" data-aue-label="Button Text" data-aue-type="text" class="button secondary">${normalized.ctaText}</a>`
+    : '';
 
   return `
   <div class="cf-teaser" data-aue-resource="urn:aemconnection:${cfPath}/jcr:content/data/${variation}" data-aue-label="CF Teaser" data-aue-type="reference">
     <div class="teaser-background">
-      <img src="${imagePath}" alt="${imageAlt}" data-aue-prop="image" data-aue-label="Image" data-aue-type="media" loading="lazy">
+      ${imageMarkup}
     </div>
     <div class="teaser-content">
       <div class="teaser-text">
-        <h3 data-aue-prop="title" data-aue-label="Title" data-aue-type="text" class="title">${teaser?.title || ''}</h3>
-        <div data-aue-prop="description" data-aue-label="Description" data-aue-type="richtext" class="description">
-          ${teaser?.description?.html || ''}
+        <h3 data-aue-prop="teaserTitle" data-aue-label="Title" data-aue-type="text" class="title">${normalized.title}</h3>
+        <div data-aue-prop="teaserDescription" data-aue-label="Description" data-aue-type="richtext" class="description">
+          ${normalized.descriptionHtml}
         </div>
       </div>
-      <div class="teaser-cta">
-        <a href="${ctaLink}" data-aue-prop="cta_title" data-aue-label="Button Text" data-aue-type="text" class="button secondary">${teaser?.cta_title || ''}</a>
-      </div>
+      ${ctaMarkup ? `<div class="teaser-cta">${ctaMarkup}</div>` : ''}
     </div>
   </div>`;
 }
@@ -145,6 +172,7 @@ export default async function decorate(block) {
       cfVariation,
       result.teaser,
       result.assetBaseUrl,
+      config,
     );
   } catch {
     renderStatus(block, 'Unable to load teaser content.');
