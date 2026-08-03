@@ -602,27 +602,23 @@
         "label": "Logo Link Title",
         "valueType": "string",
         "value": "NTT DATA Home"
+      }
+    ]
+  },
+  {
+    "id": "footer-nav-column",
+    "fields": [
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Column Title",
+        "valueType": "string"
       },
       {
-        "component": "container",
-        "name": "navColumns",
-        "label": "Navigation Columns",
-        "collapsible": false,
-        "multi": true,
-        "fields": [
-          {
-            "component": "text",
-            "name": "title",
-            "label": "Column Title",
-            "valueType": "string"
-          },
-          {
-            "component": "aem-content",
-            "name": "link",
-            "label": "Column Link",
-            "valueType": "string"
-          }
-        ]
+        "component": "aem-content",
+        "name": "link",
+        "label": "Column Link",
+        "valueType": "string"
       }
     ]
   },
