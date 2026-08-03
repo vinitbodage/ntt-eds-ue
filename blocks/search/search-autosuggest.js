@@ -40,6 +40,13 @@ function createSuggestButton(item, onSelect) {
   }
 
   button.addEventListener('click', () => onSelect(item));
+  button.addEventListener('focus', () => {
+    const listPopup = button.closest('.search-autosuggest');
+    listPopup?.querySelectorAll('.search-autosuggest-item.is-active').forEach((el) => {
+      el.classList.remove('is-active');
+    });
+    button.classList.add('is-active');
+  });
   return button;
 }
 
@@ -94,7 +101,9 @@ async function getTrendingItems(config) {
   const cached = getTrendingFromCache(config.trendingApiEndpoint, config.trendingLimit);
   if (cached) return cached;
 
-  const items = await fetchTrendingItems(config.trendingApiEndpoint, config.trendingLimit);
+  const items = await fetchTrendingItems(config.trendingApiEndpoint, config.trendingLimit, {
+    locale: config.locale,
+  });
   if (items.length) {
     setTrendingCache(config.trendingApiEndpoint, config.trendingLimit, items);
   }
@@ -158,6 +167,11 @@ export default function initAutosuggest(input, popup, field, config, labels) {
       const suggestions = await fetchSuggestions(
         config.suggestApiEndpoint,
         trimmedQuery,
+        {
+          queryParam: config.suggestQueryParam,
+          locale: config.locale,
+          limit: 10,
+        },
       );
       if (renderId !== suggestRequestId) return;
       sections.push(createSection(
@@ -205,10 +219,35 @@ export default function initAutosuggest(input, popup, field, config, labels) {
   });
 
   input.addEventListener('keydown', (event) => {
+    const options = [...popup.querySelectorAll('.search-autosuggest-item')];
+    const activeIndex = options.findIndex((btn) => btn.classList.contains('is-active'));
+
+    if (event.key === 'ArrowDown' && options.length) {
+      event.preventDefault();
+      const next = activeIndex < options.length - 1 ? activeIndex + 1 : 0;
+      options.forEach((btn, i) => btn.classList.toggle('is-active', i === next));
+      options[next]?.focus();
+      return;
+    }
+
+    if (event.key === 'ArrowUp' && options.length) {
+      event.preventDefault();
+      const prev = activeIndex > 0 ? activeIndex - 1 : options.length - 1;
+      options.forEach((btn, i) => btn.classList.toggle('is-active', i === prev));
+      options[prev]?.focus();
+      return;
+    }
+
     if (event.key === 'Escape') {
       hidePopup();
     }
     if (event.key === 'Enter') {
+      const active = popup.querySelector('.search-autosuggest-item.is-active');
+      if (active) {
+        event.preventDefault();
+        active.click();
+        return;
+      }
       const term = sanitizeSearchTerm(input.value);
       if (term.length >= MIN_QUERY_LENGTH) {
         event.preventDefault();

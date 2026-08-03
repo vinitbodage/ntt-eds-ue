@@ -3,7 +3,7 @@ import fetchJson from './fetch-json.js';
 const MAX_SEARCH_TERM_LENGTH = 200;
 const MAX_LABEL_LENGTH = 500;
 const SAFE_QUERY_PARAM_PATTERN = /^[a-z][a-z0-9_-]*$/i;
-const DEFAULT_SUGGEST_API = 'https://dummyjson.com/products/search';
+const DEFAULT_SUGGEST_PATH = '/drafts/mock-suggest.json';
 const ALLOWED_EXTERNAL_ORIGINS = new Set(['https://dummyjson.com']);
 
 /**
@@ -87,25 +87,6 @@ function isExternalUrl(url) {
   }
 }
 
-/**
- * Builds a suggest API URL with query parameters.
- * @param {string} endpoint base API URL
- * @param {Record<string, string|number>} params query parameters
- * @returns {string}
- */
-function buildSuggestApiUrl(endpoint, params = {}) {
-  const safeEndpoint = toSafeSuggestFetchUrl(endpoint, DEFAULT_SUGGEST_API);
-  if (!safeEndpoint) return '';
-
-  const url = new URL(safeEndpoint);
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      url.searchParams.set(key, String(value));
-    }
-  });
-  return url.toString();
-}
-
 function sanitizeLabel(value) {
   return sanitizeSearchTerm(value, MAX_LABEL_LENGTH);
 }
@@ -137,7 +118,7 @@ export function toSafeSameOriginPath(value, fallback = '') {
 /**
  * Normalizes API items into a consistent search suggestion shape.
  * @param {object} item raw API item
- * @returns {{ label: string, value: string, path: string }}
+ * @returns {{ label: string, value: string, path: string, meta?: string }}
  */
 export function normalizeSearchItem(item) {
   if (typeof item === 'string') {
@@ -154,10 +135,31 @@ export function normalizeSearchItem(item) {
   );
   const value = sanitizeLabel(item.value || item.query || label);
   const path = toSafeSameOriginPath(item.path || item.url || item.href || item.link || '');
-  const meta = sanitizeLabel(item.category || item.brand || '');
+  const meta = sanitizeLabel(item.category || item.brand || item.type || item.contentType || '');
 
   return {
     label, value, path, meta,
+  };
+}
+
+/**
+ * Normalizes a full search result record.
+ * @param {object} item raw API item
+ * @returns {{ title: string, description: string, path: string, image: string, meta?: string }}
+ */
+export function normalizeSearchResult(item) {
+  if (!item || typeof item !== 'object') {
+    return {
+      title: '', description: '', path: '', image: '',
+    };
+  }
+
+  return {
+    title: sanitizeLabel(item.title || item.header || item.name || ''),
+    description: sanitizeLabel(item.description || item.summary || item.excerpt || ''),
+    path: toSafeSameOriginPath(item.path || item.url || item.href || item.link || ''),
+    image: toSafeSameOriginPath(item.image || item.thumbnail || '', ''),
+    meta: sanitizeLabel(item.category || item.type || ''),
   };
 }
 
@@ -174,41 +176,85 @@ export function extractItems(json) {
   if (Array.isArray(json.results)) return json.results;
   if (Array.isArray(json.items)) return json.items;
   if (Array.isArray(json.suggestions)) return json.suggestions;
+  if (Array.isArray(json.hits)) return json.hits;
+  if (Array.isArray(json.content)) return json.content;
   return [];
+}
+
+/**
+ * Client-side filter when mock APIs return the full catalog.
+ * @param {object[]} results normalized results
+ * @param {string} query search query
+ * @returns {object[]}
+ */
+export function filterResultsByQuery(results, query) {
+  const terms = sanitizeSearchTerm(query).toLowerCase().split(/\s+/).filter(Boolean);
+  if (!terms.length) return results;
+
+  return results.filter((result) => {
+    const haystack = `${result.title} ${result.description} ${result.path} ${result.meta || ''}`.toLowerCase();
+    return terms.every((term) => haystack.includes(term));
+  });
+}
+
+/**
+ * Builds a search API URL with query parameters.
+ * @param {string} endpoint base API URL
+ * @param {Record<string, string|number>} params query parameters
+ * @param {boolean} [allowExternal] allow allowlisted external URLs
+ * @returns {string}
+ */
+function buildSearchApiUrl(endpoint, params = {}, allowExternal = false) {
+  const safeEndpoint = allowExternal
+    ? toSafeSuggestFetchUrl(endpoint, '')
+    : toSafeSameOriginFetchUrl(endpoint, '');
+  if (!safeEndpoint) return '';
+
+  const url = new URL(safeEndpoint);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      url.searchParams.set(key, String(value));
+    }
+  });
+  return url.toString();
 }
 
 /**
  * Fetches trending search items.
  * @param {string} endpoint trending API URL
  * @param {number} limit max items to request
+ * @param {object} [options] optional locale
  * @returns {Promise<Array<{ label: string, value: string, path: string, meta?: string }>>}
  */
-export async function fetchTrendingItems(endpoint, limit = 5) {
+export async function fetchTrendingItems(endpoint, limit = 5, options = {}) {
   const safeEndpoint = toSafeSameOriginFetchUrl(endpoint);
   if (!safeEndpoint) return [];
 
-  const url = new URL(safeEndpoint);
-  url.searchParams.set('limit', String(limit));
+  const params = { limit };
+  if (options.locale) params.locale = options.locale;
 
-  const json = await fetchJson(url.toString());
+  const url = buildSearchApiUrl(safeEndpoint, params);
+  const json = await fetchJson(url);
   return extractItems(json).map(normalizeSearchItem).filter((item) => item.label);
 }
 
 /**
- * Fetches autosuggest items for a query (supports DummyJSON product titles).
+ * Fetches autosuggest items for a query.
  * @param {string} endpoint suggest API URL
  * @param {string} query user search query
- * @param {number} [limit] optional max items
+ * @param {object} [options] queryParam, limit, locale
  * @returns {Promise<Array<{ label: string, value: string, path: string, meta?: string }>>}
  */
-export async function fetchSuggestions(endpoint, query, limit = 10) {
+export async function fetchSuggestions(endpoint, query, options = {}) {
   const safeQuery = sanitizeSearchTerm(query);
   if (!safeQuery) return [];
 
-  const params = { q: safeQuery };
-  if (limit) params.limit = limit;
+  const queryParam = sanitizeSearchQueryParam(options.queryParam, 'q');
+  const params = { [queryParam]: safeQuery };
+  if (options.limit) params.limit = options.limit;
+  if (options.locale) params.locale = options.locale;
 
-  const url = buildSuggestApiUrl(endpoint, params);
+  const url = buildSearchApiUrl(endpoint, params, true);
   if (!url) return [];
 
   const fetchOptions = isExternalUrl(url) ? { credentials: 'omit', mode: 'cors' } : undefined;
@@ -217,7 +263,39 @@ export async function fetchSuggestions(endpoint, query, limit = 10) {
 }
 
 /**
- * Fetches query index data for search results rendering.
+ * Fetches full search results from the NTT search API.
+ * @param {string} endpoint results API URL
+ * @param {string} query user search query
+ * @param {object} [options] queryParam, limit, locale, filterLocally
+ * @returns {Promise<object[]>}
+ */
+export async function fetchSearchResults(endpoint, query, options = {}) {
+  const safeEndpoint = toSafeSameOriginFetchUrl(endpoint);
+  if (!safeEndpoint) return [];
+
+  const safeQuery = sanitizeSearchTerm(query);
+  if (!safeQuery) return [];
+
+  const queryParam = sanitizeSearchQueryParam(options.queryParam, 'q');
+  const params = { [queryParam]: safeQuery };
+  if (options.limit) params.limit = options.limit;
+  if (options.locale) params.locale = options.locale;
+
+  const url = buildSearchApiUrl(safeEndpoint, params);
+  const json = await fetchJson(url);
+  let results = extractItems(json)
+    .map(normalizeSearchResult)
+    .filter((item) => item.title || item.path);
+
+  if (options.filterLocally !== false) {
+    results = filterResultsByQuery(results, safeQuery);
+  }
+
+  return results;
+}
+
+/**
+ * Fetches query index data for search results rendering (fallback).
  * @param {string} source query index URL
  * @returns {Promise<object[]|null>}
  */
@@ -228,10 +306,9 @@ export async function fetchQueryIndex(source) {
   const json = await fetchJson(safeSource);
   if (!json) return null;
   return extractItems(json).map((item) => ({
-    ...item,
-    title: sanitizeLabel(item.title || item.header || ''),
-    description: sanitizeLabel(item.description || ''),
-    path: toSafeSameOriginPath(item.path || item.url || item.href || item.link || ''),
-    image: toSafeSameOriginPath(item.image || '', ''),
+    ...normalizeSearchResult(item),
+    header: sanitizeLabel(item.header || item.title || ''),
   }));
 }
+
+export { DEFAULT_SUGGEST_PATH };

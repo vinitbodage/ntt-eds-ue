@@ -291,9 +291,14 @@ function buildTool(tool) {
     button.type = 'button';
     button.className = 'nav-tool nav-tool-search';
     button.setAttribute('aria-label', tool.label || 'Search');
+    button.setAttribute('aria-expanded', 'false');
     const icon = document.createElement('span');
     icon.className = 'icon icon-search';
     button.append(icon);
+    button.addEventListener('click', async () => {
+      const { openSearchOverlay } = await import('../../scripts/search/search-overlay.js');
+      await openSearchOverlay(button);
+    });
     decorateIcons(button);
     return button;
   }

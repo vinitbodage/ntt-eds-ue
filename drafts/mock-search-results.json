@@ -1,0 +1,34 @@
+{
+  "results": [
+    {
+      "title": "Cloud Services",
+      "description": "End-to-end cloud strategy, migration, and managed services for enterprise transformation.",
+      "path": "/services/cloud",
+      "category": "Services"
+    },
+    {
+      "title": "Cloud Migration",
+      "description": "Accelerate migration with proven frameworks and automation.",
+      "path": "/services/cloud/migration",
+      "category": "Services"
+    },
+    {
+      "title": "Cybersecurity",
+      "description": "Protect digital assets with managed security and consulting.",
+      "path": "/services/cybersecurity",
+      "category": "Services"
+    },
+    {
+      "title": "2026 Global AI Report",
+      "description": "A playbook for AI leaders on private and sovereign AI.",
+      "path": "/insights/global-ai-report",
+      "category": "Insight"
+    },
+    {
+      "title": "Consulting",
+      "description": "Strategy and transformation consulting across industries.",
+      "path": "/services/consulting",
+      "category": "Services"
+    }
+  ]
+}
