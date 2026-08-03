@@ -1,0 +1,76 @@
+{
+  "apiVersion": "2",
+  "consignmentSet": [
+    {
+      "consignmentId": "SHIPMENTNUMBER",
+      "recipientName": "MADE FOR MOVEMENT GROUP AS",
+      "senderName": "POSTEN NORGE",
+      "packageSet": [
+        {
+          "packageNumber": "TESTPARCELWITHETA",
+          "productName": "Business parcel",
+          "statusDescription": "Delivered",
+          "recipientName": "MADE FOR MOVEMENT GROUP AS",
+          "senderName": "POSTEN NORGE AS",
+          "dateOfEstimatedDelivery": "20.04.2021",
+          "estimatedTimeSpanOfDelivery": {
+            "startTime": "08:00",
+            "endTime": "16:00"
+          },
+          "eventSet": [
+            {
+              "displayTime": "20.04.2021 14:32",
+              "statusDescription": "Delivered",
+              "city": "SKIEN",
+              "postalCode": "3702",
+              "country": "Norway",
+              "countryCode": "NO",
+              "unitId": "318704",
+              "unitType": "BRING"
+            },
+            {
+              "displayTime": "20.04.2021 08:15",
+              "statusDescription": "Out for delivery",
+              "city": "SKIEN",
+              "postalCode": "3702",
+              "country": "Norway",
+              "countryCode": "NO",
+              "unitId": "318701",
+              "unitType": "BRING"
+            },
+            {
+              "displayTime": "19.04.2021 22:40",
+              "statusDescription": "Arrived at delivery terminal",
+              "city": "OSLO",
+              "postalCode": "0010",
+              "country": "Norway",
+              "countryCode": "NO",
+              "unitId": "210045",
+              "unitType": "BRING"
+            },
+            {
+              "displayTime": "18.04.2021 16:05",
+              "statusDescription": "In transit",
+              "city": "BERGEN",
+              "postalCode": "5003",
+              "country": "Norway",
+              "countryCode": "NO",
+              "unitId": "120033",
+              "unitType": "BRING"
+            },
+            {
+              "displayTime": "17.04.2021 09:20",
+              "statusDescription": "Shipment picked up",
+              "city": "BERGEN",
+              "postalCode": "5003",
+              "country": "Norway",
+              "countryCode": "NO",
+              "unitId": "120001",
+              "unitType": "BRING"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "definitions": [
+    {
+      "title": "Search",
+      "id": "search",
+      "model": "search",
+      "plugins": {
+        "da": {
+          "name": "search",
+          "rows": 1,
+          "columns": 1,
+          "fields": [
+            { "name": "resultPageUrl", "selector": "div>div>p>a[href]" },
+            { "name": "resultPageLinkText", "selector": "div>div>p>a" },
+            { "name": "queryIndexSource", "selector": "div>div>p" },
+            { "name": "trendingApiEndpoint", "selector": "div>div>p" },
+            { "name": "trendingLimit", "selector": "div>div>p" },
+            { "name": "recentSearchLimit", "selector": "div>div>p" },
+            { "name": "suggestApiEndpoint", "selector": "div>div>p" },
+            { "name": "searchQueryParam", "selector": "div>div>p" }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "search",
+      "fields": [
+        {
+          "component": "text",
+          "name": "resultPageLinkText",
+          "label": "Search Results Page Text",
+          "valueType": "string"
+        },
+        {
+          "component": "text",
+          "valueType": "string",
+          "name": "resultPageUrl",
+          "label": "Search Results Page",
+          "required": true
+        },
+        {
+          "component": "text",
+          "name": "queryIndexSource",
+          "label": "Query Index Source",
+          "valueType": "string",
+          "value": "/query-index.json"
+        },
+        {
+          "component": "text",
+          "name": "trendingApiEndpoint",
+          "label": "Trending API Endpoint",
+          "valueType": "string"
+        },
+        {
+          "component": "number",
+          "name": "trendingLimit",
+          "label": "Trending Items Limit",
+          "valueType": "number",
+          "value": 5
+        },
+        {
+          "component": "number",
+          "name": "recentSearchLimit",
+          "label": "Recent Searches Limit",
+          "valueType": "number",
+          "value": 3
+        },
+        {
+          "component": "text",
+          "name": "suggestApiEndpoint",
+          "label": "Autosuggest API Endpoint",
+          "valueType": "string"
+        },
+        {
+          "component": "text",
+          "name": "searchQueryParam",
+          "label": "Search Query Parameter",
+          "valueType": "string",
+          "value": "q"
+        }
+      ]
+    }
+  ],
+  "filters": []
+}

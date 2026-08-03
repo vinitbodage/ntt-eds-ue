@@ -1,0 +1,9 @@
+{
+  "data": [
+    { "label": "Cloud Services", "value": "cloud services" },
+    { "label": "Digital Transformation", "value": "digital transformation" },
+    { "label": "Cybersecurity", "value": "cybersecurity" },
+    { "label": "Data Analytics", "value": "data analytics" },
+    { "label": "AI Solutions", "value": "ai solutions" }
+  ]
+}

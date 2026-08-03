@@ -1,0 +1,80 @@
+{
+  "definitions": [
+    {
+      "title": "Search",
+      "id": "search",
+      "plugins": {
+        "xwalk": {
+          "page": {
+            "resourceType": "core/franklin/components/block/v1/block",
+            "template": {
+              "name": "Search",
+              "model": "search",
+              "key-value": true
+            }
+          }
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "search",
+      "fields": [
+        {
+          "component": "aem-content",
+          "name": "resultPageUrl",
+          "label": "Search Results Page",
+          "valueType": "string",
+          "description": "Page to navigate to when a search term is selected"
+        },
+        {
+          "component": "text",
+          "name": "queryIndexSource",
+          "label": "Query Index Source",
+          "valueType": "string",
+          "value": "/query-index.json",
+          "description": "JSON index used to render search results on the results page"
+        },
+        {
+          "component": "text",
+          "name": "trendingApiEndpoint",
+          "label": "Trending API Endpoint",
+          "valueType": "string",
+          "description": "API endpoint for trending searches. Trending section is shown only when configured."
+        },
+        {
+          "component": "number",
+          "name": "trendingLimit",
+          "label": "Trending Items Limit",
+          "valueType": "number",
+          "value": 5
+        },
+        {
+          "component": "number",
+          "name": "recentSearchLimit",
+          "label": "Recent Searches Limit",
+          "valueType": "number",
+          "value": 3
+        },
+        {
+          "component": "text",
+          "name": "suggestApiEndpoint",
+          "label": "Autosuggest API Endpoint",
+          "valueType": "string",
+          "value": "https://dummyjson.com/products/search",
+          "description": "Product search API. DummyJSON returns product titles from the products array."
+        },
+        {
+          "component": "text",
+          "name": "searchQueryParam",
+          "label": "Search Query Parameter",
+          "valueType": "string",
+          "value": "q",
+          "description": "URL query parameter name passed to the results page"
+        }
+      ]
+    }
+  ],
+  "filters": []
+}
