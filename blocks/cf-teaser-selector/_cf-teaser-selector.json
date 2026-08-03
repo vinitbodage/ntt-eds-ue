@@ -40,12 +40,24 @@
           "label": "CTA Position",
           "options": [
             {
-              "name": "right",
+              "name": "Bottom",
+              "value": "bottom"
+            },
+            {
+              "name": "Right",
               "value": "right"
             },
             {
-              "name": "bottom",
-              "value": "bottom"
+              "name": "Left Center",
+              "value": "left-center"
+            },
+            {
+              "name": "Left Bottom",
+              "value": "left-bottom"
+            },
+            {
+              "name": "Right Bottom",
+              "value": "right-bottom"
             }
           ]
         },
