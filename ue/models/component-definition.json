@@ -15,6 +15,9 @@
       "components": [
         {
           "...": "./blocks/feature-card.json#/definitions"
+        },
+        {
+          "...": "./blocks/cf-teaser-selector.json#/definitions"
         }
       ]
     }
