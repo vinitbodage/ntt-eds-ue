@@ -2,34 +2,94 @@
 import getCfTeaserConfig from './cf-teaser-selector-config.js';
 
 function readCfPath(block) {
-  const link = block.querySelector(':scope div:nth-child(1) > div a');
-  return link?.textContent?.trim() || link?.innerHTML?.trim() || '';
+  const link = block.querySelector('[data-aue-prop="cfpath"] a, :scope div:nth-child(1) a[href]');
+  if (!link) return '';
+
+  const href = link.getAttribute('href')?.trim();
+  if (href?.startsWith('/content/')) return href;
+
+  return link.textContent?.trim() || href || '';
 }
 
 function readCfVariation(block) {
-  return block.querySelector(':scope div:nth-child(2) > div > p')?.textContent?.trim() || '';
+  const variationEl = block.querySelector('[data-aue-prop="contentFragmentVariation"], :scope div:nth-child(2) p');
+  return variationEl?.textContent?.trim() || 'master';
 }
 
-function buildGraphQlUrl(config, cfPath, cfVariation) {
-  const isAuthor = window?.location?.origin?.includes('author');
-  const baseUrl = isAuthor ? config.aemAuthorUrl : config.aemPublishUrl;
-  const variation = encodeURIComponent(cfVariation || 'master');
-  const path = encodeURIComponent(cfPath);
+function buildGraphQlUrl(baseUrl, config, cfPath, cfVariation) {
+  const variation = cfVariation || 'master';
   const cacheBuster = Math.random() * 1000;
 
-  return `${baseUrl}${config.persistedGraphQlQuery};path=${path};variation=${variation};ts=${cacheBuster}`;
+  return `${baseUrl}${config.persistedGraphQlQuery};path=${cfPath};variation=${variation};ts=${cacheBuster}`;
 }
 
-function buildTeaserMarkup(cfPath, cfVariation, teaser) {
+function resolveAssetUrl(baseUrl, assetPath) {
+  if (!assetPath) return '';
+  if (/^https?:\/\//i.test(assetPath)) return assetPath;
+  if (assetPath.startsWith('/')) return `${baseUrl}${assetPath}`;
+  return assetPath;
+}
+
+function extractTeaser(data, config) {
+  return data?.data?.[config.graphQlResultKey]?.item || null;
+}
+
+async function fetchJson(url, options = {}) {
+  const response = await fetch(url, options);
+  if (!response.ok) return null;
+
+  const data = await response.json();
+  if (data?.errors?.length) return null;
+  return data;
+}
+
+async function fetchTeaserFromAem(config, cfPath, cfVariation) {
+  const authorUrl = buildGraphQlUrl(config.aemAuthorUrl, config, cfPath, cfVariation);
+  const publishUrl = buildGraphQlUrl(config.aemPublishUrl, config, cfPath, cfVariation);
+
+  const authorData = await fetchJson(authorUrl, { credentials: 'include' });
+  const authorTeaser = extractTeaser(authorData, config);
+  if (authorTeaser) {
+    return { teaser: authorTeaser, assetBaseUrl: config.aemAuthorUrl };
+  }
+
+  const publishData = await fetchJson(publishUrl);
+  const publishTeaser = extractTeaser(publishData, config);
+  if (publishTeaser) {
+    return { teaser: publishTeaser, assetBaseUrl: config.aemPublishUrl };
+  }
+
+  return null;
+}
+
+async function fetchTeaserFromMock(config) {
+  if (!config.mockApiEndpoint || !window.location.hostname.includes('localhost')) {
+    return null;
+  }
+
+  const data = await fetchJson(config.mockApiEndpoint);
+  const teaser = extractTeaser(data, config);
+  if (!teaser) return null;
+
+  return {
+    teaser,
+    assetBaseUrl: window.location.origin,
+  };
+}
+
+function buildTeaserMarkup(cfPath, cfVariation, teaser, assetBaseUrl) {
   const variation = cfVariation || 'master';
-  const imagePath = teaser?.image?._path || '';
+  const imagePath = resolveAssetUrl(assetBaseUrl, teaser?.image?._path || '');
   const imageAlt = teaser?.title || '';
-  const ctaLink = teaser?.cta_link ? `${teaser.cta_link}.html` : '#';
+  let ctaLink = '#';
+  if (teaser?.cta_link) {
+    ctaLink = teaser.cta_link.endsWith('.html') ? teaser.cta_link : `${teaser.cta_link}.html`;
+  }
 
   return `
   <div class="cf-teaser" data-aue-resource="urn:aemconnection:${cfPath}/jcr:content/data/${variation}" data-aue-label="CF Teaser" data-aue-type="reference">
     <div class="teaser-background">
-      <img src="${imagePath}" alt="${imageAlt}" data-aue-prop="image" data-aue-label="Image" data-aue-type="media">
+      <img src="${imagePath}" alt="${imageAlt}" data-aue-prop="image" data-aue-label="Image" data-aue-type="media" loading="lazy">
     </div>
     <div class="teaser-content">
       <div class="teaser-text">
@@ -45,6 +105,10 @@ function buildTeaserMarkup(cfPath, cfVariation, teaser) {
   </div>`;
 }
 
+function renderStatus(block, message) {
+  block.innerHTML = `<div class="cf-teaser cf-teaser-status" role="status">${message}</div>`;
+}
+
 /**
  * Loads teaser content from a selected Content Fragment and decorates the block.
  * @param {Element} block The block element
@@ -56,21 +120,33 @@ export default async function decorate(block) {
   const cfPath = readCfPath(block);
   const cfVariation = readCfVariation(block);
 
-  if (!cfPath) return;
+  if (!cfPath) {
+    renderStatus(block, 'Select a Content Fragment to display the teaser.');
+    return;
+  }
 
-  const url = buildGraphQlUrl(config, cfPath, cfVariation);
+  renderStatus(block, 'Loading teaser...');
 
   try {
-    const response = await fetch(url, { credentials: 'include' });
-    if (!response.ok) return;
+    let result = await fetchTeaserFromAem(config, cfPath, cfVariation);
 
-    const data = await response.json();
-    const teaser = data?.data?.[config.graphQlResultKey]?.item;
-    if (!teaser) return;
+    if (!result && config.mockApiEndpoint) {
+      result = await fetchTeaserFromMock(config);
+    }
+
+    if (!result?.teaser) {
+      renderStatus(block, 'Unable to load teaser content. Check the Content Fragment path and GraphQL configuration.');
+      return;
+    }
 
     block.setAttribute('data-aue-type', 'container');
-    block.innerHTML = buildTeaserMarkup(cfPath, cfVariation, teaser);
+    block.innerHTML = buildTeaserMarkup(
+      cfPath,
+      cfVariation,
+      result.teaser,
+      result.assetBaseUrl,
+    );
   } catch {
-    // Leave authored placeholder markup when CF data cannot be loaded.
+    renderStatus(block, 'Unable to load teaser content.');
   }
 }
