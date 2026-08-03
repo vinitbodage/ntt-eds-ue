@@ -100,70 +100,81 @@ function parseLogo(block, rows) {
   };
 }
 
+function looksLikeUrl(text) {
+  return /^(https?:\/\/|\/|#)/.test(text) || /\.html(\?|$)/i.test(text);
+}
+
+function getNavTitleFromRow(row) {
+  const title = readRowProp(row, 'title');
+  if (title) return title;
+
+  const heading = row.querySelector('h2, h3, h4, h5, h6, p > strong, strong');
+  if (heading?.textContent.trim()) return heading.textContent.trim();
+
+  const cell = getRowCell(row);
+  const labelParagraph = [...cell.querySelectorAll('p')].find((paragraph) => {
+    const text = getText(paragraph);
+    return text && !paragraph.querySelector('a[href]') && !looksLikeUrl(text);
+  });
+  return getText(labelParagraph);
+}
+
 function parseInstrumentedNavRow(row) {
   const linkField = row.querySelector('[data-aue-prop="link"]');
   if (!linkField || isLogoFieldRow(row)) return null;
 
-  const title = readRowProp(row, 'title');
   const link = readLinkFromElement(linkField);
   const href = getHrefFromLink(link);
+  const title = getNavTitleFromRow(row);
   if (!title && !href) return null;
 
+  const linkText = getText(link);
+  const displayTitle = title || (linkText && !looksLikeUrl(linkText) ? linkText : '');
+
   return {
-    title: title || getText(link),
+    title: displayTitle,
     href,
     source: getLinkSource(link, linkField),
     subLinksList: row.querySelector('ul'),
   };
 }
 
-function looksLikeUrl(text) {
-  return /^(https?:\/\/|\/|#)/.test(text) || /\.html(\?|$)/i.test(text);
-}
-
 function parseLegacyNavRow(row) {
   if (isLogoFieldRow(row) || isLegacyLogoRow(row)) return null;
-
-  const heading = row.querySelector('h2, h3, h4, h5, h6, p > strong, strong');
-  const headingLink = heading?.querySelector('a[href]') || row.querySelector('a[href]');
-  if (heading || headingLink) {
-    const href = headingLink?.getAttribute('href') || '';
-    const title = heading?.textContent.trim() || headingLink?.textContent.trim() || '';
-    if (title || href) {
-      return {
-        title,
-        href,
-        source: headingLink || heading,
-        subLinksList: row.querySelector('ul'),
-      };
-    }
-  }
 
   const cell = getRowCell(row);
   const paragraphs = [...cell.querySelectorAll('p')];
   const linkParagraph = paragraphs.find((paragraph) => (
     paragraph.querySelector('a[href]') || looksLikeUrl(getText(paragraph))
   ));
-  if (!linkParagraph) return null;
-
-  const link = readLinkFromElement(linkParagraph);
+  const link = linkParagraph ? readLinkFromElement(linkParagraph) : readLinkFromElement(cell);
   const href = getHrefFromLink(link);
-  if (!href) return null;
+  const title = getNavTitleFromRow(row);
+  if (!title && !href) return null;
 
-  const labelParagraph = paragraphs.find((paragraph) => {
-    const text = getText(paragraph);
-    return paragraph !== linkParagraph && text && !looksLikeUrl(text);
-  });
+  const linkText = getText(link);
+  const displayTitle = title || (linkText && !looksLikeUrl(linkText) ? linkText : '');
 
   return {
-    title: getText(labelParagraph) || getText(link),
+    title: displayTitle,
     href,
-    source: getLinkSource(link, linkParagraph),
+    source: getLinkSource(link, linkParagraph || cell),
     subLinksList: row.querySelector('ul'),
   };
 }
 
-function collectNavColumns(rows) {
+function collectNavColumns(block, rows) {
+  const containerItems = [...block.querySelectorAll('[data-aue-prop="navColumns"]')];
+  if (containerItems.length) {
+    const fromContainers = containerItems.map((container) => {
+      const row = container.closest(':scope > div') || container;
+      return parseInstrumentedNavRow(container)
+        || parseInstrumentedNavRow(row)
+        || parseLegacyNavRow(row);
+    }).filter(Boolean);
+    if (fromContainers.length) return fromContainers;
+  }
+
   const items = [];
   rows.forEach((row) => {
     const instrumented = parseInstrumentedNavRow(row);
@@ -250,7 +261,7 @@ export default function decorate(block) {
 
   const rows = getRows(block);
   const logoData = parseLogo(block, rows);
-  const navColumns = collectNavColumns(rows);
+  const navColumns = collectNavColumns(block, rows);
 
   const inner = document.createElement('div');
   inner.className = 'footer-site-inner';
