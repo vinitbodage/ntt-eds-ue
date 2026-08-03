@@ -73,12 +73,6 @@
     ]
   },
   {
-    "id": "footer-site",
-    "components": [
-      "footer-nav-column"
-    ]
-  },
-  {
     "id": "hero-banner",
     "components": [
       "hero-banner-slide"

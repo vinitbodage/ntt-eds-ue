@@ -450,19 +450,48 @@
     ]
   },
   {
-    "id": "footer-nav-column",
+    "id": "footer-site",
     "fields": [
       {
-        "component": "text",
-        "name": "title",
-        "label": "Column Title",
-        "valueType": "string"
+        "component": "reference",
+        "valueType": "string",
+        "name": "logo",
+        "label": "Logo",
+        "multi": false
       },
       {
         "component": "aem-content",
-        "name": "link",
-        "label": "Column Link",
+        "name": "logoLink",
+        "label": "Logo Link",
         "valueType": "string"
+      },
+      {
+        "component": "text",
+        "name": "logoTitle",
+        "label": "Logo Link Title",
+        "valueType": "string",
+        "value": "NTT DATA Home"
+      },
+      {
+        "component": "container",
+        "name": "navColumns",
+        "label": "Navigation Columns",
+        "collapsible": false,
+        "multi": true,
+        "fields": [
+          {
+            "component": "text",
+            "name": "title",
+            "label": "Column Title",
+            "valueType": "string"
+          },
+          {
+            "component": "aem-content",
+            "name": "link",
+            "label": "Column Link",
+            "valueType": "string"
+          }
+        ]
       }
     ]
   },
