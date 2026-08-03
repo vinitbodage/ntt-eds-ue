@@ -5,8 +5,8 @@
 const DEFAULTS = {
   aemAuthorUrl: 'https://author-p87305-e741707.adobeaemcloud.com',
   aemPublishUrl: 'https://publish-p87305-e741707.adobeaemcloud.com',
-  persistedGraphQlQuery: '/graphql/execute.json/aem-boilerplate/teaserByPath',
-  graphQlResultKey: 'teaserExampleByPath',
+  persistedGraphQlQuery: '/graphql/execute.json/ntt-eds/teaserByPath',
+  graphQlResultKey: 'teaserByPath',
 };
 
 /**
