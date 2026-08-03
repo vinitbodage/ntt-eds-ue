@@ -1,6 +1,20 @@
 /* eslint-disable no-underscore-dangle */
 import getCfTeaserConfig from './cf-teaser-selector-config.js';
 
+function isAuthoring() {
+  const { classList } = document.documentElement;
+  return classList.contains('adobe-ue-edit') || classList.contains('adobe-ue-preview');
+}
+
+function buildCfResourceUrn(cfPath, cfVariation) {
+  const variation = cfVariation || 'master';
+  return `urn:aemconnection:${cfPath}/jcr:content/data/${variation}`;
+}
+
+function buildCfAssetsUrl(config, cfPath) {
+  return `${config.aemAuthorUrl}/ui#/aem/assets.html${cfPath}`;
+}
+
 function readCfPath(block) {
   const link = block.querySelector('[data-aue-prop="cfpath"] a, :scope div:nth-child(1) a[href]');
   if (!link) return '';
@@ -116,7 +130,7 @@ function buildTeaserMarkup(cfPath, cfVariation, teaser, assetBaseUrl, config) {
     : '';
 
   return `
-  <div class="cf-teaser" data-aue-resource="urn:aemconnection:${cfPath}/jcr:content/data/${variation}" data-aue-label="CF Teaser" data-aue-type="reference">
+  <div class="cf-teaser" data-aue-resource="${buildCfResourceUrn(cfPath, variation)}" data-aue-label="CF Teaser" data-aue-type="reference">
     <div class="teaser-background">
       ${imageMarkup}
     </div>
@@ -129,6 +143,37 @@ function buildTeaserMarkup(cfPath, cfVariation, teaser, assetBaseUrl, config) {
       </div>
       ${ctaMarkup ? `<div class="teaser-cta">${ctaMarkup}</div>` : ''}
     </div>
+  </div>`;
+}
+
+function buildCfEditSection(cfPath, cfVariation, config) {
+  const variation = cfVariation || 'master';
+  const cfResource = buildCfResourceUrn(cfPath, variation);
+  const assetsUrl = buildCfAssetsUrl(config, cfPath);
+
+  return `
+  <div class="cf-teaser-edit">
+    <p class="cf-teaser-edit-label">Teaser content is managed in a Content Fragment.</p>
+    <div class="cf-teaser-edit-actions">
+      <button
+        type="button"
+        class="cf-teaser-edit-button"
+        data-aue-resource="${cfResource}"
+        data-aue-label="Edit Content Fragment"
+        data-aue-type="reference"
+      >
+        Edit Content Fragment
+      </button>
+      <a
+        class="cf-teaser-edit-link"
+        href="${assetsUrl}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open in Assets
+      </a>
+    </div>
+    <p class="cf-teaser-edit-path">${cfPath} · ${variation}</p>
   </div>`;
 }
 
@@ -163,6 +208,9 @@ export default async function decorate(block) {
 
     if (!result?.teaser) {
       renderStatus(block, 'Unable to load teaser content. Check the Content Fragment path and GraphQL configuration.');
+      if (isAuthoring()) {
+        block.insertAdjacentHTML('beforeend', buildCfEditSection(cfPath, cfVariation, config));
+      }
       return;
     }
 
@@ -174,6 +222,10 @@ export default async function decorate(block) {
       result.assetBaseUrl,
       config,
     );
+
+    if (isAuthoring()) {
+      block.insertAdjacentHTML('beforeend', buildCfEditSection(cfPath, cfVariation, config));
+    }
   } catch {
     renderStatus(block, 'Unable to load teaser content.');
   }

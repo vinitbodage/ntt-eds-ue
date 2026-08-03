@@ -167,6 +167,73 @@
   margin-top: auto;
 }
 
+.block.cf-teaser-selector .cf-teaser-edit {
+  display: none;
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px dashed rgb(48 48 48 / 25%);
+  border-radius: 12px;
+  background-color: rgb(48 48 48 / 4%);
+}
+
+.adobe-ue-edit .block.cf-teaser-selector .cf-teaser-edit,
+.adobe-ue-preview .block.cf-teaser-selector .cf-teaser-edit {
+  display: block;
+}
+
+.block.cf-teaser-selector .cf-teaser-edit-label {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.block.cf-teaser-selector .cf-teaser-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.block.cf-teaser-selector .cf-teaser-edit-button,
+.block.cf-teaser-selector .cf-teaser-edit-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.block.cf-teaser-selector .cf-teaser-edit-button {
+  border: 0;
+  color: #fff;
+  background-color: #1473e6;
+}
+
+.block.cf-teaser-selector .cf-teaser-edit-button:hover {
+  background-color: #0d66d0;
+}
+
+.block.cf-teaser-selector .cf-teaser-edit-link {
+  color: #1473e6;
+  background-color: rgb(20 115 230 / 8%);
+}
+
+.block.cf-teaser-selector .cf-teaser-edit-link:hover {
+  background-color: rgb(20 115 230 / 16%);
+}
+
+.block.cf-teaser-selector .cf-teaser-edit-path {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: rgb(48 48 48 / 72%);
+  overflow-wrap: anywhere;
+}
+
 @media (width >= 900px) {
   .block.cf-teaser-selector .cf-teaser .teaser-text .title {
     font-size: 2.5rem;
