@@ -1,6 +1,14 @@
 import fetchJson from './fetch-json.js';
+import { toSafeSameOriginFetchUrl } from './search-api.js';
 
 const DEFAULT_MOCK_ENDPOINT = '/drafts/mock-product-list.json';
+
+/** Headers allowed on cross-origin API Mesh requests (must match mesh CORS allowedHeaders). */
+export const GRAPHQL_REQUEST_HEADERS = [
+  'Accept',
+  'Content-Type',
+  'x-api-key',
+];
 
 export const PRODUCTS_QUERY = `
   query GetProducts($pageSize: Int!) {
@@ -26,13 +34,6 @@ export const PRODUCTS_QUERY = `
     }
   }
 `;
-
-/** Request headers sent by the Product List block (must be allowlisted in API Mesh CORS). */
-export const GRAPHQL_REQUEST_HEADERS = [
-  'Accept',
-  'Content-Type',
-  'x-api-key',
-];
 
 /**
  * Sanitizes an author-configured GraphQL endpoint URL.
@@ -62,21 +63,12 @@ export function resolveGraphqlEndpoint(config) {
 }
 
 /**
- * Restricts mock API targets to the current origin.
- * @param {string} value mock endpoint URL or path
+ * Resolves an optional same-origin GraphQL proxy endpoint.
+ * @param {string} value proxy URL from block authoring
  * @returns {string}
  */
-export function toSafeMockEndpoint(value) {
-  const candidate = String(value || '').trim();
-  if (!candidate) return '';
-
-  try {
-    const url = new URL(candidate, window.location.origin);
-    if (url.origin !== window.location.origin) return '';
-    return url.toString();
-  } catch {
-    return '';
-  }
+export function resolveGraphqlProxyEndpoint(value) {
+  return toSafeSameOriginFetchUrl(value, '');
 }
 
 function sanitizeText(value, maxLength = 500) {
@@ -94,6 +86,138 @@ function sanitizeUrl(value) {
   } catch {
     return '';
   }
+}
+
+/**
+ * Builds CORS-safe request headers for API Mesh GraphQL calls.
+ * Only includes headers listed in GRAPHQL_REQUEST_HEADERS.
+ * @param {object} config product list configuration
+ * @returns {Record<string, string>}
+ */
+export function buildGraphqlHeaders(config) {
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  };
+
+  const safeApiKey = sanitizeText(config?.graphqlApiKey, 256);
+  if (safeApiKey) {
+    headers['x-api-key'] = safeApiKey;
+  }
+
+  return Object.fromEntries(
+    Object.entries(headers).filter(([name]) => GRAPHQL_REQUEST_HEADERS
+      .some((allowed) => allowed.toLowerCase() === name.toLowerCase())),
+  );
+}
+
+/**
+ * Restricts mock API targets to the current origin.
+ * @param {string} value mock endpoint URL or path
+ * @returns {string}
+ */
+export function toSafeMockEndpoint(value) {
+  const candidate = String(value || '').trim();
+  if (!candidate) return '';
+
+  try {
+    const url = new URL(candidate, window.location.origin);
+    if (url.origin !== window.location.origin) return '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+function isCrossOriginUrl(url) {
+  try {
+    return new URL(url).origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+function parseGraphqlResponse(json) {
+  if (!json || json?.errors?.length) return null;
+  return json;
+}
+
+async function postGraphqlDirect(endpoint, query, variables, config) {
+  const headers = buildGraphqlHeaders(config);
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'omit',
+    headers,
+    body: JSON.stringify({ query, variables }),
+  });
+
+  if (!response.ok) return null;
+
+  const json = await response.json();
+  return parseGraphqlResponse(json);
+}
+
+async function postGraphqlViaProxy(proxyEndpoint, endpoint, query, variables, config) {
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  };
+
+  const response = await fetch(proxyEndpoint, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'same-origin',
+    headers,
+    body: JSON.stringify({
+      endpoint,
+      query,
+      variables,
+      apiKey: sanitizeText(config?.graphqlApiKey, 256) || undefined,
+    }),
+  });
+
+  if (!response.ok) return null;
+
+  const json = await response.json();
+  return parseGraphqlResponse(json);
+}
+
+/**
+ * Executes a GraphQL query using a same-origin proxy or direct cross-origin fetch.
+ * @param {object} config product list configuration
+ * @param {string} query GraphQL query
+ * @param {object} variables query variables
+ * @returns {Promise<object|null>}
+ */
+export async function executeGraphqlQuery(config, query, variables) {
+  const endpoint = resolveGraphqlEndpoint(config);
+  if (!endpoint) return null;
+
+  const proxyEndpoint = resolveGraphqlProxyEndpoint(config?.graphqlProxyEndpoint);
+
+  if (proxyEndpoint) {
+    const proxied = await postGraphqlViaProxy(proxyEndpoint, endpoint, query, variables, config);
+    if (proxied) return proxied;
+  }
+
+  if (!isCrossOriginUrl(endpoint)) {
+    return postGraphqlDirect(endpoint, query, variables, config);
+  }
+
+  try {
+    const direct = await postGraphqlDirect(endpoint, query, variables, config);
+    if (direct) return direct;
+  } catch {
+    // Fall through to proxy retry when direct CORS/network fetch fails.
+  }
+
+  if (proxyEndpoint) {
+    return postGraphqlViaProxy(proxyEndpoint, endpoint, query, variables, config);
+  }
+
+  return null;
 }
 
 function formatPrice(price) {
@@ -148,46 +272,16 @@ export function extractProducts(data) {
   };
 }
 
-async function postGraphql(endpoint, query, variables, config) {
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  };
-
-  const safeApiKey = sanitizeText(config.graphqlApiKey, 256);
-  if (safeApiKey) {
-    headers['x-api-key'] = safeApiKey;
-  }
-
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    mode: 'cors',
-    credentials: 'omit',
-    headers,
-    body: JSON.stringify({ query, variables }),
-  });
-
-  if (!response.ok) return null;
-
-  const json = await response.json();
-  if (json?.errors?.length) return null;
-  return json;
-}
-
 /**
  * Fetches products from API Mesh GraphQL.
  * @param {object} config product list configuration
  * @returns {Promise<{ items: object[], totalCount: number, source: string }|null>}
  */
 export async function fetchProducts(config) {
-  const endpoint = resolveGraphqlEndpoint(config);
-  if (!endpoint) return null;
-
-  const data = await postGraphql(
-    endpoint,
+  const data = await executeGraphqlQuery(
+    config,
     PRODUCTS_QUERY,
     { pageSize: config.pageSize },
-    config,
   );
 
   if (!data) return null;
@@ -195,7 +289,9 @@ export async function fetchProducts(config) {
   const { items, totalCount } = extractProducts(data);
   if (!items.length) return null;
 
-  return { items, totalCount, source: 'graphql' };
+  const source = resolveGraphqlProxyEndpoint(config?.graphqlProxyEndpoint) ? 'proxy' : 'graphql';
+
+  return { items, totalCount, source };
 }
 
 /**

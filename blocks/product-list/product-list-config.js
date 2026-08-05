@@ -19,6 +19,7 @@ export const DEFAULTS = {
   heading: 'Products',
   meshId: DEFAULT_MESH_ID,
   graphqlEndpoint: buildDefaultGraphqlEndpoint(DEFAULT_MESH_ID),
+  graphqlProxyEndpoint: '',
   graphqlApiKey: '',
   pageSize: 12,
   mockApiEndpoint: '/drafts/mock-product-list.json',
@@ -28,6 +29,7 @@ const CONFIG_KEY_ALIASES = {
   heading: 'heading',
   meshid: 'meshId',
   graphqlendpoint: 'graphqlEndpoint',
+  graphqlproxyendpoint: 'graphqlProxyEndpoint',
   graphqlapikey: 'graphqlApiKey',
   pagesize: 'pageSize',
   mockapiendpoint: 'mockApiEndpoint',
@@ -102,6 +104,9 @@ export default function readProductListConfig(block) {
       || DEFAULTS.heading,
     meshId,
     graphqlEndpoint,
+    graphqlProxyEndpoint: readFieldText(block.querySelector('[data-aue-prop="graphqlProxyEndpoint"]'))
+      || keyValueConfig.graphqlProxyEndpoint
+      || DEFAULTS.graphqlProxyEndpoint,
     graphqlApiKey: readFieldText(block.querySelector('[data-aue-prop="graphqlApiKey"]'))
       || keyValueConfig.graphqlApiKey
       || DEFAULTS.graphqlApiKey,

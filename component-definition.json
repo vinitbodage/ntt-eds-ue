@@ -493,6 +493,10 @@
                   "selector": "div>div>p"
                 },
                 {
+                  "name": "graphqlProxyEndpoint",
+                  "selector": "div>div>p"
+                },
+                {
                   "name": "graphqlApiKey",
                   "selector": "div>div>p"
                 },

@@ -13,6 +13,7 @@
             { "name": "heading", "selector": "div>div>p" },
             { "name": "meshId", "selector": "div>div>p" },
             { "name": "graphqlEndpoint", "selector": "div>div>p" },
+            { "name": "graphqlProxyEndpoint", "selector": "div>div>p" },
             { "name": "graphqlApiKey", "selector": "div>div>p" },
             { "name": "pageSize", "selector": "div>div>p" },
             { "name": "mockApiEndpoint", "selector": "div>div>p" }
@@ -43,6 +44,13 @@
           "component": "text",
           "name": "graphqlEndpoint",
           "label": "GraphQL Endpoint",
+          "valueType": "string",
+          "value": "https://edge-sandbox-graph.adobe.io/api/b214abfa-ec45-403d-8623-72af08f32293/graphql"
+        },
+        {
+          "component": "text",
+          "name": "graphqlProxyEndpoint",
+          "label": "GraphQL Proxy Endpoint",
           "valueType": "string"
         },
         {

@@ -1073,15 +1073,22 @@
         "name": "graphqlEndpoint",
         "label": "GraphQL Endpoint",
         "valueType": "string",
-        "value": "https://edge-graph.adobe.io/api/b214abfa-ec45-403d-8623-72af08f32293/graphql",
+        "value": "https://edge-sandbox-graph.adobe.io/api/b214abfa-ec45-403d-8623-72af08f32293/graphql",
         "description": "Full API Mesh GraphQL URL. Rebuilt from Mesh ID when left empty."
+      },
+      {
+        "component": "text",
+        "name": "graphqlProxyEndpoint",
+        "label": "GraphQL Proxy Endpoint",
+        "valueType": "string",
+        "description": "Optional same-origin proxy URL to avoid CORS. POST body: { endpoint, query, variables, apiKey }."
       },
       {
         "component": "text",
         "name": "graphqlApiKey",
         "label": "GraphQL API Key",
         "valueType": "string",
-        "description": "Optional x-api-key header for API Mesh requests. Add your site origins and allowedHeaders in API Mesh CORS config (see config/api-mesh-cors.example.json)."
+        "description": "Optional x-api-key header for API Mesh requests. Must be listed in API Mesh CORS allowedHeaders (see config/api-mesh-cors.example.json)."
       },
       {
         "component": "number",
