@@ -2,15 +2,6 @@ import fetchJson from './fetch-json.js';
 
 const DEFAULT_MOCK_ENDPOINT = '/drafts/mock-product-list.json';
 
-const MESH_ID_PATTERN = /^[a-f0-9-]{36}$/i;
-
-function isAllowedGraphqlOrigin(origin) {
-  if (origin === 'https://edge-graph.adobe.io') return true;
-  if (/^https:\/\/[a-z0-9-]+\.adobeio-static\.net$/i.test(origin)) return true;
-  if (/^https:\/\/[a-z0-9-]+\.adobeioruntime\.net$/i.test(origin)) return true;
-  return false;
-}
-
 export const PRODUCTS_QUERY = `
   query GetProducts($pageSize: Int!) {
     products(search: "", pageSize: $pageSize) {
@@ -44,18 +35,8 @@ export const GRAPHQL_REQUEST_HEADERS = [
 ];
 
 /**
- * Validates an API Mesh ID.
- * @param {string} meshId mesh identifier
- * @returns {string}
- */
-export function sanitizeMeshId(meshId) {
-  const candidate = String(meshId || '').trim();
-  return MESH_ID_PATTERN.test(candidate) ? candidate : '';
-}
-
-/**
- * Restricts GraphQL fetch targets to the API Mesh domain.
- * @param {string} value endpoint URL
+ * Sanitizes an author-configured GraphQL endpoint URL.
+ * @param {string} value endpoint URL from block authoring
  * @returns {string}
  */
 export function toSafeGraphqlEndpoint(value) {
@@ -64,8 +45,7 @@ export function toSafeGraphqlEndpoint(value) {
 
   try {
     const url = new URL(candidate);
-    if (!['http:', 'https:'].includes(url.protocol)) return '';
-    if (!isAllowedGraphqlOrigin(url.origin)) return '';
+    if (url.protocol !== 'https:') return '';
     return url.toString();
   } catch {
     return '';
@@ -73,18 +53,12 @@ export function toSafeGraphqlEndpoint(value) {
 }
 
 /**
- * Resolves the GraphQL endpoint from block configuration.
+ * Uses the GraphQL endpoint authored on the block (resolved in product-list-config.js).
  * @param {object} config product list configuration
  * @returns {string}
  */
 export function resolveGraphqlEndpoint(config) {
-  const configured = toSafeGraphqlEndpoint(config?.graphqlEndpoint);
-  if (configured) return configured;
-
-  const meshId = sanitizeMeshId(config?.meshId);
-  if (!meshId) return '';
-
-  return toSafeGraphqlEndpoint(`https://edge-graph.adobe.io/api/${meshId}/graphql`);
+  return toSafeGraphqlEndpoint(config?.graphqlEndpoint);
 }
 
 /**

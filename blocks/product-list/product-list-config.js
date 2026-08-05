@@ -39,9 +39,15 @@ function normalizeConfigKey(key) {
 
 function readFieldText(field) {
   if (!field) return '';
+
+  const text = field.textContent?.trim() || '';
   const link = field.querySelector('a[href]');
-  if (link) return link.href;
-  return field.textContent.trim();
+  if (!link) return text;
+
+  const href = link.getAttribute('href')?.trim() || '';
+  if (text.startsWith('https://') || text.startsWith('http://')) return text;
+  if (href.startsWith('https://') || href.startsWith('http://')) return href;
+  return text || href;
 }
 
 function readKeyValueConfig(block) {
