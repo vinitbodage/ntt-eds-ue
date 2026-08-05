@@ -2,8 +2,14 @@ import fetchJson from './fetch-json.js';
 
 const DEFAULT_MOCK_ENDPOINT = '/drafts/mock-product-list.json';
 
-const ALLOWED_GRAPHQL_ORIGINS = new Set(['https://edge-graph.adobe.io']);
 const MESH_ID_PATTERN = /^[a-f0-9-]{36}$/i;
+
+function isAllowedGraphqlOrigin(origin) {
+  if (origin === 'https://edge-graph.adobe.io') return true;
+  if (/^https:\/\/[a-z0-9-]+\.adobeio-static\.net$/i.test(origin)) return true;
+  if (/^https:\/\/[a-z0-9-]+\.adobeioruntime\.net$/i.test(origin)) return true;
+  return false;
+}
 
 export const PRODUCTS_QUERY = `
   query GetProducts($pageSize: Int!) {
@@ -59,7 +65,7 @@ export function toSafeGraphqlEndpoint(value) {
   try {
     const url = new URL(candidate);
     if (!['http:', 'https:'].includes(url.protocol)) return '';
-    if (!ALLOWED_GRAPHQL_ORIGINS.has(url.origin)) return '';
+    if (!isAllowedGraphqlOrigin(url.origin)) return '';
     return url.toString();
   } catch {
     return '';
@@ -67,18 +73,18 @@ export function toSafeGraphqlEndpoint(value) {
 }
 
 /**
- * Builds the API Mesh GraphQL endpoint URL.
- * @param {string} meshId API Mesh ID
- * @param {string} [overrideEndpoint] optional full endpoint override
+ * Resolves the GraphQL endpoint from block configuration.
+ * @param {object} config product list configuration
  * @returns {string}
  */
-export function buildGraphqlEndpoint(meshId, overrideEndpoint = '') {
-  const endpoint = String(overrideEndpoint || '').trim();
-  if (endpoint) return toSafeGraphqlEndpoint(endpoint);
+export function resolveGraphqlEndpoint(config) {
+  const configured = toSafeGraphqlEndpoint(config?.graphqlEndpoint);
+  if (configured) return configured;
 
-  const safeMeshId = sanitizeMeshId(meshId);
-  if (!safeMeshId) return '';
-  return `https://edge-graph.adobe.io/api/${safeMeshId}/graphql`;
+  const meshId = sanitizeMeshId(config?.meshId);
+  if (!meshId) return '';
+
+  return toSafeGraphqlEndpoint(`https://edge-graph.adobe.io/api/${meshId}/graphql`);
 }
 
 /**
@@ -200,7 +206,7 @@ async function postGraphql(endpoint, query, variables, config) {
  * @returns {Promise<{ items: object[], totalCount: number, source: string }|null>}
  */
 export async function fetchProducts(config) {
-  const endpoint = buildGraphqlEndpoint(config.meshId, config.graphqlEndpoint);
+  const endpoint = resolveGraphqlEndpoint(config);
   if (!endpoint) return null;
 
   const data = await postGraphql(

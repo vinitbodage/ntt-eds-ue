@@ -2,10 +2,23 @@
  * Default API Mesh GraphQL settings for the Product List block.
  * Authors can override these values in Universal Editor block properties.
  */
+const DEFAULT_MESH_ID = 'b214abfa-ec45-403d-8623-72af08f32293';
+
+/**
+ * Builds the default API Mesh GraphQL endpoint from a mesh ID.
+ * @param {string} [meshId] API Mesh ID
+ * @returns {string}
+ */
+export function buildDefaultGraphqlEndpoint(meshId = DEFAULT_MESH_ID) {
+  const candidate = String(meshId || '').trim();
+  if (!/^[a-f0-9-]{36}$/i.test(candidate)) return '';
+  return `https://edge-graph.adobe.io/api/${candidate}/graphql`;
+}
+
 export const DEFAULTS = {
   heading: 'Products',
-  meshId: 'b214abfa-ec45-403d-8623-72af08f32293',
-  graphqlEndpoint: '',
+  meshId: DEFAULT_MESH_ID,
+  graphqlEndpoint: buildDefaultGraphqlEndpoint(DEFAULT_MESH_ID),
   graphqlApiKey: '',
   pageSize: 12,
   mockApiEndpoint: '/drafts/mock-product-list.json',
@@ -66,16 +79,23 @@ export default function readProductListConfig(block) {
     DEFAULTS.pageSize,
   );
 
+  const meshId = readFieldText(block.querySelector('[data-aue-prop="meshId"]'))
+    || keyValueConfig.meshId
+    || DEFAULTS.meshId;
+
+  const authoredEndpoint = readFieldText(block.querySelector('[data-aue-prop="graphqlEndpoint"]'))
+    || keyValueConfig.graphqlEndpoint;
+
+  const graphqlEndpoint = authoredEndpoint?.trim()
+    || buildDefaultGraphqlEndpoint(meshId)
+    || DEFAULTS.graphqlEndpoint;
+
   return {
     heading: readFieldText(block.querySelector('[data-aue-prop="heading"]'))
       || keyValueConfig.heading
       || DEFAULTS.heading,
-    meshId: readFieldText(block.querySelector('[data-aue-prop="meshId"]'))
-      || keyValueConfig.meshId
-      || DEFAULTS.meshId,
-    graphqlEndpoint: readFieldText(block.querySelector('[data-aue-prop="graphqlEndpoint"]'))
-      || keyValueConfig.graphqlEndpoint
-      || DEFAULTS.graphqlEndpoint,
+    meshId,
+    graphqlEndpoint,
     graphqlApiKey: readFieldText(block.querySelector('[data-aue-prop="graphqlApiKey"]'))
       || keyValueConfig.graphqlApiKey
       || DEFAULTS.graphqlApiKey,

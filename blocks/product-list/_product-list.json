@@ -41,7 +41,8 @@
           "name": "graphqlEndpoint",
           "label": "GraphQL Endpoint",
           "valueType": "string",
-          "description": "Optional full API Mesh GraphQL URL. Leave empty to use https://edge-graph.adobe.io/api/{meshId}/graphql"
+          "value": "https://edge-graph.adobe.io/api/b214abfa-ec45-403d-8623-72af08f32293/graphql",
+          "description": "Full API Mesh GraphQL URL. Rebuilt from Mesh ID when left empty."
         },
         {
           "component": "text",
