@@ -1,0 +1,77 @@
+{
+  "data": {
+    "products": {
+      "total_count": 4,
+      "items": [
+        {
+          "id": 1,
+          "name": "Radiant Tee",
+          "sku": "WS12",
+          "url_key": "radiant-tee",
+          "price_range": {
+            "minimum_price": {
+              "final_price": {
+                "value": 22,
+                "currency": "USD"
+              }
+            }
+          },
+          "small_image": {
+            "url": "/images/spotlight/cloud.jpg"
+          }
+        },
+        {
+          "id": 2,
+          "name": "Breathe-Easy Tank",
+          "sku": "WT09",
+          "url_key": "breathe-easy-tank",
+          "price_range": {
+            "minimum_price": {
+              "final_price": {
+                "value": 34,
+                "currency": "USD"
+              }
+            }
+          },
+          "small_image": {
+            "url": "/images/spotlight/ai.jpg"
+          }
+        },
+        {
+          "id": 3,
+          "name": "Argus All-Weather Tank",
+          "sku": "MT07",
+          "url_key": "argus-all-weather-tank",
+          "price_range": {
+            "minimum_price": {
+              "final_price": {
+                "value": 22,
+                "currency": "USD"
+              }
+            }
+          },
+          "small_image": {
+            "url": "/images/spotlight/networking.jpg"
+          }
+        },
+        {
+          "id": 4,
+          "name": "Hero Hoodie",
+          "sku": "MH07",
+          "url_key": "hero-hoodie",
+          "price_range": {
+            "minimum_price": {
+              "final_price": {
+                "value": 54,
+                "currency": "USD"
+              }
+            }
+          },
+          "small_image": {
+            "url": "/images/spotlight/cloud.jpg"
+          }
+        }
+      ]
+    }
+  }
+}

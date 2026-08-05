@@ -18,6 +18,9 @@
         },
         {
           "...": "./blocks/cf-teaser-selector.json#/definitions"
+        },
+        {
+          "...": "./blocks/product-list.json#/definitions"
         }
       ]
     }

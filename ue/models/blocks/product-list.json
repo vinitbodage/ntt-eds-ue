@@ -1,0 +1,72 @@
+{
+  "definitions": [
+    {
+      "title": "Product List",
+      "id": "product-list",
+      "model": "product-list",
+      "plugins": {
+        "da": {
+          "name": "product-list",
+          "rows": 1,
+          "columns": 1,
+          "fields": [
+            { "name": "heading", "selector": "div>div>p" },
+            { "name": "meshId", "selector": "div>div>p" },
+            { "name": "graphqlEndpoint", "selector": "div>div>p" },
+            { "name": "graphqlApiKey", "selector": "div>div>p" },
+            { "name": "pageSize", "selector": "div>div>p" },
+            { "name": "mockApiEndpoint", "selector": "div>div>p" }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "product-list",
+      "fields": [
+        {
+          "component": "text",
+          "name": "heading",
+          "label": "Heading",
+          "valueType": "string",
+          "value": "Products"
+        },
+        {
+          "component": "text",
+          "name": "meshId",
+          "label": "API Mesh ID",
+          "valueType": "string",
+          "value": "b214abfa-ec45-403d-8623-72af08f32293"
+        },
+        {
+          "component": "text",
+          "name": "graphqlEndpoint",
+          "label": "GraphQL Endpoint",
+          "valueType": "string"
+        },
+        {
+          "component": "text",
+          "name": "graphqlApiKey",
+          "label": "GraphQL API Key",
+          "valueType": "string"
+        },
+        {
+          "component": "number",
+          "name": "pageSize",
+          "label": "Products to Display",
+          "valueType": "number",
+          "value": 12
+        },
+        {
+          "component": "text",
+          "name": "mockApiEndpoint",
+          "label": "Mock API Endpoint",
+          "valueType": "string",
+          "value": "/drafts/mock-product-list.json"
+        }
+      ]
+    }
+  ],
+  "filters": []
+}

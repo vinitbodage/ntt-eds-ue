@@ -1051,6 +1051,55 @@
     ]
   },
   {
+    "id": "product-list",
+    "fields": [
+      {
+        "component": "text",
+        "name": "heading",
+        "label": "Heading",
+        "valueType": "string",
+        "value": "Products"
+      },
+      {
+        "component": "text",
+        "name": "meshId",
+        "label": "API Mesh ID",
+        "valueType": "string",
+        "value": "b214abfa-ec45-403d-8623-72af08f32293",
+        "description": "API Mesh identifier used to build the GraphQL endpoint."
+      },
+      {
+        "component": "text",
+        "name": "graphqlEndpoint",
+        "label": "GraphQL Endpoint",
+        "valueType": "string",
+        "description": "Optional full API Mesh GraphQL URL. Leave empty to use https://edge-graph.adobe.io/api/{meshId}/graphql"
+      },
+      {
+        "component": "text",
+        "name": "graphqlApiKey",
+        "label": "GraphQL API Key",
+        "valueType": "string",
+        "description": "Optional x-api-key header for API Mesh requests."
+      },
+      {
+        "component": "number",
+        "name": "pageSize",
+        "label": "Products to Display",
+        "valueType": "number",
+        "value": 12
+      },
+      {
+        "component": "text",
+        "name": "mockApiEndpoint",
+        "label": "Mock API Endpoint",
+        "valueType": "string",
+        "value": "/drafts/mock-product-list.json",
+        "description": "Same-origin mock JSON used on localhost when GraphQL is unavailable."
+      }
+    ]
+  },
+  {
     "id": "search",
     "fields": [
       {
