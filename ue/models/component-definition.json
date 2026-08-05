@@ -21,6 +21,9 @@
         },
         {
           "...": "./blocks/product-list.json#/definitions"
+        },
+        {
+          "...": "./blocks/product-details.json#/definitions"
         }
       ]
     }

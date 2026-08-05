@@ -1,0 +1,48 @@
+{
+  "sku": "VA01",
+  "name": "Dulcea Infinity Scarf",
+  "url_key": "dulcea-infinity-scarf",
+  "stock_status": "IN_STOCK",
+  "categories": [
+    {
+      "name": "Accessories",
+      "url_path": "venia-accessories"
+    },
+    {
+      "name": "Scarves",
+      "url_path": "venia-accessories/venia-scarves"
+    }
+  ],
+  "description": {
+    "html": "<p>Made of super soft pima cotton, this lightweight scarf is laid out in a chic, continuous loop. Double it or drape it to create the perfect embellishment to any ensemble.</p><ul><li>58\" L x 32\" W</li><li>Cotton/Viscose blend</li></ul>"
+  },
+  "short_description": {
+    "html": ""
+  },
+  "image": {
+    "label": "Main",
+    "url": "https://venia.magento.com/media/catalog/product/cache/74c1057f7991b4edb2bc7bdaa94de933/v/a/va01-rn_main.jpg"
+  },
+  "media_gallery": [
+    {
+      "label": "Main",
+      "url": "https://venia.magento.com/media/catalog/product/cache/74c1057f7991b4edb2bc7bdaa94de933/v/a/va01-rn_main.jpg"
+    },
+    {
+      "label": "",
+      "url": "https://venia.magento.com/media/catalog/product/cache/74c1057f7991b4edb2bc7bdaa94de933/v/a/va01-pe_alt.jpg"
+    }
+  ],
+  "price_range": {
+    "minimum_price": {
+      "final_price": {
+        "currency": "USD",
+        "value": 38.4
+      },
+      "regular_price": {
+        "currency": "USD",
+        "value": 48
+      }
+    }
+  }
+}

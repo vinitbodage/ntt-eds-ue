@@ -37,7 +37,7 @@
   "filters": [
     {
       "id": "section",
-      "components": ["feature-card", "cf-teaser-selector", "product-list"]
+      "components": ["feature-card", "cf-teaser-selector", "product-list", "product-details"]
     }
   ]
 }
