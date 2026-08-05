@@ -24,6 +24,7 @@ export const DEFAULTS = {
   graphqlApiKey: '',
   pageSize: 12,
   mockApiEndpoint: '/drafts/mock-product-list.json',
+  productDetailPageUrl: '',
 };
 
 const CONFIG_KEY_ALIASES = {
@@ -34,6 +35,7 @@ const CONFIG_KEY_ALIASES = {
   graphqlapikey: 'graphqlApiKey',
   pagesize: 'pageSize',
   mockapiendpoint: 'mockApiEndpoint',
+  productdetailpageurl: 'productDetailPageUrl',
 };
 
 function normalizeConfigKey(key) {
@@ -115,5 +117,8 @@ export default function readProductListConfig(block) {
     mockApiEndpoint: readFieldText(block.querySelector('[data-aue-prop="mockApiEndpoint"]'))
       || keyValueConfig.mockApiEndpoint
       || DEFAULTS.mockApiEndpoint,
+    productDetailPageUrl: readFieldText(block.querySelector('[data-aue-prop="productDetailPageUrl"]'))
+      || keyValueConfig.productDetailPageUrl
+      || DEFAULTS.productDetailPageUrl,
   };
 }

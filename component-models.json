@@ -1105,6 +1105,13 @@
         "valueType": "string",
         "value": "/drafts/mock-product-list.json",
         "description": "Same-origin mock JSON used on localhost when GraphQL is unavailable."
+      },
+      {
+        "component": "aem-content",
+        "name": "productDetailPageUrl",
+        "label": "Product Detail Page",
+        "valueType": "string",
+        "description": "Page opened when a product card is clicked. The product SKU is appended as a ?sku= query parameter in a new browser tab."
       }
     ]
   },

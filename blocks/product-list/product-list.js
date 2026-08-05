@@ -10,9 +10,31 @@ function renderStatus(message, isError = false) {
   return status;
 }
 
-function createProductCard(product) {
-  const article = document.createElement('article');
-  article.className = 'product-list-card';
+function buildProductDetailUrl(baseUrl, sku) {
+  const safeBaseUrl = String(baseUrl || '').trim();
+  const safeSku = String(sku || '').trim();
+  if (!safeBaseUrl || !safeSku) return '';
+
+  try {
+    const url = new URL(safeBaseUrl, window.location.origin);
+    url.searchParams.set('sku', safeSku);
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+function createProductCard(product, productDetailPageUrl) {
+  const detailUrl = buildProductDetailUrl(productDetailPageUrl, product.sku);
+  const card = detailUrl ? document.createElement('a') : document.createElement('article');
+  card.className = 'product-list-card';
+
+  if (detailUrl) {
+    card.href = detailUrl;
+    card.target = '_blank';
+    card.rel = 'noopener noreferrer';
+    card.setAttribute('aria-label', `View details for ${product.name || product.sku || 'product'}`);
+  }
 
   if (product.imageUrl) {
     const media = document.createElement('div');
@@ -23,7 +45,7 @@ function createProductCard(product) {
     img.alt = product.imageAlt || product.name || 'Product image';
     img.loading = 'lazy';
     media.append(img);
-    article.append(media);
+    card.append(media);
   }
 
   const body = document.createElement('div');
@@ -50,11 +72,11 @@ function createProductCard(product) {
     body.append(price);
   }
 
-  article.append(body);
-  return article;
+  card.append(body);
+  return card;
 }
 
-function renderProducts(block, heading, result) {
+function renderProducts(block, heading, result, productDetailPageUrl) {
   block.replaceChildren();
 
   const wrapper = document.createElement('div');
@@ -77,7 +99,7 @@ function renderProducts(block, heading, result) {
   grid.className = 'product-list-grid';
   grid.setAttribute('role', 'list');
   result.items.forEach((product) => {
-    const card = createProductCard(product);
+    const card = createProductCard(product, productDetailPageUrl);
     card.setAttribute('role', 'listitem');
     grid.append(card);
   });
@@ -107,7 +129,7 @@ export default async function decorate(block) {
       return;
     }
 
-    renderProducts(block, config.heading, result);
+    renderProducts(block, config.heading, result, config.productDetailPageUrl);
   } catch {
     block.replaceChildren(renderStatus('Unable to load products.', true));
   }

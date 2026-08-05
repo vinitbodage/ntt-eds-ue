@@ -507,6 +507,10 @@
                 {
                   "name": "mockApiEndpoint",
                   "selector": "div>div>p"
+                },
+                {
+                  "name": "productDetailPageUrl",
+                  "selector": "div>div>a"
                 }
               ]
             }

@@ -16,7 +16,8 @@
             { "name": "graphqlProxyEndpoint", "selector": "div>div>p" },
             { "name": "graphqlApiKey", "selector": "div>div>p" },
             { "name": "pageSize", "selector": "div>div>p" },
-            { "name": "mockApiEndpoint", "selector": "div>div>p" }
+            { "name": "mockApiEndpoint", "selector": "div>div>p" },
+            { "name": "productDetailPageUrl", "selector": "div>div>a" }
           ]
         }
       }
@@ -73,6 +74,12 @@
           "label": "Mock API Endpoint",
           "valueType": "string",
           "value": "/drafts/mock-product-list.json"
+        },
+        {
+          "component": "aem-content",
+          "name": "productDetailPageUrl",
+          "label": "Product Detail Page",
+          "valueType": "string"
         }
       ]
     }
