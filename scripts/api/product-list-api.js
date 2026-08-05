@@ -30,6 +30,13 @@ export const PRODUCTS_QUERY = `
   }
 `;
 
+/** Request headers sent by the Product List block (must be allowlisted in API Mesh CORS). */
+export const GRAPHQL_REQUEST_HEADERS = [
+  'Accept',
+  'Content-Type',
+  'x-api-key',
+];
+
 /**
  * Validates an API Mesh ID.
  * @param {string} meshId mesh identifier
@@ -161,18 +168,21 @@ export function extractProducts(data) {
   };
 }
 
-async function postGraphql(endpoint, query, variables, apiKey) {
+async function postGraphql(endpoint, query, variables, config) {
   const headers = {
+    Accept: 'application/json',
     'Content-Type': 'application/json',
   };
 
-  const safeApiKey = sanitizeText(apiKey, 256);
+  const safeApiKey = sanitizeText(config.graphqlApiKey, 256);
   if (safeApiKey) {
     headers['x-api-key'] = safeApiKey;
   }
 
   const response = await fetch(endpoint, {
     method: 'POST',
+    mode: 'cors',
+    credentials: 'omit',
     headers,
     body: JSON.stringify({ query, variables }),
   });
@@ -197,7 +207,7 @@ export async function fetchProducts(config) {
     endpoint,
     PRODUCTS_QUERY,
     { pageSize: config.pageSize },
-    config.graphqlApiKey,
+    config,
   );
 
   if (!data) return null;

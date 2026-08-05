@@ -1,0 +1,28 @@
+{
+  "meshConfig": {
+    "responseConfig": {
+      "includeHTTPDetails": false,
+      "CORS": {
+        "origin": [
+          "http://localhost:3000",
+          "https://main--ntt-eds-ue--vinitbodage.aem.page",
+          "https://main--ntt-eds-ue--vinitbodage.aem.live",
+          "https://main--ntt-eds-ue--vinitbodage.ue.da.live"
+        ],
+        "methods": [
+          "GET",
+          "POST",
+          "HEAD",
+          "OPTIONS"
+        ],
+        "allowedHeaders": "Accept, Content-Type, x-api-key, Origin",
+        "exposedHeaders": [
+          "Content-Type"
+        ],
+        "maxAge": 86400,
+        "credentials": false
+      }
+    }
+  },
+  "_comment": "Merge responseConfig.CORS into your App Builder API Mesh config (mesh ID b214abfa-ec45-403d-8623-72af08f32293). See https://developer.adobe.com/graphql-mesh-gateway/mesh/advanced/cors/"
+}

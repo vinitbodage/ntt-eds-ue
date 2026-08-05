@@ -48,7 +48,7 @@
           "name": "graphqlApiKey",
           "label": "GraphQL API Key",
           "valueType": "string",
-          "description": "Optional x-api-key header for API Mesh requests."
+          "description": "Optional x-api-key header for API Mesh requests. Add your site origins and allowedHeaders in API Mesh CORS config (see config/api-mesh-cors.example.json)."
         },
         {
           "component": "number",
