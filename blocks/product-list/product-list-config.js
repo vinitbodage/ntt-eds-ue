@@ -12,7 +12,7 @@ const DEFAULT_MESH_ID = 'b214abfa-ec45-403d-8623-72af08f32293';
 export function buildDefaultGraphqlEndpoint(meshId = DEFAULT_MESH_ID) {
   const candidate = String(meshId || '').trim();
   if (!/^[a-f0-9-]{36}$/i.test(candidate)) return '';
-  return `https://edge-graph.adobe.io/api/${candidate}/graphql`;
+  return `https://edge-sandbox-graph.adobe.io/api/${candidate}/graphql`;
 }
 
 export const DEFAULTS = {
