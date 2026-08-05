@@ -1,6 +1,25 @@
 import { loadProductDetail, readSkuFromUrl } from '../../scripts/api/product-detail-api.js';
 import readProductDetailsConfig from './product-details-config.js';
 
+function renderLoader(message = 'Loading product...') {
+  const loader = document.createElement('div');
+  loader.className = 'product-details-loader';
+  loader.setAttribute('role', 'status');
+  loader.setAttribute('aria-live', 'polite');
+  loader.setAttribute('aria-busy', 'true');
+
+  const spinner = document.createElement('span');
+  spinner.className = 'product-details-loader-spinner';
+  spinner.setAttribute('aria-hidden', 'true');
+
+  const label = document.createElement('p');
+  label.className = 'product-details-loader-label';
+  label.textContent = message;
+
+  loader.append(spinner, label);
+  return loader;
+}
+
 function renderStatus(message, isError = false) {
   const status = document.createElement('p');
   status.className = 'product-details-status';
@@ -199,7 +218,7 @@ export default async function decorate(block) {
     return;
   }
 
-  block.replaceChildren(renderStatus('Loading product...'));
+  block.replaceChildren(renderLoader());
 
   try {
     const product = await loadProductDetail(config, sku);
