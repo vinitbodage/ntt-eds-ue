@@ -207,10 +207,13 @@ function renderProductDetails(block, product) {
 export default async function decorate(block) {
   if (block.querySelector('.product-details-content')) return;
 
+  block.dataset.blockStatus = 'loading';
+
   const config = readProductDetailsConfig(block);
   const sku = readSkuFromUrl(config.skuQueryParam);
 
   if (!sku) {
+    block.dataset.blockStatus = 'loaded';
     block.replaceChildren(renderStatus(
       `No product SKU found. Add a ?${config.skuQueryParam}= query parameter to the page URL.`,
       true,
@@ -234,5 +237,7 @@ export default async function decorate(block) {
     renderProductDetails(block, product);
   } catch {
     block.replaceChildren(renderStatus('Unable to load product.', true));
+  } finally {
+    block.dataset.blockStatus = 'loaded';
   }
 }

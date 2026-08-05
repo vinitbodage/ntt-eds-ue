@@ -3,51 +3,8 @@ import { buildGraphqlHeaders, toSafeMockEndpoint } from './product-list-api.js';
 
 const DEFAULT_MOCK_ENDPOINT = '/drafts/mock-product-detail.json';
 
-/** App Builder proxy for product detail GraphQL (CORS-enabled for *.aem.page). */
+/** App Builder proxy for product detail requests (CORS-enabled for *.aem.page). */
 export const DEFAULT_APP_BUILDER_PRODUCT_DETAIL_PROXY = 'https://120642-edsapi-stage.adobeio-static.net/api/v1/web/api-mesh/api-mesh-product-detail';
-
-export const PRODUCT_DETAIL_QUERY = `
-  query GetProductBySku($sku: String!) {
-    products(filter: { sku: { eq: $sku } }) {
-      items {
-        sku
-        name
-        url_key
-        stock_status
-        categories {
-          name
-          url_path
-        }
-        description {
-          html
-        }
-        short_description {
-          html
-        }
-        image {
-          label
-          url
-        }
-        media_gallery {
-          label
-          url
-        }
-        price_range {
-          minimum_price {
-            final_price {
-              value
-              currency
-            }
-            regular_price {
-              value
-              currency
-            }
-          }
-        }
-      }
-    }
-  }
-`;
 
 function sanitizeText(value, maxLength = 500) {
   if (value == null) return '';
@@ -187,15 +144,14 @@ async function postProductDetailViaProxy(proxyEndpoint, sku, config) {
     mode: 'cors',
     credentials: 'omit',
     headers,
-    body: JSON.stringify({
-      query: PRODUCT_DETAIL_QUERY,
-      variables: { sku },
-    }),
+    body: JSON.stringify({ sku }),
   });
 
   if (!response.ok) return null;
 
   const json = await response.json();
+  if (json?.error) return null;
+
   const rawProduct = extractProductPayload(json);
   if (!rawProduct) return null;
 
