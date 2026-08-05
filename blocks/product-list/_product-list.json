@@ -42,14 +42,15 @@
           "label": "GraphQL Endpoint",
           "valueType": "string",
           "value": "https://edge-sandbox-graph.adobe.io/api/b214abfa-ec45-403d-8623-72af08f32293/graphql",
-          "description": "Full API Mesh GraphQL URL. Rebuilt from Mesh ID when left empty."
+          "description": "API Mesh GraphQL URL (server-side). Browser uses GraphQL Proxy Endpoint instead."
         },
         {
           "component": "text",
           "name": "graphqlProxyEndpoint",
           "label": "GraphQL Proxy Endpoint",
           "valueType": "string",
-          "description": "Optional same-origin proxy URL to avoid CORS. POST body: { endpoint, query, variables, apiKey }."
+          "value": "https://120642-edsapi-stage.adobeio-static.net/api/v1/web/api-mesh/api-mesh-graphql",
+          "description": "App Builder proxy for browser requests (CORS-safe). Used automatically when GraphQL Endpoint is API Mesh."
         },
         {
           "component": "text",

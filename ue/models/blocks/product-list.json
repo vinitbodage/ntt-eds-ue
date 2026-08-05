@@ -51,7 +51,8 @@
           "component": "text",
           "name": "graphqlProxyEndpoint",
           "label": "GraphQL Proxy Endpoint",
-          "valueType": "string"
+          "valueType": "string",
+          "value": "https://120642-edsapi-stage.adobeio-static.net/api/v1/web/api-mesh/api-mesh-graphql"
         },
         {
           "component": "text",

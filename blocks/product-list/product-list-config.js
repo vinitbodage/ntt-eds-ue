@@ -3,6 +3,7 @@
  * Authors can override these values in Universal Editor block properties.
  */
 const DEFAULT_MESH_ID = 'b214abfa-ec45-403d-8623-72af08f32293';
+const DEFAULT_APP_BUILDER_GRAPHQL_PROXY = 'https://120642-edsapi-stage.adobeio-static.net/api/v1/web/api-mesh/api-mesh-graphql';
 
 /**
  * Builds the default API Mesh GraphQL endpoint from a mesh ID.
@@ -19,7 +20,7 @@ export const DEFAULTS = {
   heading: 'Products',
   meshId: DEFAULT_MESH_ID,
   graphqlEndpoint: buildDefaultGraphqlEndpoint(DEFAULT_MESH_ID),
-  graphqlProxyEndpoint: '',
+  graphqlProxyEndpoint: DEFAULT_APP_BUILDER_GRAPHQL_PROXY,
   graphqlApiKey: '',
   pageSize: 12,
   mockApiEndpoint: '/drafts/mock-product-list.json',

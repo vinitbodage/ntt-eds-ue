@@ -3,6 +3,9 @@ import { toSafeSameOriginFetchUrl } from './search-api.js';
 
 const DEFAULT_MOCK_ENDPOINT = '/drafts/mock-product-list.json';
 
+/** App Builder GraphQL proxy (CORS-enabled for *.aem.page). */
+export const DEFAULT_APP_BUILDER_GRAPHQL_PROXY = 'https://120642-edsapi-stage.adobeio-static.net/api/v1/web/api-mesh/api-mesh-graphql';
+
 /** Headers allowed on cross-origin API Mesh requests (must match mesh CORS allowedHeaders). */
 export const GRAPHQL_REQUEST_HEADERS = [
   'Accept',
@@ -63,12 +66,67 @@ export function resolveGraphqlEndpoint(config) {
 }
 
 /**
- * Resolves an optional same-origin GraphQL proxy endpoint.
+ * Returns true when the URL targets Adobe API Mesh GraphQL (browser CORS blocked).
+ * @param {string} url GraphQL endpoint
+ * @returns {boolean}
+ */
+export function isMeshGraphqlEndpoint(url) {
+  try {
+    const { hostname } = new URL(url);
+    return hostname === 'edge-sandbox-graph.adobe.io' || hostname === 'edge-graph.adobe.io';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validates an App Builder web action URL used as a GraphQL proxy.
+ * @param {string} value proxy URL from block authoring
+ * @returns {string}
+ */
+export function toSafeAppBuilderProxyUrl(value) {
+  const candidate = String(value || '').trim();
+  if (!candidate) return '';
+
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== 'https:') return '';
+    const host = url.hostname;
+    const isAppBuilderHost = host.endsWith('.adobeio-static.net') || host.endsWith('.adobeioruntime.net');
+    if (!isAppBuilderHost) return '';
+    if (!url.pathname.includes('api-mesh-graphql')) return '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Resolves an optional GraphQL proxy endpoint (App Builder or same-origin).
  * @param {string} value proxy URL from block authoring
  * @returns {string}
  */
 export function resolveGraphqlProxyEndpoint(value) {
+  const appBuilderProxy = toSafeAppBuilderProxyUrl(value);
+  if (appBuilderProxy) return appBuilderProxy;
   return toSafeSameOriginFetchUrl(value, '');
+}
+
+/**
+ * Picks the proxy URL to use: authored value, or App Builder default for Mesh endpoints.
+ * @param {object} config product list configuration
+ * @returns {string}
+ */
+export function resolveEffectiveGraphqlProxy(config) {
+  const authored = resolveGraphqlProxyEndpoint(config?.graphqlProxyEndpoint);
+  if (authored) return authored;
+
+  const endpoint = resolveGraphqlEndpoint(config);
+  if (endpoint && isMeshGraphqlEndpoint(endpoint)) {
+    return DEFAULT_APP_BUILDER_GRAPHQL_PROXY;
+  }
+
+  return '';
 }
 
 function sanitizeText(value, maxLength = 500) {
@@ -159,6 +217,30 @@ async function postGraphqlDirect(endpoint, query, variables, config) {
   return parseGraphqlResponse(json);
 }
 
+async function postGraphqlViaAppBuilderProxy(proxyEndpoint, query, variables, config) {
+  const headers = buildGraphqlHeaders(config);
+
+  const response = await fetch(proxyEndpoint, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'omit',
+    headers,
+    body: JSON.stringify({ query, variables }),
+  });
+
+  if (!response.ok) return null;
+
+  const json = await response.json();
+  const payload = json?.body ?? json;
+  if (payload?.errors?.length) return null;
+
+  if (payload?.products) {
+    return { data: payload };
+  }
+
+  return parseGraphqlResponse(payload);
+}
+
 async function postGraphqlViaProxy(proxyEndpoint, endpoint, query, variables, config) {
   const headers = {
     Accept: 'application/json',
@@ -195,11 +277,20 @@ export async function executeGraphqlQuery(config, query, variables) {
   const endpoint = resolveGraphqlEndpoint(config);
   if (!endpoint) return null;
 
-  const proxyEndpoint = resolveGraphqlProxyEndpoint(config?.graphqlProxyEndpoint);
+  const proxyEndpoint = resolveEffectiveGraphqlProxy(config);
 
-  if (proxyEndpoint) {
+  if (proxyEndpoint && toSafeAppBuilderProxyUrl(proxyEndpoint)) {
+    const proxied = await postGraphqlViaAppBuilderProxy(proxyEndpoint, query, variables, config);
+    if (proxied) return proxied;
+  }
+
+  if (proxyEndpoint && !toSafeAppBuilderProxyUrl(proxyEndpoint)) {
     const proxied = await postGraphqlViaProxy(proxyEndpoint, endpoint, query, variables, config);
     if (proxied) return proxied;
+  }
+
+  if (isCrossOriginUrl(endpoint) && isMeshGraphqlEndpoint(endpoint)) {
+    return null;
   }
 
   if (!isCrossOriginUrl(endpoint)) {
@@ -210,11 +301,7 @@ export async function executeGraphqlQuery(config, query, variables) {
     const direct = await postGraphqlDirect(endpoint, query, variables, config);
     if (direct) return direct;
   } catch {
-    // Fall through to proxy retry when direct CORS/network fetch fails.
-  }
-
-  if (proxyEndpoint) {
-    return postGraphqlViaProxy(proxyEndpoint, endpoint, query, variables, config);
+    // Fall through when direct CORS/network fetch fails.
   }
 
   return null;
@@ -289,7 +376,7 @@ export async function fetchProducts(config) {
   const { items, totalCount } = extractProducts(data);
   if (!items.length) return null;
 
-  const source = resolveGraphqlProxyEndpoint(config?.graphqlProxyEndpoint) ? 'proxy' : 'graphql';
+  const source = resolveEffectiveGraphqlProxy(config) ? 'proxy' : 'graphql';
 
   return { items, totalCount, source };
 }
