@@ -1,10 +1,38 @@
 import fetchJson from './fetch-json.js';
-import { buildGraphqlHeaders, toSafeMockEndpoint } from './product-list-api.js';
+import {
+  buildGraphqlHeaders,
+  toSafeMockEndpoint,
+  DEFAULT_APP_BUILDER_GRAPHQL_PROXY,
+} from './product-list-api.js';
 
 const DEFAULT_MOCK_ENDPOINT = '/drafts/mock-product-detail.json';
 
 /** App Builder proxy for product detail requests (CORS-enabled for *.aem.page). */
 export const DEFAULT_APP_BUILDER_PRODUCT_DETAIL_PROXY = 'https://120642-edsapi-stage.adobeio-static.net/api/v1/web/api-mesh/api-mesh-product-detail';
+
+const PRODUCT_DETAIL_QUERY = `
+  query ProductDetailBySku($sku: String!) {
+    products(filter: { sku: { eq: $sku } }) {
+      items {
+        sku
+        name
+        url_key
+        stock_status
+        categories { name url_path }
+        description { html }
+        short_description { html }
+        image { url label }
+        media_gallery { url label }
+        price_range {
+          minimum_price {
+            final_price { value currency }
+            regular_price { value currency }
+          }
+        }
+      }
+    }
+  }
+`;
 
 function sanitizeText(value, maxLength = 500) {
   if (value == null) return '';
@@ -39,7 +67,7 @@ export function toSafeProductDetailProxyUrl(value) {
     const isAppBuilderHost = host.endsWith('.adobeio-static.net') || host.endsWith('.adobeioruntime.net');
     if (!isAppBuilderHost) return '';
     if (!url.pathname.includes('api-mesh-product-detail')) return '';
-    return url.toString();
+    return url.origin + url.pathname;
   } catch {
     return '';
   }
@@ -79,11 +107,16 @@ function formatPrice(price) {
 export function extractProductPayload(payload) {
   if (!payload || typeof payload !== 'object') return null;
 
+  if (payload.error?.body?.error) return null;
+
   const body = payload.body ?? payload;
+
+  if (body?.error) return null;
 
   if (body?.sku && body?.name) return body;
 
   const graphqlItem = body?.data?.products?.items?.[0]
+    || body?.products?.items?.[0]
     || payload?.data?.products?.items?.[0];
   if (graphqlItem) return graphqlItem;
 
@@ -136,10 +169,40 @@ export function normalizeProductDetail(item) {
   };
 }
 
-async function postProductDetailViaProxy(proxyEndpoint, sku, config) {
-  const headers = buildGraphqlHeaders(config);
+async function parseProxyResponse(response) {
+  if (!response.ok) return null;
 
-  const response = await fetch(proxyEndpoint, {
+  let json;
+  try {
+    json = await response.json();
+  } catch {
+    return null;
+  }
+
+  if (json?.error) return null;
+
+  const rawProduct = extractProductPayload(json);
+  if (!rawProduct) return null;
+
+  return normalizeProductDetail(rawProduct);
+}
+
+async function fetchProductDetailViaRestProxy(proxyEndpoint, sku, config) {
+  const requestUrl = new URL(proxyEndpoint);
+  requestUrl.searchParams.set('sku', sku);
+
+  const getResponse = await fetch(requestUrl.toString(), {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'omit',
+    headers: { Accept: 'application/json' },
+  });
+
+  const fromGet = await parseProxyResponse(getResponse);
+  if (fromGet) return fromGet;
+
+  const headers = buildGraphqlHeaders(config);
+  const postResponse = await fetch(proxyEndpoint, {
     method: 'POST',
     mode: 'cors',
     credentials: 'omit',
@@ -147,15 +210,24 @@ async function postProductDetailViaProxy(proxyEndpoint, sku, config) {
     body: JSON.stringify({ sku }),
   });
 
-  if (!response.ok) return null;
+  return parseProxyResponse(postResponse);
+}
 
-  const json = await response.json();
-  if (json?.error) return null;
+async function fetchProductDetailViaGraphqlProxy(sku, config) {
+  const headers = buildGraphqlHeaders(config);
 
-  const rawProduct = extractProductPayload(json);
-  if (!rawProduct) return null;
+  const response = await fetch(DEFAULT_APP_BUILDER_GRAPHQL_PROXY, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'omit',
+    headers,
+    body: JSON.stringify({
+      query: PRODUCT_DETAIL_QUERY,
+      variables: { sku },
+    }),
+  });
 
-  return normalizeProductDetail(rawProduct);
+  return parseProxyResponse(response);
 }
 
 /**
@@ -171,7 +243,10 @@ export async function fetchProductDetail(config, sku) {
   const proxyEndpoint = toSafeProductDetailProxyUrl(config?.productDetailProxyEndpoint)
     || DEFAULT_APP_BUILDER_PRODUCT_DETAIL_PROXY;
 
-  return postProductDetailViaProxy(proxyEndpoint, safeSku, config);
+  const fromRest = await fetchProductDetailViaRestProxy(proxyEndpoint, safeSku, config);
+  if (fromRest) return fromRest;
+
+  return fetchProductDetailViaGraphqlProxy(safeSku, config);
 }
 
 /**
@@ -198,14 +273,14 @@ export async function fetchProductDetailFromMock(mockEndpoint, sku) {
 }
 
 /**
- * Loads product detail from GraphQL with localhost mock fallback.
+ * Loads product detail from API Mesh with localhost mock fallback.
  * @param {object} config product detail configuration
  * @param {string} sku product SKU
  * @returns {Promise<object|null>}
  */
 export async function loadProductDetail(config, sku) {
-  const graphqlResult = await fetchProductDetail(config, sku);
-  if (graphqlResult) return graphqlResult;
+  const apiResult = await fetchProductDetail(config, sku);
+  if (apiResult) return apiResult;
 
   const mockEndpoint = config.mockApiEndpoint || DEFAULT_MOCK_ENDPOINT;
   if (window.location.hostname.includes('localhost')) {
