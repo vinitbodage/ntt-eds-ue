@@ -1179,18 +1179,25 @@
       },
       {
         "component": "text",
+        "name": "resultsApiEndpoint",
+        "label": "Search Results API",
+        "valueType": "string",
+        "description": "Same-origin API for full search results (e.g. /api/search/results). Falls back to query index when empty."
+      },
+      {
+        "component": "text",
         "name": "queryIndexSource",
         "label": "Query Index Source",
         "valueType": "string",
         "value": "/query-index.json",
-        "description": "JSON index used to render search results on the results page"
+        "description": "JSON index fallback when Results API is not configured"
       },
       {
         "component": "text",
         "name": "trendingApiEndpoint",
         "label": "Trending API Endpoint",
         "valueType": "string",
-        "description": "API endpoint for trending searches. Trending section is shown only when configured."
+        "description": "Same-origin trending searches API. Trending section is shown only when configured."
       },
       {
         "component": "number",
@@ -1211,8 +1218,7 @@
         "name": "suggestApiEndpoint",
         "label": "Autosuggest API Endpoint",
         "valueType": "string",
-        "value": "https://dummyjson.com/products/search",
-        "description": "Product search API. DummyJSON returns product titles from the products array."
+        "description": "Same-origin autosuggest API (e.g. /api/search/suggest)"
       },
       {
         "component": "text",
@@ -1220,7 +1226,28 @@
         "label": "Search Query Parameter",
         "valueType": "string",
         "value": "q",
-        "description": "URL query parameter name passed to the results page"
+        "description": "URL query parameter on the results page"
+      },
+      {
+        "component": "text",
+        "name": "suggestQueryParam",
+        "label": "Suggest API Query Parameter",
+        "valueType": "string",
+        "value": "q"
+      },
+      {
+        "component": "text",
+        "name": "resultsQueryParam",
+        "label": "Results API Query Parameter",
+        "valueType": "string",
+        "value": "q"
+      },
+      {
+        "component": "text",
+        "name": "locale",
+        "label": "Locale / Market",
+        "valueType": "string",
+        "description": "Optional locale passed to search APIs (e.g. global/en)"
       }
     ]
   },

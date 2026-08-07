@@ -3,6 +3,7 @@ import {
 } from '../../scripts/aem.js';
 import {
   fetchQueryIndex,
+  fetchSearchResults,
   sanitizeSearchTerm,
   toSafeSameOriginPath,
 } from '../../scripts/api/search-api.js';
@@ -136,6 +137,26 @@ function filterData(searchTerms, data) {
   ].map((item) => item.result);
 }
 
+export function createSearchResultsHeading(block, query, config) {
+  const existing = block.querySelector('.search-results-heading');
+  if (existing) existing.remove();
+
+  const sanitized = sanitizeSearchTerm(query);
+  if (!sanitized) return null;
+
+  const template = config.placeholders?.searchResultsFor || 'Search results for "{query}"';
+  const heading = document.createElement('h1');
+  heading.className = 'search-results-heading';
+  heading.textContent = template.replace('{query}', sanitized);
+  const resultsEl = block.querySelector('.search-results');
+  if (resultsEl) {
+    block.insertBefore(heading, resultsEl);
+  } else {
+    block.append(heading);
+  }
+  return heading;
+}
+
 export function createSearchResultsContainer(block) {
   const results = document.createElement('ul');
   results.className = 'search-results';
@@ -160,9 +181,22 @@ export async function renderSearchResults(block, config, searchValue) {
     return;
   }
 
+  createSearchResultsHeading(block, sanitizedValue, config);
+
   const searchTerms = sanitizedValue.toLowerCase().split(/\s+/).filter((term) => !!term);
-  const data = await fetchQueryIndex(config.queryIndexSource);
-  const filteredData = filterData(searchTerms, data || []);
+  let filteredData = [];
+
+  if (config.resultsApiEndpoint) {
+    filteredData = await fetchSearchResults(config.resultsApiEndpoint, sanitizedValue, {
+      queryParam: config.resultsQueryParam,
+      locale: config.locale,
+      limit: 50,
+    });
+  } else {
+    const data = await fetchQueryIndex(config.queryIndexSource);
+    filteredData = filterData(searchTerms, data || []);
+  }
+
   const headingTag = searchResults.dataset.h;
 
   if (filteredData.length) {
@@ -174,7 +208,7 @@ export async function renderSearchResults(block, config, searchValue) {
   } else {
     const noResultsMessage = document.createElement('li');
     searchResults.classList.add('no-results');
-    noResultsMessage.textContent = config.placeholders?.searchNoResults || 'No results found.';
+    noResultsMessage.textContent = config.placeholders?.searchNoResults || 'No Results';
     searchResults.append(noResultsMessage);
   }
 }

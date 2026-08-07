@@ -1,0 +1,18 @@
+{
+  "data": [
+    { "Key": "Search Placeholder", "Text": "Search" },
+    { "Key": "Search Recent", "Text": "Recent searches" },
+    { "Key": "Search Trending", "Text": "Trending searches" },
+    { "Key": "Search Suggestions", "Text": "Suggestions" },
+    { "Key": "Search Loading", "Text": "Loading..." },
+    { "Key": "Search Empty", "Text": "Start typing to search." },
+    { "Key": "Search No Suggestions", "Text": "No suggestions found." },
+    { "Key": "Search No Results", "Text": "No Results" },
+    { "Key": "Search Results For", "Text": "Search results for \"{query}\"" },
+    { "Key": "Search Results Page", "Text": "/drafts/search-results" },
+    { "Key": "Search Suggest Api", "Text": "/drafts/mock-suggest.json" },
+    { "Key": "Search Trending Api", "Text": "/drafts/mock-trending.json" },
+    { "Key": "Search Results Api", "Text": "/drafts/mock-search-results.json" },
+    { "Key": "Search Locale", "Text": "global/en" }
+  ]
+}

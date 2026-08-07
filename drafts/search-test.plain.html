@@ -4,12 +4,13 @@
     <title>Search Block Test</title>
   </head>
   <body>
+    <header></header>
     <main>
       <div>
         <div class="section">
           <div>
             <h1>Search Autosuggest Test</h1>
-            <p>Click the search box and type a product name (e.g. "lipstick") to see DummyJSON product suggestions.</p>
+            <p>Use mocks or configure production API paths via placeholders.</p>
           </div>
         </div>
       </div>
@@ -19,6 +20,10 @@
             <div>
               <div>Search Results Page</div>
               <div><p><a href="/drafts/search-results">/drafts/search-results</a></p></div>
+            </div>
+            <div>
+              <div>Search Results API</div>
+              <div><p>/drafts/mock-search-results.json</p></div>
             </div>
             <div>
               <div>Query Index Source</div>
@@ -38,11 +43,15 @@
             </div>
             <div>
               <div>Autosuggest API Endpoint</div>
-              <div><p>https://dummyjson.com/products/search</p></div>
+              <div><p>/drafts/mock-suggest.json</p></div>
             </div>
             <div>
               <div>Search Query Param</div>
               <div><p>q</p></div>
+            </div>
+            <div>
+              <div>Locale</div>
+              <div><p>global/en</p></div>
             </div>
           </div>
         </div>

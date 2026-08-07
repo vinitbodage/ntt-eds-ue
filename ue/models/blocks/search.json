@@ -12,12 +12,16 @@
           "fields": [
             { "name": "resultPageUrl", "selector": "div>div>p>a[href]" },
             { "name": "resultPageLinkText", "selector": "div>div>p>a" },
+            { "name": "resultsApiEndpoint", "selector": "div>div>p" },
             { "name": "queryIndexSource", "selector": "div>div>p" },
             { "name": "trendingApiEndpoint", "selector": "div>div>p" },
             { "name": "trendingLimit", "selector": "div>div>p" },
             { "name": "recentSearchLimit", "selector": "div>div>p" },
             { "name": "suggestApiEndpoint", "selector": "div>div>p" },
-            { "name": "searchQueryParam", "selector": "div>div>p" }
+            { "name": "searchQueryParam", "selector": "div>div>p" },
+            { "name": "suggestQueryParam", "selector": "div>div>p" },
+            { "name": "resultsQueryParam", "selector": "div>div>p" },
+            { "name": "locale", "selector": "div>div>p" }
           ]
         }
       }
@@ -39,6 +43,12 @@
           "name": "resultPageUrl",
           "label": "Search Results Page",
           "required": true
+        },
+        {
+          "component": "text",
+          "name": "resultsApiEndpoint",
+          "label": "Search Results API",
+          "valueType": "string"
         },
         {
           "component": "text",
@@ -79,6 +89,26 @@
           "label": "Search Query Parameter",
           "valueType": "string",
           "value": "q"
+        },
+        {
+          "component": "text",
+          "name": "suggestQueryParam",
+          "label": "Suggest API Query Parameter",
+          "valueType": "string",
+          "value": "q"
+        },
+        {
+          "component": "text",
+          "name": "resultsQueryParam",
+          "label": "Results API Query Parameter",
+          "valueType": "string",
+          "value": "q"
+        },
+        {
+          "component": "text",
+          "name": "locale",
+          "label": "Locale / Market",
+          "valueType": "string"
         }
       ]
     }
